@@ -13,7 +13,7 @@ export default function Dashboard() {
             <button className="bg-black text-white py-8 px-16 rounded-lg shadow-md hover:bg-gray-800 transition duration-300">
               IT Equipment
             </button>
-            <button className="bg-black text-white py-20 px-20   rounded-lg shadow-md hover:bg-gray-800 transition duration-300">
+            <button onClick={() => window.location.href = "/sample"} className="bg-black text-white py-20 px-20   rounded-lg shadow-md hover:bg-gray-800 transition duration-300">
               Office Supplies
             </button>
             <button className="bg-black text-white py-8 px-16 rounded-lg shadow-md hover:bg-gray-800 transition duration-300">
