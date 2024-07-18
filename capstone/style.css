@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 *{
   margin: 0;
   padding: 0;
@@ -221,7 +220,7 @@
 }
 .home-section{
   position: relative;
-  background: #E4E9F7;
+  background: white;
   height: 100vh;
   left: 260px;
   width: calc(100% - 260px);
