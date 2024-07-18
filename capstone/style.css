@@ -14,7 +14,7 @@
   left: 0;
   height: 100%;
   width: 260px;
-  background: #11101d;
+  background: #001d22;
   z-index: 100;
   transition: all 0.5s ease;
 }
@@ -64,7 +64,7 @@
   transition: all 0.4s ease;
 }
 .sidebar .nav-links li:hover{
-  background: #1d1b31;
+  background: #263f43;
 }
 .sidebar .nav-links li .iocn-link{
   display: flex;
@@ -108,7 +108,7 @@
 .sidebar .nav-links li .sub-menu{
   padding: 6px 6px 14px 80px;
   margin-top: -10px;
-  background: #1d1b31;
+  background: #002c32;
   display: none;
 }
 .sidebar .nav-links li.showMenu .sub-menu{
@@ -177,7 +177,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #1d1b31;
+  background: #002c32;
   padding: 12px 0;
   transition: all 0.5s ease;
 }
