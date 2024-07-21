@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import "../Css/Electronics.css";
-export default function Electronics() {
+
+export default function RequestItems() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const [add_modal, setIsModalOpen] = useState(false);
@@ -15,7 +15,6 @@ export default function Electronics() {
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
   };
-
   return (
     <>
       <div className="limiter">
@@ -26,22 +25,20 @@ export default function Electronics() {
                 <thead>
                   <tr className="table100-head">
                     <th className="column1">Item ID</th>
-                    <th className="column2">Item Name</th>
-                    <th className="column3">Quantity</th>
-                    <th className="column4">UnitPrice</th>
-
-                    <th className="column6">Date</th>
+                    <th className="column2">Requested by</th>
+                    <th className="column3">Requested by</th>
+                    <th className="column4">Status</th>
+                    <th className="column6">Priority</th>
                     <th className="column6">Operation</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td className="column1">2</td>
-                    <td className="column2">200396</td>
-                    <td className="column3">69</td>
-                    <td className="column4">$22.00</td>
-
-                    <td className="column6">2017-09-26 05:57</td>
+                    <td className="column2">CSS Department</td>
+                    <td className="column3">2017-09-26 05:57</td>
+                    <td className="column4">Pending</td>
+                    <td className="column6">Medium</td>
                     <td className="flex items-center justify-center mt-2">
                       <button
                         type="button"
@@ -85,17 +82,22 @@ export default function Electronics() {
                   <input
                     className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
                     type="text"
-                    placeholder="Item Name"
+                    placeholder="Requested By"
                   />
                   <input
                     className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
                     type="text"
-                    placeholder="Quantity"
+                    placeholder="Requested Date"
                   />
                   <input
                     className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
                     type="email"
-                    placeholder="Unit Price"
+                    placeholder="Status"
+                  />
+                  <input
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
+                    type="email"
+                    placeholder="Priority"
                   />
                 </div>
                 <div className="my-4">
