@@ -276,13 +276,9 @@ tbody tr:hover {
   }
 
   table tbody tr td:nth-child(5):before {
-    content: "Desciption";
-  }
-
-  table tbody tr td:nth-child(6):before {
     content: "Date";
   }
-  table tbody tr td:nth-child(7):before {
+  table tbody tr td:nth-child(6):before {
     content: "Operation";
   }
 

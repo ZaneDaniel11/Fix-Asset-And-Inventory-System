@@ -1,10 +1,20 @@
 import React, { useState } from "react";
 
 export default function Electronics() {
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
   const [add_modal, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
+  const openDeleteModal = () => {
+    setDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
+  };
 
   return (
     <>
@@ -19,7 +29,7 @@ export default function Electronics() {
                     <th className="column2">Item Name</th>
                     <th className="column3">Quantity</th>
                     <th className="column4">UnitPrice</th>
-                    <th className="column5">Description</th>
+
                     <th className="column6">Date</th>
                     <th className="column6">Operation</th>
                   </tr>
@@ -28,18 +38,11 @@ export default function Electronics() {
                   <tr>
                     <td className="column1">2</td>
                     <td className="column2">200396</td>
-                    <td className="column3">Game Console Controller</td>
+                    <td className="column3">69</td>
                     <td className="column4">$22.00</td>
-                    <td className="column5">2</td>
+
                     <td className="column6">2017-09-26 05:57</td>
                     <td className="flex items-center justify-center mt-2">
-                      <button
-                        type="button"
-                        onClick={openModal}
-                        className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
-                      >
-                        <i className="fa-solid fa-plus"></i>
-                      </button>
                       <button
                         type="button"
                         onClick={openModal}
@@ -48,6 +51,7 @@ export default function Electronics() {
                         <i className="fa-solid fa-pen"></i>
                       </button>
                       <button
+                        onClick={openDeleteModal}
                         type="button"
                         className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
                       >
@@ -66,7 +70,7 @@ export default function Electronics() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">Modal Title</h5>
+              <h5 className="text-lg font-semibold">Edit</h5>
               <button
                 type="button"
                 onClick={closeModal}
@@ -118,6 +122,32 @@ export default function Electronics() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {deleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
+            <h5 className="text-lg font-semibold">
+              Are you sure you want to delete?
+            </h5>
+
+            <div className="flex justify-end mt-4">
+              <button
+                type="button"
+                onClick={closeDeleteModal}
+                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
