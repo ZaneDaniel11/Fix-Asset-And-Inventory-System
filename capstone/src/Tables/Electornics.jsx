@@ -1,20 +1,16 @@
 import React, { useState } from "react";
+import { CSSTransition } from "react-transition-group";
 import "../Css/Electronics.css";
-export default function Electronics() {
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
+export default function Maintenance() {
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [add_modal, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const openDeleteModal = () => {
-    setDeleteModalOpen(true);
-  };
-
-  const closeDeleteModal = () => {
-    setDeleteModalOpen(false);
-  };
+  const openDeleteModal = () => setDeleteModalOpen(true);
+  const closeDeleteModal = () => setDeleteModalOpen(false);
 
   return (
     <>
@@ -25,23 +21,21 @@ export default function Electronics() {
               <table>
                 <thead>
                   <tr className="table100-head">
-                    <th className="column1">Item ID</th>
+                    <th className="column1">Maintenance ID</th>
                     <th className="column2">Item Name</th>
-                    <th className="column3">Quantity</th>
-                    <th className="column4">UnitPrice</th>
-
-                    <th className="column6">Date</th>
-                    <th className="column6">Operation</th>
+                    <th className="column3">Schedule</th>
+                    <th className="column4">Status </th>
+                    <th className="column5" style={{ paddingRight: 20 }}>
+                      Operation{" "}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td className="column1">2</td>
-                    <td className="column2">200396</td>
-                    <td className="column3">69</td>
-                    <td className="column4">$22.00</td>
-
-                    <td className="column6">2017-09-26 05:57</td>
+                    <td className="column2">2</td>
+                    <td className="column3">2017-09-26 05:57</td>
+                    <td className="column4">Complete</td>
                     <td className="flex items-center justify-center mt-2">
                       <button
                         type="button"
@@ -66,7 +60,12 @@ export default function Electronics() {
         </div>
       </div>
 
-      {add_modal && (
+      <CSSTransition
+        in={add_modal}
+        timeout={300}
+        classNames="modal"
+        unmountOnExit
+      >
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
@@ -124,9 +123,14 @@ export default function Electronics() {
             </form>
           </div>
         </div>
-      )}
+      </CSSTransition>
 
-      {deleteModalOpen && (
+      <CSSTransition
+        in={deleteModalOpen}
+        timeout={300}
+        classNames="modal"
+        unmountOnExit
+      >
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <h5 className="text-lg font-semibold">
@@ -150,7 +154,7 @@ export default function Electronics() {
             </div>
           </div>
         </div>
-      )}
+      </CSSTransition>
     </>
   );
 }
