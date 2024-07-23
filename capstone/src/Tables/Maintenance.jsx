@@ -2,8 +2,30 @@ import React, { useState } from "react";
 
 export default function Maintenance() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-
-  const [add_modal, setIsModalOpen] = useState(false);
+  const [addModal, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusQuery, setStatusQuery] = useState("");
+  const [items, setItems] = useState([
+    {
+      id: 2,
+      name: "Item 1",
+      schedule: "2017-09-26 05:57",
+      status: "Complete",
+    },
+    {
+      id: 3,
+      name: "Item 2",
+      schedule: "2018-03-15 11:23",
+      status: "In Progress",
+    },
+    {
+      id: 4,
+      name: "Item 3",
+      schedule: "2019-01-10 09:30",
+      status: "Pending",
+    },
+    // Add more items as needed
+  ]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -16,47 +38,74 @@ export default function Maintenance() {
     setDeleteModalOpen(false);
   };
 
+  const filteredItems = items.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (statusQuery === "" || item.status === statusQuery)
+  );
+
   return (
     <>
       <div className="limiter">
         <div className="container-table100">
           <div className="wrap-table100">
             <div className="table100">
+              <div className="flex justify-between mb-4">
+                <input
+                  type="text"
+                  placeholder="Search by Item Name"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="p-2 border rounded border-black"
+                />
+                <select
+                  value={statusQuery}
+                  onChange={(e) => setStatusQuery(e.target.value)}
+                  className="p-2 border rounded border-black"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="Complete">Complete</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Pending">Pending</option>
+                </select>
+              </div>
               <table>
                 <thead>
                   <tr className="table100-head">
                     <th className="column1">Maintenance ID</th>
                     <th className="column2">Item Name</th>
                     <th className="column3">Schedule</th>
-                    <th className="column4">Status </th>
+                    <th className="column4">Status</th>
                     <th className="column5" style={{ paddingRight: 20 }}>
-                      Operation{" "}
+                      Operation
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td className="column1">2</td>
-                    <td className="column2">2</td>
-                    <td className="column3">2017-09-26 05:57</td>
-                    <td className="column4">Complete</td>
-                    <td className="flex items-center justify-center mt-2">
-                      <button
-                        type="button"
-                        onClick={openModal}
-                        className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
-                      >
-                        <i className="fa-solid fa-pen"></i>
-                      </button>
-                      <button
-                        onClick={openDeleteModal}
-                        type="button"
-                        className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
-                      >
-                        <i className="fa-solid fa-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
+                  {filteredItems.map((item) => (
+                    <tr key={item.id}>
+                      <td className="column1">{item.id}</td>
+                      <td className="column2">{item.name}</td>
+                      <td className="column3">{item.schedule}</td>
+                      <td className="column4">{item.status}</td>
+                      <td className="flex items-center justify-center mt-2">
+                        <button
+                          type="button"
+                          onClick={openModal}
+                          className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                        >
+                          <i className="fa-solid fa-pen"></i>
+                        </button>
+                        <button
+                          onClick={openDeleteModal}
+                          type="button"
+                          className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                        >
+                          <i className="fa-solid fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -64,7 +113,7 @@ export default function Maintenance() {
         </div>
       </div>
 
-      {add_modal && (
+      {addModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
@@ -81,17 +130,17 @@ export default function Maintenance() {
               <div className="mt-4">
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
                   <input
-                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
                     type="text"
                     placeholder="Item Name"
                   />
                   <input
-                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
                     type="text"
                     placeholder="Quantity"
                   />
                   <input
-                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
                     type="email"
                     placeholder="Unit Price"
                   />
@@ -99,7 +148,7 @@ export default function Maintenance() {
                 <div className="my-4">
                   <textarea
                     placeholder="Description"
-                    className="h-32 bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                    className="h-32 bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline w-full border border-black"
                   ></textarea>
                 </div>
               </div>
