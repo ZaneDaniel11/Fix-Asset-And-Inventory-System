@@ -2,16 +2,22 @@ import React, { useState } from "react";
 import { CSSTransition } from "react-transition-group";
 import "../Css/Electronics.css";
 
-export default function Maintenance() {
+export default function Electronics() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
   const [add_modal, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const openDeleteModal = () => setDeleteModalOpen(true);
-  const closeDeleteModal = () => setDeleteModalOpen(false);
+  const openDeleteModal = () => {
+    setDeleteModalOpen(true);
+  };
 
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
+  };
+ 
   return (
     <>
       <div className="limiter">
@@ -21,11 +27,12 @@ export default function Maintenance() {
               <table>
                 <thead>
                   <tr className="table100-head">
-                    <th className="column1">Maintenance ID</th>
+                    <th className="column1">Item ID</th>
                     <th className="column2">Item Name</th>
-                    <th className="column3">Schedule</th>
-                    <th className="column4">Status </th>
-                    <th className="column5" style={{ paddingRight: 20 }}>
+                    <th className="column3">Quantity</th>
+                    <th className="column4">Unit Price </th>
+                    <th className="column5">Date Added</th>
+                    <th className="column6" style={{ paddingRight: 20 }}>
                       Operation{" "}
                     </th>
                   </tr>
@@ -33,10 +40,11 @@ export default function Maintenance() {
                 <tbody>
                   <tr>
                     <td className="column1">2</td>
-                    <td className="column2">2</td>
-                    <td className="column3">2017-09-26 05:57</td>
-                    <td className="column4">Complete</td>
-                    <td className="flex items-center justify-center mt-2">
+                    <td className="column2">Chairs</td>
+                    <td className="column3">69</td>
+                    <td className="column4">400</td>
+                    <td className="column5">2017-09-26 05:57</td>
+                    <td className="column6 flex items-center justify-center mt-2">
                       <button
                         type="button"
                         onClick={openModal}
@@ -60,12 +68,7 @@ export default function Maintenance() {
         </div>
       </div>
 
-      <CSSTransition
-        in={add_modal}
-        timeout={300}
-        classNames="modal"
-        unmountOnExit
-      >
+      {add_modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
@@ -123,14 +126,9 @@ export default function Maintenance() {
             </form>
           </div>
         </div>
-      </CSSTransition>
+      )}
 
-      <CSSTransition
-        in={deleteModalOpen}
-        timeout={300}
-        classNames="modal"
-        unmountOnExit
-      >
+      {deleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <h5 className="text-lg font-semibold">
@@ -154,7 +152,7 @@ export default function Maintenance() {
             </div>
           </div>
         </div>
-      </CSSTransition>
+      )}
     </>
   );
 }
