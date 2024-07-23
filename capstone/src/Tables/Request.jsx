@@ -1,9 +1,30 @@
 import React, { useState } from "react";
+import "../Css/Electronics.css";
 
-export default function RequestItems() {
+export default function Electronics() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-
-  const [add_modal, setIsModalOpen] = useState(false);
+  const [addModal, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusQuery, setStatusQuery] = useState("");
+  const [items, setItems] = useState([
+    {
+      id: 2,
+      name: "Chairs",
+      quantity: 69,
+      price: 400,
+      dateAdded: "2017-09-26 05:57",
+      status: "Available",
+    },
+    {
+      id: 3,
+      name: "Tables",
+      quantity: 20,
+      price: 800,
+      dateAdded: "2018-03-15 11:23",
+      status: "Out of Stock",
+    },
+    // Add more items as needed
+  ]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -15,47 +36,78 @@ export default function RequestItems() {
   const closeDeleteModal = () => {
     setDeleteModalOpen(false);
   };
+
+  const filteredItems = items.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (statusQuery === "" || item.status === statusQuery)
+  );
+
   return (
     <>
       <div className="limiter">
         <div className="container-table100">
           <div className="wrap-table100">
             <div className="table100">
+              <div className="flex justify-between mb-4">
+                <input
+                  type="text"
+                  placeholder="Search by Item Name"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="p-2 border rounded border-black"
+                />
+                <select
+                  value={statusQuery}
+                  onChange={(e) => setStatusQuery(e.target.value)}
+                  className="p-2 border rounded border-black"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="Available">Available</option>
+                  <option value="Out of Stock">Out of Stock</option>
+                </select>
+              </div>
               <table>
                 <thead>
                   <tr className="table100-head">
                     <th className="column1">Item ID</th>
-                    <th className="column2">Requested by</th>
-                    <th className="column3">Requested by</th>
-                    <th className="column4">Status</th>
-                    <th className="column6">Priority</th>
-                    <th className="column6">Operation</th>
+                    <th className="column2">Item Name</th>
+                    <th className="column3">Quantity</th>
+                    <th className="column4">Unit Price</th>
+                    <th className="column5">Date Added</th>
+                    <th className="column6">Status</th>
+                    <th className="column7" style={{ paddingRight: 20 }}>
+                      Operation
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td className="column1">2</td>
-                    <td className="column2">CSS Department</td>
-                    <td className="column3">2017-09-26 05:57</td>
-                    <td className="column4">Pending</td>
-                    <td className="column6">Medium</td>
-                    <td className="flex items-center justify-center mt-2">
-                      <button
-                        type="button"
-                        onClick={openModal}
-                        className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
-                      >
-                        <i className="fa-solid fa-pen"></i>
-                      </button>
-                      <button
-                        onClick={openDeleteModal}
-                        type="button"
-                        className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
-                      >
-                        <i className="fa-solid fa-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
+                  {filteredItems.map((item) => (
+                    <tr key={item.id}>
+                      <td className="column1">{item.id}</td>
+                      <td className="column2">{item.name}</td>
+                      <td className="column3">{item.quantity}</td>
+                      <td className="column4">{item.price}</td>
+                      <td className="column5">{item.dateAdded}</td>
+                      <td className="column6">{item.status}</td>
+                      <td className="column7 flex items-center justify-center mt-2">
+                        <button
+                          type="button"
+                          onClick={openModal}
+                          className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                        >
+                          <i className="fa-solid fa-pen"></i>
+                        </button>
+                        <button
+                          onClick={openDeleteModal}
+                          type="button"
+                          className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                        >
+                          <i className="fa-solid fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -63,7 +115,7 @@ export default function RequestItems() {
         </div>
       </div>
 
-      {add_modal && (
+      {addModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
@@ -80,30 +132,25 @@ export default function RequestItems() {
               <div className="mt-4">
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
                   <input
-                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
                     type="text"
-                    placeholder="Requested By"
+                    placeholder="Item Name"
                   />
                   <input
-                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
                     type="text"
-                    placeholder="Requested Date"
+                    placeholder="Quantity"
                   />
                   <input
-                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
                     type="email"
-                    placeholder="Status"
-                  />
-                  <input
-                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
-                    type="email"
-                    placeholder="Priority"
+                    placeholder="Unit Price"
                   />
                 </div>
                 <div className="my-4">
                   <textarea
                     placeholder="Description"
-                    className="h-32 bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                    className="h-32 bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline w-full border border-black"
                   ></textarea>
                 </div>
               </div>
