@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import "../Css/Electronics.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheckCircle, faSpinner, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 
-export default function Electronics() {
+
+export default function Maintenance() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [addModal, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -9,19 +11,21 @@ export default function Electronics() {
   const [items, setItems] = useState([
     {
       id: 2,
-      name: "Chairs",
-      quantity: 69,
-      price: 400,
-      dateAdded: "2017-09-26 05:57",
-      status: "Available",
+      name: "Item 1",
+      schedule: "2017-09-26 05:57",
+      status: "Complete",
     },
     {
       id: 3,
-      name: "Tables",
-      quantity: 20,
-      price: 800,
-      dateAdded: "2018-03-15 11:23",
-      status: "Out of Stock",
+      name: "Item 2",
+      schedule: "2018-03-15 11:23",
+      status: "In Progress",
+    },
+    {
+      id: 4,
+      name: "Item 3",
+      schedule: "2019-01-10 09:30",
+      status: "Pending",
     },
     // Add more items as needed
   ]);
@@ -43,6 +47,19 @@ export default function Electronics() {
       (statusQuery === "" || item.status === statusQuery)
   );
 
+  const getStatusInfo = (status) => {
+    switch (status) {
+      case "Complete":
+        return { className: "text-green-500", icon: faCheckCircle };
+      case "In Progress":
+        return { className: "text-yellow-500", icon: faSpinner, spin: true };
+      case "Pending":
+        return { className: "text-red-500", icon: faExclamationCircle };
+      default:
+        return { className: "", icon: null };
+    }
+  };
+
   return (
     <>
       <div className="limiter">
@@ -63,51 +80,57 @@ export default function Electronics() {
                   className="p-2 border rounded border-black"
                 >
                   <option value="">All Statuses</option>
-                  <option value="Available">Available</option>
-                  <option value="Out of Stock">Out of Stock</option>
+                  <option value="Complete">Complete</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Pending">Pending</option>
                 </select>
               </div>
               <table>
                 <thead>
                   <tr className="table100-head">
-                    <th className="column1">Item ID</th>
+                    <th className="column1">Maintenance ID</th>
                     <th className="column2">Item Name</th>
-                    <th className="column3">Quantity</th>
-                    <th className="column4">Unit Price</th>
-                    <th className="column5">Date Added</th>
-                    <th className="column6">Status</th>
-                    <th className="column7" style={{ paddingRight: 20 }}>
+                    <th className="column3">Schedule</th>
+                    <th className="column4">Status</th>
+                    <th className="column5" style={{ paddingRight: 20 }}>
                       Operation
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredItems.map((item) => (
-                    <tr key={item.id}>
-                      <td className="column1">{item.id}</td>
-                      <td className="column2">{item.name}</td>
-                      <td className="column3">{item.quantity}</td>
-                      <td className="column4">{item.price}</td>
-                      <td className="column5">{item.dateAdded}</td>
-                      <td className="column6">{item.status}</td>
-                      <td className="column7 flex items-center justify-center mt-2">
-                        <button
-                          type="button"
-                          onClick={openModal}
-                          className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
-                        >
-                          <i className="fa-solid fa-pen"></i>
-                        </button>
-                        <button
-                          onClick={openDeleteModal}
-                          type="button"
-                          className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
-                        >
-                          <i className="fa-solid fa-trash"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {filteredItems.map((item) => {
+                    const statusInfo = getStatusInfo(item.status);
+                    return (
+                      <tr key={item.id}>
+                        <td className="column1">{item.id}</td>
+                        <td className="column2">{item.name}</td>
+                        <td className="column3">{item.schedule}</td>
+                        <td className={`column4 ${statusInfo.className}`}>
+                          <FontAwesomeIcon 
+                            icon={statusInfo.icon} 
+                            className={`mr-2 ${statusInfo.spin ? 'spin' : ''}`} 
+                          />
+                          {item.status}
+                        </td>
+                        <td className="flex items-center justify-center mt-2">
+                          <button
+                            type="button"
+                            onClick={openModal}
+                            className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                          >
+                            <i className="fa-solid fa-pen"></i>
+                          </button>
+                          <button
+                            onClick={openDeleteModal}
+                            type="button"
+                            className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                          >
+                            <i className="fa-solid fa-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

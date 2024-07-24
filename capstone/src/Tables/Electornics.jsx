@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../Css/Electronics.css";
 
+
 export default function Electronics() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [addModal, setIsModalOpen] = useState(false);
