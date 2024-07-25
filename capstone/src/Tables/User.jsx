@@ -1,28 +1,31 @@
 import React, { useState } from "react";
 
-export default function Maintenance() {
+export default function Users() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editModal, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusQuery, setStatusQuery] = useState("");
+  const [userTypeQuery, setUserTypeQuery] = useState("");
   const [items, setItems] = useState([
     {
       id: 2,
-      name: "Item 1",
-      schedule: "2017-09-26 05:57",
-      status: "Complete",
+      name: "Pagatpat",
+      password: "Password21",
+      createdDate: "2017-09-26 05:57",
+      usertype: "Member",
     },
     {
       id: 3,
-      name: "Item 2",
-      schedule: "2018-03-15 11:23",
-      status: "In Progress",
+      name: "Pelayo",
+      password: "Password21",
+      createdDate: "2017-09-26 05:57",
+      usertype: "Admin",
     },
     {
       id: 4,
-      name: "Item 3",
-      schedule: "2019-01-10 09:30",
-      status: "Pending",
+      name: "Pino",
+      password: "Password21",
+      createdDate: "2017-09-26 05:57",
+      usertype: "Member",
     },
     // Add more items as needed
   ]);
@@ -41,21 +44,8 @@ export default function Maintenance() {
   const filteredItems = items.filter(
     (item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (statusQuery === "" || item.status === statusQuery)
+      (userTypeQuery === "" || item.usertype === userTypeQuery)
   );
-
-  const getStatusInfo = (status) => {
-    switch (status) {
-      case "Complete":
-        return { className: "text-green-500", icon: "fa-check-circle", spin: false };
-      case "In Progress":
-        return { className: "text-yellow-500", icon: "fa-spinner", spin: true };
-      case "Pending":
-        return { className: "text-red-500", icon: "fa-exclamation-circle", spin: false };
-      default:
-        return { className: "", icon: null, spin: false };
-    }
-  };
 
   return (
     <>
@@ -66,48 +56,44 @@ export default function Maintenance() {
               <div className="flex justify-between mb-4">
                 <input
                   type="text"
-                  placeholder="Search by Item Name"
+                  placeholder="Search by User Name"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="p-2 border rounded border-black"
                 />
                 <select
-                  value={statusQuery}
-                  onChange={(e) => setStatusQuery(e.target.value)}
+                  value={userTypeQuery}
+                  onChange={(e) => setUserTypeQuery(e.target.value)}
                   className="p-2 border rounded border-black"
                 >
-                  <option value="">All Statuses</option>
-                  <option value="Complete">Complete</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Pending">Pending</option>
+                  <option value="">All User Types</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Member">Member</option>
                 </select>
               </div>
               <table>
                 <thead>
                   <tr className="table100-head">
-                    <th className="column1">Maintenance ID</th>
-                    <th className="column2">Item Name</th>
-                    
-                    <th className="column3">Schedule</th>
-                    <th className="column4">Status</th>
-                    <th className="column5" style={{ paddingRight: 20 }}>
+                    <th className="column1">User ID</th>
+                    <th className="column2">User Name</th>
+                    <th className="column3">Password</th>
+                    <th className="column4">Created Date</th>
+                    <th className="column5">User Type</th>
+                    <th className="column6" style={{ paddingRight: 20 }}>
                       Operation
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredItems.map((item) => {
-                    const statusInfo = getStatusInfo(item.status);
                     return (
                       <tr key={item.id}>
                         <td className="column1">{item.id}</td>
                         <td className="column2">{item.name}</td>
-                        <td className="column3">{item.schedule}</td>
-                        <td className={`column4 ${statusInfo.className}`}>
-                          <i className={`fa ${statusInfo.icon} ${statusInfo.spin ? 'spin' : ''} mr-2`}></i>
-                          {item.status}
-                        </td>
-                        <td className="flex items-center justify-center mt-2">
+                        <td className="column3">{item.password}</td>
+                        <td className="column4">{item.createdDate}</td>
+                        <td className="column5">{item.usertype}</td>
+                        <td className="column6 flex items-center justify-center mt-2">
                           <button
                             type="button"
                             onClick={openModal}
@@ -162,9 +148,8 @@ export default function Maintenance() {
                   <select
                     className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
                   >
-                    <option value="Complete">Complete</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Pending">Pending</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Member">Member</option>
                   </select>
                 </div>
                 <div className="my-4">

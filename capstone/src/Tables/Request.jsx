@@ -1,33 +1,35 @@
 import React, { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckCircle, faSpinner, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 
-
-export default function Maintenance() {
+export default function RequestItems() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [addModal, setIsModalOpen] = useState(false);
+  const [editModal, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusQuery, setStatusQuery] = useState("");
   const [items, setItems] = useState([
     {
       id: 2,
       name: "Item 1",
-      schedule: "2017-09-26 05:57",
+      requestedBy: "User 1",
+      requestedDate: "2017-09-26 05:57",
       status: "Complete",
+      priority: "High",
     },
     {
       id: 3,
       name: "Item 2",
-      schedule: "2018-03-15 11:23",
+      requestedBy: "User 2",
+      requestedDate: "2018-03-15 11:23",
       status: "In Progress",
+      priority: "Medium",
     },
     {
       id: 4,
       name: "Item 3",
-      schedule: "2019-01-10 09:30",
+      requestedBy: "User 3",
+      requestedDate: "2019-01-10 09:30",
       status: "Pending",
+      priority: "Low",
     },
-    // Add more items as needed
   ]);
 
   const openModal = () => setIsModalOpen(true);
@@ -50,13 +52,13 @@ export default function Maintenance() {
   const getStatusInfo = (status) => {
     switch (status) {
       case "Complete":
-        return { className: "text-green-500", icon: faCheckCircle };
+        return { className: "text-green-500", icon: "fa-check-circle", spin: false };
       case "In Progress":
-        return { className: "text-yellow-500", icon: faSpinner, spin: true };
+        return { className: "text-yellow-500", icon: "fa-spinner", spin: true };
       case "Pending":
-        return { className: "text-red-500", icon: faExclamationCircle };
+        return { className: "text-red-500", icon: "fa-exclamation-circle", spin: false };
       default:
-        return { className: "", icon: null };
+        return { className: "", icon: null, spin: false };
     }
   };
 
@@ -88,11 +90,13 @@ export default function Maintenance() {
               <table>
                 <thead>
                   <tr className="table100-head">
-                    <th className="column1">Maintenance ID</th>
+                    <th className="column1">Request ID</th>
                     <th className="column2">Item Name</th>
-                    <th className="column3">Schedule</th>
-                    <th className="column4">Status</th>
-                    <th className="column5" style={{ paddingRight: 20 }}>
+                    <th className="column3">Requested By</th>
+                    <th className="column4">Requested Date</th>
+                    <th className="column5">Status</th>
+                    <th className="column6">Priority</th>
+                    <th className="column7" style={{ paddingRight: 20 }}>
                       Operation
                     </th>
                   </tr>
@@ -104,15 +108,14 @@ export default function Maintenance() {
                       <tr key={item.id}>
                         <td className="column1">{item.id}</td>
                         <td className="column2">{item.name}</td>
-                        <td className="column3">{item.schedule}</td>
-                        <td className={`column4 ${statusInfo.className}`}>
-                          <FontAwesomeIcon 
-                            icon={statusInfo.icon} 
-                            className={`mr-2 ${statusInfo.spin ? 'spin' : ''}`} 
-                          />
+                        <td className="column3">{item.requestedBy}</td>
+                        <td className="column4">{item.requestedDate}</td>
+                        <td className={`column5 ${statusInfo.className}`}>
+                          <i className={`fa ${statusInfo.icon} ${statusInfo.spin ? 'spin' : ''} mr-2`}></i>
                           {item.status}
                         </td>
-                        <td className="flex items-center justify-center mt-2">
+                        <td className="column6">{item.priority}</td>
+                        <td className="column7 flex items-center justify-center mt-2">
                           <button
                             type="button"
                             onClick={openModal}
@@ -138,7 +141,7 @@ export default function Maintenance() {
         </div>
       </div>
 
-      {addModal && (
+      {editModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
@@ -161,14 +164,16 @@ export default function Maintenance() {
                   />
                   <input
                     className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
-                    type="text"
-                    placeholder="Quantity"
+                    type="date"
+                    placeholder="Schedule"
                   />
-                  <input
+                  <select
                     className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
-                    type="email"
-                    placeholder="Unit Price"
-                  />
+                  >
+                    <option value="Complete">Complete</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Pending">Pending</option>
+                  </select>
                 </div>
                 <div className="my-4">
                   <textarea
