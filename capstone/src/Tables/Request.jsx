@@ -16,6 +16,8 @@ export default function RequestItems() {
       requestedBy: "User 1",
       requestedDate: "2017-09-26 05:57",
       status: "Complete",
+      purpose:"For Pe",
+      EstimatedCost:"1000",
       priority: "High",
     },
     {
@@ -23,6 +25,8 @@ export default function RequestItems() {
       name: "Item 2",
       requestedBy: "User 2",
       requestedDate: "2018-03-15 11:23",
+      purpose:"For Pe",
+      EstimatedCost:"1000",
       status: "In Progress",
       priority: "Medium",
     },
@@ -31,6 +35,8 @@ export default function RequestItems() {
       name: "Item 3",
       requestedBy: "User 3",
       requestedDate: "2019-01-10 09:30",
+      purpose:"For Pe",
+      EstimatedCost:"1000",
       status: "Pending",
       priority: "Low",
     },
@@ -316,6 +322,8 @@ export default function RequestItems() {
               <p><strong>Item Name:</strong> {currentItem.name}</p>
               <p><strong>Requested By:</strong> {currentItem.requestedBy}</p>
               <p><strong>Requested Date:</strong> {currentItem.requestedDate}</p>
+              <p><strong>Purpose:</strong> {currentItem.purpose}</p>
+              <p><strong>Estimated Cose:</strong> {currentItem.EstimatedCost}</p>
               <p><strong>Status:</strong> {currentItem.status}</p>
               <p><strong>Priority:</strong> {currentItem.priority}</p>
               <p><strong>Description:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
