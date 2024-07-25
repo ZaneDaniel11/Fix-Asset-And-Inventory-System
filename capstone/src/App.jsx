@@ -3,8 +3,10 @@ import Dashboard from "./Dashboard";
 import { Route, Routes } from "react-router-dom";
 import Electronics from "./Tables/Electornics.jsx";
 import Login from "./Login.jsx";
-import RequestItems from "./Tables/Request.jsx";
 import Maintenance from "./Tables/Maintenance.jsx";
+import RequestItems from "./Tables/Request.jsx";
+import Users from "./Tables/User.jsx";
+
 
 function App() {
   return (
@@ -13,8 +15,10 @@ function App() {
         <Route exact path="/Login" element={<Login />} />
         <Route exact path="/Electronics" element={<Electronics />} />
         <Route exact path="/" element={<Dashboard />} />
-        <Route exact path="/RequestItems" element={<RequestItems />} />
+        <Route exact path="/Request" element={<RequestItems/>} />
         <Route exact path="/Maintenance" element={<Maintenance />} />
+        <Route exact path="/Users" element={<Users/>} />
+       
       </Routes>
     </div>
   );

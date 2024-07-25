@@ -6,7 +6,6 @@ export default function RequestTable() {
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-  const openDeleteModal = () => setDeleteModalOpen(true);
   const closeDeleteModal = () => setDeleteModalOpen(false);
 
   return (
@@ -130,32 +129,6 @@ export default function RequestTable() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {deleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-            <h5 className="text-lg font-semibold">
-              Are you sure you want to delete?
-            </h5>
-
-            <div className="flex justify-end mt-4">
-              <button
-                type="button"
-                onClick={closeDeleteModal}
-                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg mr-2"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="bg-red-500 text-white px-4 py-2 rounded-lg"
-              >
-                Delete
-              </button>
-            </div>
           </div>
         </div>
       )}

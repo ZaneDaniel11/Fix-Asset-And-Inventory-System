@@ -3,7 +3,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CSS file or within a <style> tag */
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
 .modal-enter {
   opacity: 0;
   transform: scale(0.9);
@@ -119,7 +128,7 @@ iframe {
   display: -moz-box;
   display: -ms-flexbox;
   display: flex;
-  align-items: center;
+
   justify-content: center;
   flex-wrap: wrap;
   padding: 33px 30px;
@@ -303,10 +312,11 @@ tbody tr:hover {
   }
 
   .column4,
-  .column5,
-  .column6 {
+  .column5
+  {
     text-align: left;
   }
+
 
   .column4,
   .column5,
