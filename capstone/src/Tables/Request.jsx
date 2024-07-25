@@ -16,8 +16,6 @@ export default function RequestItems() {
       requestedBy: "User 1",
       requestedDate: "2017-09-26 05:57",
       status: "Complete",
-      purpose: "For Pe",
-      EstimatedCost: "1000",
       priority: "High",
     },
     {
@@ -25,8 +23,6 @@ export default function RequestItems() {
       name: "Item 2",
       requestedBy: "User 2",
       requestedDate: "2018-03-15 11:23",
-      purpose: "For Pe",
-      EstimatedCost: "1000",
       status: "In Progress",
       priority: "Medium",
     },
@@ -35,8 +31,6 @@ export default function RequestItems() {
       name: "Item 3",
       requestedBy: "User 3",
       requestedDate: "2019-01-10 09:30",
-      purpose: "For Pe",
-      EstimatedCost: "1000",
       status: "Pending",
       priority: "Low",
     },
@@ -89,31 +83,6 @@ export default function RequestItems() {
       <div className="limiter">
         <div className="container-table100">
           <div className="wrap-table100">
-            <div className="flex justify-between mb-4">
-              {/* Search bar */}
-              <input
-                type="text"
-                id="searchBar"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
-              />
-
-              {/* Select input for filtering */}
-              <select
-                id="statusFilter"
-                value={statusFilter}
-                onChange={handleStatusChange}
-                className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
-              >
-                <option value="">All</option>
-                <option value="pending">Pending</option>
-                <option value="inprogress">In Progress</option>
-                <option value="complete">Complete</option>
-              </select>
-            </div>
-
             <div className="table100">
               <div className="flex justify-between mb-4">
                 <input
@@ -358,12 +327,6 @@ export default function RequestItems() {
               </p>
               <p>
                 <strong>Requested Date:</strong> {currentItem.requestedDate}
-              </p>
-              <p>
-                <strong>Purpose:</strong> {currentItem.purpose}
-              </p>
-              <p>
-                <strong>Estimated Cose:</strong> {currentItem.EstimatedCost}
               </p>
               <p>
                 <strong>Status:</strong> {currentItem.status}

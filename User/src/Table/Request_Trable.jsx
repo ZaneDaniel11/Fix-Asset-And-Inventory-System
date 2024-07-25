@@ -3,10 +3,42 @@ import React, { useState } from "react";
 export default function RequestTable() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [add_modal, setIsModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("All");
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+  const openViewModal = (request) => {
+    setSelectedRequest(request);
+    setViewModalOpen(true);
+  };
+  const closeViewModal = () => setViewModalOpen(false);
   const closeDeleteModal = () => setDeleteModalOpen(false);
+
+  const requests = [
+    {
+      id: 2,
+      requestedBy: "CSS Department",
+      requestedDate: "2017-09-26 05:57",
+      suggestedDealer: "Bruce Wayne",
+      purpose: "For P.E",
+      estimatedCost: "10000",
+      status: "Pending",
+    },
+    // Add more requests as needed
+  ];
+
+  const statusColors = {
+    Pending: "bg-yellow-200 text-yellow-700",
+    Approved: "bg-green-200 text-green-700",
+    Rejected: "bg-red-200 text-red-700",
+  };
+
+  const filteredRequests =
+    statusFilter === "All"
+      ? requests
+      : requests.filter((request) => request.status === statusFilter);
 
   return (
     <>
@@ -14,7 +46,7 @@ export default function RequestTable() {
         <div className="container-table100">
           <div className="wrap-table100">
             <div className="table100">
-              <div className="flex justify-end mb-4">
+              <div className="flex justify-between mb-4">
                 <button
                   type="button"
                   onClick={openModal}
@@ -22,6 +54,16 @@ export default function RequestTable() {
                 >
                   <i className="fa-solid fa-plus"></i> Add
                 </button>
+                <select
+                  className="border rounded-lg px-3 py-2"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="All">All</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
               </div>
               <table>
                 <thead>
@@ -31,31 +73,34 @@ export default function RequestTable() {
                     <th className="column3">Requested Date</th>
                     <th className="column4">Suggested Dealer</th>
                     <th className="column5">Purpose</th>
-                    <th className="column6">Estimated Cost</th>
+                    <th className="column3">Estimated Cost</th>
                     <th className="column6">Status</th>
-                    <td className="column6">Operation</td>
+                    <th className="column6 text-white">Operation</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td className="column1">2</td>
-                    <td className="column2">CSS Department</td>
-                    <td className="column3">2017-09-26 05:57</td>
-                    <td className="column4">Bruce Wayne</td>
-                    <td className="column4">For P.E</td>
-                    <td className="column4">10000</td>
-                    <td className="column6">Pending</td>
-
-                    <td className="flex items-center justify-center mt-2">
-                      <button
-                        type="button"
-                        onClick={openModal}
-                        className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
-                      >
-                        <i className="fa-regular fa-eye"></i>
-                      </button>
-                    </td>
-                  </tr>
+                  {filteredRequests.map((request) => (
+                    <tr key={request.id}>
+                      <td className="column1">{request.id}</td>
+                      <td className="column2">{request.requestedBy}</td>
+                      <td className="column3">{request.requestedDate}</td>
+                      <td className="column3">{request.suggestedDealer}</td>
+                      <td className="column4">{request.purpose}</td>
+                      <td className="column6">{request.estimatedCost}</td>
+                      <td className={`column6 ${statusColors[request.status]}`}>
+                        {request.status}
+                      </td>
+                      <td className="flex items-center justify-center mt-2">
+                        <button
+                          type="button"
+                          onClick={() => openViewModal(request)}
+                          className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                        >
+                          <i className="fa-regular fa-eye"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -129,6 +174,60 @@ export default function RequestTable() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {viewModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
+            <div className="flex justify-between items-center">
+              <h5 className="text-lg font-semibold">Request Details</h5>
+              <button
+                type="button"
+                onClick={closeViewModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            {selectedRequest && (
+              <div className="mt-4">
+                <p>
+                  <strong>Item ID:</strong> {selectedRequest.id}
+                </p>
+                <p>
+                  <strong>Requested by:</strong> {selectedRequest.requestedBy}
+                </p>
+                <p>
+                  <strong>Requested Date:</strong>{" "}
+                  {selectedRequest.requestedDate}
+                </p>
+                <p>
+                  <strong>Suggested Dealer:</strong>{" "}
+                  {selectedRequest.suggestedDealer}
+                </p>
+                <p>
+                  <strong>Purpose:</strong> {selectedRequest.purpose}
+                </p>
+                <p>
+                  <strong>Estimated Cost:</strong>{" "}
+                  {selectedRequest.estimatedCost}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedRequest.status}
+                </p>
+              </div>
+            )}
+            <div className="flex justify-end mt-4">
+              <button
+                type="button"
+                onClick={closeViewModal}
+                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg mr-2"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
