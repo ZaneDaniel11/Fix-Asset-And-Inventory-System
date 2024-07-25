@@ -312,10 +312,11 @@ tbody tr:hover {
   }
 
   .column4,
-  .column5,
-  .column6 {
+  .column5
+  {
     text-align: left;
   }
+
 
   .column4,
   .column5,

@@ -1,8 +1,12 @@
 import React, { useState } from "react";
+import "../Css/Electronics.css";
 
 export default function RequestItems() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [editModal, setIsModalOpen] = useState(false);
+  const [editModal, setEditModalOpen] = useState(false);
+  const [viewModal, setViewModalOpen] = useState(false);
+  const [addModal, setAddModalOpen] = useState(false);
+  const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusQuery, setStatusQuery] = useState("");
   const [items, setItems] = useState([
@@ -32,16 +36,20 @@ export default function RequestItems() {
     },
   ]);
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const openAddModal = () => setAddModalOpen(true);
+  const closeAddModal = () => setAddModalOpen(false);
 
-  const openDeleteModal = () => {
-    setDeleteModalOpen(true);
-  };
+  const openEditModal = () => setEditModalOpen(true);
+  const closeEditModal = () => setEditModalOpen(false);
 
-  const closeDeleteModal = () => {
-    setDeleteModalOpen(false);
+  const openViewModal = (item) => {
+    setCurrentItem(item);
+    setViewModalOpen(true);
   };
+  const closeViewModal = () => setViewModalOpen(false);
+
+  const openDeleteModal = () => setDeleteModalOpen(true);
+  const closeDeleteModal = () => setDeleteModalOpen(false);
 
   const filteredItems = items.filter(
     (item) =>
@@ -86,6 +94,13 @@ export default function RequestItems() {
                   <option value="In Progress">In Progress</option>
                   <option value="Pending">Pending</option>
                 </select>
+                <button
+                  type="button"
+                  onClick={openAddModal}
+                  className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
+                >
+                  Add Request
+                </button>
               </div>
               <table>
                 <thead>
@@ -118,7 +133,14 @@ export default function RequestItems() {
                         <td className="column7 flex items-center justify-center mt-2">
                           <button
                             type="button"
-                            onClick={openModal}
+                            onClick={() => openViewModal(item)}
+                            className="text-white bg-blue-500 hover:bg-blue-600 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                          >
+                            <i className="fa-solid fa-eye"></i>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={openEditModal}
                             className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
                           >
                             <i className="fa-solid fa-pen"></i>
@@ -141,6 +163,80 @@ export default function RequestItems() {
         </div>
       </div>
 
+      {addModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
+            <div className="flex justify-between items-center">
+              <h5 className="text-lg font-semibold">Add Request</h5>
+              <button
+                type="button"
+                onClick={closeAddModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <form action="">
+              <div className="mt-4">
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
+                  <input
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
+                    type="text"
+                    placeholder="Item Name"
+                  />
+                  <input
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
+                    type="text"
+                    placeholder="Requested By"
+                  />
+                  <input
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
+                    type="date"
+                    placeholder="Requested Date"
+                  />
+                  <select
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
+                  >
+                    <option value="Complete">Complete</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Pending">Pending</option>
+                  </select>
+                  <select
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
+                  >
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </select>
+                </div>
+                <div className="my-4">
+                  <textarea
+                    placeholder="Description"
+                    className="h-32 bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline w-full border border-black"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-4">
+                <button
+                  type="button"
+                  onClick={closeAddModal}
+                  className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg mr-2"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {editModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
@@ -148,7 +244,7 @@ export default function RequestItems() {
               <h5 className="text-lg font-semibold">Edit</h5>
               <button
                 type="button"
-                onClick={closeModal}
+                onClick={closeEditModal}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <i className="fa-solid fa-xmark"></i>
@@ -186,7 +282,7 @@ export default function RequestItems() {
               <div className="flex justify-end mt-4">
                 <button
                   type="button"
-                  onClick={closeModal}
+                  onClick={closeEditModal}
                   className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg mr-2"
                 >
                   Close
@@ -199,6 +295,31 @@ export default function RequestItems() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {viewModal && currentItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
+            <div className="flex justify-between items-center">
+              <h5 className="text-lg font-semibold">View Item Details</h5>
+              <button
+                type="button"
+                onClick={closeViewModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div className="mt-4">
+              <p><strong>Item Name:</strong> {currentItem.name}</p>
+              <p><strong>Requested By:</strong> {currentItem.requestedBy}</p>
+              <p><strong>Requested Date:</strong> {currentItem.requestedDate}</p>
+              <p><strong>Status:</strong> {currentItem.status}</p>
+              <p><strong>Priority:</strong> {currentItem.priority}</p>
+              <p><strong>Description:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            </div>
           </div>
         </div>
       )}
