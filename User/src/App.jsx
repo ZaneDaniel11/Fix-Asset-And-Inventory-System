@@ -4,6 +4,7 @@ import Login from "./Login";
 import Home from "./Home";
 import Request from "./Request";
 import RBondRequest from "./RequestBon";
+import Historys from "./History";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/request" element={<Request />} />
         <Route path="/bondpaper" element={<RBondRequest />} />
+        <Route path="/History" element={<Historys />} />
       </Routes>
     </div>
   );

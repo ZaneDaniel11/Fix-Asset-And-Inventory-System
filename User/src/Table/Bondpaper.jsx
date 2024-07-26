@@ -4,10 +4,14 @@ export default function BondpaperReq() {
   const [add_modal, setIsModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("All");
+  const [selectedRequest, setSelectedRequest] = useState(null);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-  const openViewModal = () => setViewModalOpen(true);
+  const openViewModal = (request) => {
+    setSelectedRequest(request);
+    setViewModalOpen(true);
+  };
   const closeViewModal = () => setViewModalOpen(false);
 
   const handleStatusFilterChange = (event) => {
@@ -52,6 +56,12 @@ export default function BondpaperReq() {
       ? requests
       : requests.filter((request) => request.status === filterStatus);
 
+  const statusColors = {
+    Pending: "bg-yellow-200 text-yellow-800",
+    Approved: "bg-green-200 text-green-800",
+    Rejected: "bg-red-200 text-red-800",
+  };
+
   return (
     <>
       <div className="limiter">
@@ -62,9 +72,9 @@ export default function BondpaperReq() {
                 <button
                   type="button"
                   onClick={openModal}
-                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 flex items-center"
                 >
-                  <i className="fa-solid fa-plus"></i> Add
+                  <i className="fa-solid fa-plus me-2"></i> Add
                 </button>
                 <select
                   value={filterStatus}
@@ -86,7 +96,7 @@ export default function BondpaperReq() {
                     <th className="column3">Purpose</th>
                     <th className="column3">Requested By</th>
                     <th className="column3">No Of Paper</th>
-                    <th className="column6">Type</th>
+                    <th className="column4">Type</th>
                     <th className="column6">Status</th>
                     <td className="column6 text-white">Operation</td>
                   </tr>
@@ -101,28 +111,16 @@ export default function BondpaperReq() {
                       <td className="column3">{request.requestedBy}</td>
                       <td className="column3">{request.noOfPaper}</td>
                       <td className="column4">{request.type}</td>
-                      <td
-                        className="column6"
-                        style={{
-                          backgroundColor:
-                            request.status === "Pending"
-                              ? "yellow"
-                              : request.status === "Approved"
-                              ? "green"
-                              : "red",
-                          color:
-                            request.status === "Pending" ? "black" : "white",
-                        }}
-                      >
+                      <td className={`column6 ${statusColors[request.status]}`}>
                         {request.status}
                       </td>
                       <td className="flex items-center justify-center mt-2">
                         <button
                           type="button"
-                          onClick={openViewModal}
-                          className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                          onClick={() => openViewModal(request)}
+                          className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2 flex items-center"
                         >
-                          <i className="fa-regular fa-eye"></i>
+                          <i className="fa-regular fa-eye me-2"></i>
                         </button>
                       </td>
                     </tr>
@@ -188,15 +186,15 @@ export default function BondpaperReq() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg mr-2"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg mr-2 flex items-center"
                 >
-                  Close
+                  <i className="fa-solid fa-xmark me-2"></i> Close
                 </button>
                 <button
                   type="button"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center"
                 >
-                  Save changes
+                  <i className="fa-solid fa-save me-2"></i> Save changes
                 </button>
               </div>
             </form>
@@ -217,33 +215,34 @@ export default function BondpaperReq() {
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
-            <div className="mt-4">
-              {/* Details of the selected request */}
-              <p>
-                <strong>Request Id:</strong> 2
-              </p>
-              <p>
-                <strong>Office:</strong> CSS Department
-              </p>
-              <p>
-                <strong>Date:</strong> 2017-09-26 05:57
-              </p>
-              <p>
-                <strong>Purpose:</strong> Faculty Usage
-              </p>
-              <p>
-                <strong>Requested By:</strong> Bruce Wayne
-              </p>
-              <p>
-                <strong>No Of Paper:</strong> 10000
-              </p>
-              <p>
-                <strong>Type:</strong> Long Bondpaper
-              </p>
-              <p>
-                <strong>Status:</strong> Pending
-              </p>
-            </div>
+            {selectedRequest && (
+              <div className="mt-4">
+                <p>
+                  <strong>Request Id:</strong> {selectedRequest.id}
+                </p>
+                <p>
+                  <strong>Office:</strong> {selectedRequest.office}
+                </p>
+                <p>
+                  <strong>Date:</strong> {selectedRequest.date}
+                </p>
+                <p>
+                  <strong>Purpose:</strong> {selectedRequest.purpose}
+                </p>
+                <p>
+                  <strong>Requested By:</strong> {selectedRequest.requestedBy}
+                </p>
+                <p>
+                  <strong>No Of Paper:</strong> {selectedRequest.noOfPaper}
+                </p>
+                <p>
+                  <strong>Type:</strong> {selectedRequest.type}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedRequest.status}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}

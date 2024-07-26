@@ -26,13 +26,36 @@ export default function RequestTable() {
       estimatedCost: "10000",
       status: "Pending",
     },
-    // Add more requests as needed
+    {
+      id: 3,
+      requestedBy: "Education",
+      requestedDate: "2017-09-26 05:57",
+      suggestedDealer: "Bruce Wayne",
+      purpose: "For Faculty",
+      estimatedCost: "15000",
+      status: "Approved",
+    },
+    {
+      id: 4,
+      requestedBy: "Criminology",
+      requestedDate: "2017-09-26 05:57",
+      suggestedDealer: "Bruce Wayne",
+      purpose: "For Seminar",
+      estimatedCost: "20000",
+      status: "Rejected",
+    },
   ];
 
   const statusColors = {
     Pending: "bg-yellow-200 text-yellow-700",
     Approved: "bg-green-200 text-green-700",
     Rejected: "bg-red-200 text-red-700",
+  };
+
+  const statusIcons = {
+    Pending: "fa-hourglass-start",
+    Approved: "fa-check-circle",
+    Rejected: "fa-times-circle",
   };
 
   const filteredRequests =
@@ -50,7 +73,7 @@ export default function RequestTable() {
                 <button
                   type="button"
                   onClick={openModal}
-                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
                 >
                   <i className="fa-solid fa-plus"></i> Add
                 </button>
@@ -88,13 +111,18 @@ export default function RequestTable() {
                       <td className="column4">{request.purpose}</td>
                       <td className="column6">{request.estimatedCost}</td>
                       <td className={`column6 ${statusColors[request.status]}`}>
+                        <i
+                          className={`fa-solid ${
+                            statusIcons[request.status]
+                          } me-2`}
+                        ></i>
                         {request.status}
                       </td>
                       <td className="flex items-center justify-center mt-2">
                         <button
                           type="button"
                           onClick={() => openViewModal(request)}
-                          className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                          className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
                         >
                           <i className="fa-regular fa-eye"></i>
                         </button>

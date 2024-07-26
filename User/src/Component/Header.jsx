@@ -36,15 +36,7 @@ export default function Head() {
               </li>
               <li class="max-lg:border-b max-lg:py-3 px-3">
                 <a
-                  href="/bondpaper"
-                  class="hover:text-[#007bff] text-white block font-bold text-[15px]"
-                >
-                  Approve
-                </a>
-              </li>
-              <li class="max-lg:border-b max-lg:py-3 px-3">
-                <a
-                  href="/bondpaper"
+                  href="/History"
                   class="hover:text-[#007bff] text-white block font-bold text-[15px]"
                 >
                   Request History
