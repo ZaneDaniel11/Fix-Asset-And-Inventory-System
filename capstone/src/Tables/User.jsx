@@ -86,25 +86,14 @@ export default function Users() {
 
   const handleDeleteUser = async () => {
     if (currentItem && currentItem.UserId) {
-      try {
-        const response = await axios.delete(`${API_URL}Delete.php`, {
-          params: { id: currentItem.UserId },
-        });
-
-        if (response.data.success) {
-          // Successfully deleted
-          closeDeleteModal();
-          // Refresh users data
-          const updatedUsersResponse = await axios.get(`${API_URL}Read.php`);
-          setUsers(updatedUsersResponse.data);
-        } else {
-          console.error("Failed to delete user:", response.data.error);
-        }
-      } catch (error) {
-        console.error("Failed to delete user:", error);
+      const response = await axios.delete(`${API_URL}Delete.php`, {
+        params: { id: currentItem.UserId },
+      });
+      if (response.data.success) {
+        closeDeleteModal();
+        const UpdateData = await axios.get(`${API_URL}Read.php`);
+        setUsers(UpdateData.data);
       }
-    } else {
-      console.error("No user ID provided for deletion.");
     }
   };
 
