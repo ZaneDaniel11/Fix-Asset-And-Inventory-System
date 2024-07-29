@@ -1,46 +1,28 @@
+import React from 'react';
+
 export default function Dashboard() {
+  const items = [
+    { title: 'Request', count: 16 },
+    { title: 'Borrowed', count: 21 },
+    { title: 'Returned', count: 17 },
+    { title: 'Maintenance', count: 53 },
+    { title: 'Users', count: 5 },
+    { title: 'Log', count: 53 },
+  ];
+
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100 mx-20">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-8">Stocks and Inventory</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-20">
-          <button
-            className="bg-BlackNgadiliBlack text-white py-20 px-16 rounded-3xl shadow-md hover:bg-gray-800 transition duration-300 text-3xl"
-            onClick={() => (window.location.href = "/Electronics")}
+    <div className="p-4 bg-background">
+      <h1 className="text-2xl font-bold text-center mb-6">Dashboard</h1>
+      <div className="flex flex-wrap justify-center">
+        {items.map((item, index) => (
+          <div
+            key={index}
+            className="m-4 p-6 bg-card rounded-lg shadow-md text-center w-64 h-32"
           >
-            Electronics
-          </button>
-          <button
-            onClick={() => (window.location.href = "/Electronics")}
-            className="bg-BlackNgadiliBlack text-white py-8 px-16 rounded-3xl shadow-md hover:bg-gray-800 transition duration-300 text-3xl"
-          >
-            Furniture
-          </button>
-          <button
-            onClick={() => (window.location.href = "/Electronics")}
-            className="bg-BlackNgadiliBlack text-white py-8 px-16 rounded-3xl shadow-md hover:bg-gray-800 transition duration-300 text-3xl"
-          >
-            IT Equipment
-          </button>
-          <button
-            onClick={() => (window.location.href = "/Electronics")}
-            className="bg-BlackNgadiliBlack text-white py-20 px-20   rounded-3xl shadow-md hover:bg-gray-800 transition duration-300 text-3xl"
-          >
-            Office Supplies
-          </button>
-          <button
-            onClick={() => (window.location.href = "/Electronics")}
-            className="bg-BlackNgadiliBlack text-white py-8 px-16 rounded-3xl shadow-md hover:bg-gray-800 transition duration-300 text-3xl"
-          >
-            Maintenance Supplies
-          </button>
-          <button
-            onClick={() => (window.location.href = "/Electronics")}
-            className="bg-BlackNgadiliBlack text-white py-8 px-16 rounded-3xl shadow-md hover:bg-gray-800 transition duration-300 text-3xl"
-          >
-            Consumables
-          </button>
-        </div>
+            <h2 className="text-muted-foreground text-lg font-semibold">{item.title}</h2>
+            <p className="text-primary font-bold text-2xl">{item.count}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
