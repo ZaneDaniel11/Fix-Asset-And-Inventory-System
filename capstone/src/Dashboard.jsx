@@ -12,15 +12,15 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 bg-background">
-      <h1 className="text-2xl font-bold text-center mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-center mb-6 text-white">Dashboard</h1>
       <div className="flex flex-wrap justify-center">
         {items.map((item, index) => (
           <div
             key={index}
-            className="m-4 p-6 bg-card rounded-lg shadow-md text-center w-64 h-32"
+            className="m-4 p-6 rounded-lg shadow-md text-center w-64 h-32 bg-black"
           >
-            <h2 className="text-muted-foreground text-lg font-semibold">{item.title}</h2>
-            <p className="text-primary font-bold text-2xl">{item.count}</p>
+            <h2 className="text-white text-lg font-semibold">{item.title}</h2>
+            <p className="text-white font-bold text-2xl">{item.count}</p>
           </div>
         ))}
       </div>
