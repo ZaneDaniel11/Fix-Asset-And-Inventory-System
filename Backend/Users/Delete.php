@@ -4,7 +4,7 @@ include('../Connection.php');
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
 
-    // Prepare the SQL statement to prevent SQL injection
+    
     $stmt = $conn->prepare("DELETE FROM users_tb WHERE UserId = ?");
     $stmt->bind_param("i", $id);
 
