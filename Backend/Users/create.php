@@ -1,43 +1,39 @@
 <?php
 include('../Connection.php');
 
-// Retrieve the raw POST data
-$data = json_decode(file_get_contents("php://input"));
+$response = array("success" => false, "error" => "Missing required fields.");
 
-// Check if data is valid
-if (isset( $data->username, $data->password, $data->usertype, $data->email)) {
-    $username = $data->username;
-    $password = $data->password;
-    $usertype = $data->usertype;
-    $email = $data->email;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Check if all required fields are present
+    if (isset($_POST['username']) && isset($_POST['Password']) && isset($_POST['Email']) && isset($_POST['usertype'])) {
+        $username = $_POST['username'];
+        $password = $_POST['Password'];
+        $email = $_POST['Email'];
+        $usertype = $_POST['usertype'];
 
-    // Prepare an SQL statement to prevent SQL injection
-    $stmt = $conn->prepare("INSERT INTO users_tb (UserName, Password, UserType, Email) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssss", $name, $username, $password, $usertype, $email);
+        // Prepare the SQL statement
+        $stmt = $conn->prepare("INSERT INTO users_tb (UserName, Password, Email, UserType) VALUES (?, ?, ?, ?)");
+        if ($stmt === false) {
+            $response = array("success" => false, "error" => $conn->error);
+        } else {
+            // Bind the parameters (s = string, i = integer, d = double, b = blob)
+            $stmt->bind_param("ssss", $username, $password, $email, $usertype);
 
-    if ($stmt->execute()) {
-        $createdDate = date('Y-m-d H:i:s'); // Assuming you want the current date and time
-        $response = array(
-            "success" => true,
-            "user" => array(
-                "UserId" => $conn->insert_id,
-                "Username" => $username,
-                "Password" => $password,
-                "CreatedDate" => $createdDate,
-                "UserType" => $usertype,
-                "Email" => $email
-            )
-        );
+            // Execute the statement
+            if ($stmt->execute()) {
+                $response = array("success" => true, "message" => "User added successfully.");
+            } else {
+                $response = array("success" => false, "error" => $stmt->error);
+            }
+
+            // Close the statement
+            $stmt->close();
+        }
     } else {
-        $response = array("success" => false, "error" => $stmt->error);
+        $response = array("success" => false, "error" => "Missing required fields.");
     }
-
-    $stmt->close();
-} else {
-    $response = array("success" => false, "error" => "Invalid input data.");
 }
 
 echo json_encode($response);
-
 $conn->close();
 ?>

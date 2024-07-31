@@ -13,15 +13,21 @@ export default function Users() {
   const [searchQuery, setSearchQuery] = useState("");
   const [userTypeQuery, setUserTypeQuery] = useState("");
   const [users, setUsers] = useState([]);
+  const openAddUserModal = () => setAddUserModalOpen(true);
+  const closeAddUserModal = () => setAddUserModalOpen(false);
+
+  const closeModal = () => setIsModalOpen(false);
+
+  const openDeleteModal = () => setDeleteModalOpen(true);
+
+  const closeDeleteModal = () => setDeleteModalOpen(false);
   const [addUser, setAddUser] = useState({
-    name: "",
-    username: "",
-    password: "",
-    usertype: "",
-    email: "",
+    UserName: "",
+    Password: "",
+    UserType: "",
+    Email: "",
   });
 
-  // Fetch Users Data
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -39,12 +45,6 @@ export default function Users() {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => setIsModalOpen(false);
-
-  const openDeleteModal = () => setDeleteModalOpen(true);
-
-  const closeDeleteModal = () => setDeleteModalOpen(false);
-
   const openViewModal = (user) => {
     setCurrentItem(user);
     setViewModalOpen(true);
@@ -55,33 +55,9 @@ export default function Users() {
     setCurrentItem(null);
   };
 
-  const openAddUserModal = () => setAddUserModalOpen(true);
-
-  const closeAddUserModal = () => setAddUserModalOpen(false);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setAddUser({ ...addUser, [name]: value });
-  };
-
-  // Handle Add User
-  const handleAddUser = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post(`${API_URL}Create.php`, addUser);
-      setAddUser({
-        username: "",
-        password: "",
-        usertype: "",
-        email: "",
-      });
-      closeAddUserModal();
-      // Refresh users data
-      const response = await axios.get(`${API_URL}Read.php`);
-      setUsers(response.data);
-    } catch (error) {
-      console.error("Failed to add user", error);
-    }
   };
 
   const handleDeleteUser = async () => {
@@ -97,13 +73,6 @@ export default function Users() {
     }
   };
 
-  const handleEditUser = async () => {
-    closeModal();
-    const response = await axios.get(`${API_URL}Read.php`);
-    setUsers(response.data);
-  };
-
-  // Filter Users
   const filteredUsers = users.filter(
     (user) =>
       user.UserName.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -267,27 +236,17 @@ export default function Users() {
                       }
                       className="p-2 border rounded border-black w-full"
                     >
-                      <option value="">Select User Type</option>
                       <option value="Admin">Admin</option>
                       <option value="Member">Member</option>
                     </select>
                   </div>
                 </div>
-                <div className="flex justify-end mt-4">
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="text-white bg-gray-700 hover:bg-gray-800 font-medium rounded-lg text-sm px-4 py-2 me-2"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
-                  >
-                    Save Changes
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  className="mt-4 text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
+                >
+                  Submit
+                </button>
               </div>
             </form>
           </div>
@@ -298,7 +257,7 @@ export default function Users() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">Confirm Deletion</h5>
+              <h5 className="text-lg font-semibold">Delete Confirmation</h5>
               <button
                 type="button"
                 onClick={closeDeleteModal}
@@ -307,24 +266,20 @@ export default function Users() {
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
-            <div className="mt-4">
-              <p>Are you sure you want to delete this user?</p>
-              <div className="flex justify-end mt-4">
-                <button
-                  type="button"
-                  onClick={closeDeleteModal}
-                  className="text-white bg-gray-700 hover:bg-gray-800 font-medium rounded-lg text-sm px-4 py-2 me-2"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteUser}
-                  className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2"
-                >
-                  Delete
-                </button>
-              </div>
+            <p className="mt-4">Are you sure you want to delete this user?</p>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={closeDeleteModal}
+                className="text-gray-500 hover:text-gray-700 mr-4"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteUser}
+                className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2"
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>
@@ -334,7 +289,7 @@ export default function Users() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">View User</h5>
+              <h5 className="text-lg font-semibold">User Details</h5>
               <button
                 type="button"
                 onClick={closeViewModal}
@@ -344,30 +299,11 @@ export default function Users() {
               </button>
             </div>
             <div className="mt-4">
-              <p>
-                <strong>User ID:</strong> {currentItem?.UserId}
-              </p>
-              <p>
-                <strong>User Name:</strong> {currentItem?.UserName}
-              </p>
-              <p>
-                <strong>Email:</strong> {currentItem?.Email}
-              </p>
-              <p>
-                <strong>Created Date:</strong> {currentItem?.CreatedDate}
-              </p>
-              <p>
-                <strong>User Type:</strong> {currentItem?.UserType}
-              </p>
-              <div className="flex justify-end mt-4">
-                <button
-                  type="button"
-                  onClick={closeViewModal}
-                  className="text-white bg-gray-700 hover:bg-gray-800 font-medium rounded-lg text-sm px-4 py-2"
-                >
-                  Close
-                </button>
-              </div>
+              <p>User ID: {currentItem?.UserId}</p>
+              <p>User Name: {currentItem?.UserName}</p>
+              <p>Email: {currentItem?.Email}</p>
+              <p>User Type: {currentItem?.UserType}</p>
+              <p>Created Date: {currentItem?.CreatedDate}</p>
             </div>
           </div>
         </div>
@@ -392,18 +328,18 @@ export default function Users() {
                   <div className="relative">
                     <input
                       type="text"
-                      name="username"
-                      value={addUser.username}
+                      name="UserName"
+                      value={addUser.UserName}
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
-                      placeholder="Username"
+                      placeholder="User Name"
                     />
                   </div>
                   <div className="relative">
                     <input
                       type="password"
-                      name="password"
-                      value={addUser.password}
+                      name="Password"
+                      value={addUser.Password}
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
                       placeholder="Password"
@@ -412,8 +348,8 @@ export default function Users() {
                   <div className="relative">
                     <input
                       type="email"
-                      name="email"
-                      value={addUser.email}
+                      name="Email"
+                      value={addUser.Email}
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
                       placeholder="Email"
@@ -421,8 +357,8 @@ export default function Users() {
                   </div>
                   <div className="relative">
                     <select
-                      name="usertype"
-                      value={addUser.usertype}
+                      name="UserType"
+                      value={addUser.UserType}
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
                     >
@@ -432,21 +368,12 @@ export default function Users() {
                     </select>
                   </div>
                 </div>
-                <div className="flex justify-end mt-4">
-                  <button
-                    type="button"
-                    onClick={closeAddUserModal}
-                    className="text-white bg-gray-700 hover:bg-gray-800 font-medium rounded-lg text-sm px-4 py-2 me-2"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
-                  >
-                    Add User
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  className="mt-4 text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
+                >
+                  Submit
+                </button>
               </div>
             </form>
           </div>

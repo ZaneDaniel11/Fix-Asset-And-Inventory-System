@@ -39,22 +39,10 @@ export default function Login() {
                   Password
                 </label>
               </div>
-              <div class="my-6">
-                {/* <a href="/home">
-                  <button
-                    // type="submit"
-                    class="w-full rounded-md bg-black px-3 py-4 text-white focus:bg-gray-600 focus:outline-none"
-                  >
-                    Sign in
-                  </button>
-                </a> */}
-              </div>
+              <div class="my-6"></div>
             </form>
             <a href="/Home">
-              <button
-                // type="submit"
-                class="w-full rounded-md bg-MainColor px-3 py-4 text-white focus:bg-gray-600 focus:outline-none"
-              >
+              <button class="w-full rounded-md bg-MainColor px-3 py-4 text-white focus:bg-gray-600 focus:outline-none">
                 Sign in
               </button>
             </a>
