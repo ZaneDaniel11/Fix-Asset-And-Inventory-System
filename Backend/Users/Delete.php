@@ -2,6 +2,7 @@
 include('../Connection.php');
 
 if (isset($_GET['id'])) {
+    $response = array();
     $id = $_GET['id'];
     $stmt = $conn->prepare("DELETE FROM users_tb WHERE UserId = ?");
     $stmt->bind_param("i", $id);

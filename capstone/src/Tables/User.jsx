@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { FetchUserss } from "../Handlers/Users/Read";
 
-const API_URL =
-  "http://localhost/Fix-Asset-And-Inventory-System/Backend/Users/";
+const API_URL = "http://localhost/Backend/Users/Read.php";
 
 export default function Users() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -30,15 +30,23 @@ export default function Users() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      try {
-        const response = await axios.get(`${API_URL}Read.php`);
-        setUsers(response.data);
-      } catch (error) {
-        console.error("Failed to fetch users", error);
-      }
+      FetchUserss();
     };
     fetchUsers();
   }, []);
+
+  const handleDeleteUser = async () => {
+    if (currentItem && currentItem.UserId) {
+      const response = await axios.delete(`${API_URL}Delete.php`, {
+        params: { id: currentItem.UserId },
+      });
+      if (response.data.success) {
+        closeDeleteModal();
+        const UpdateData = await axios.get(`${API_URL}Read.php`);
+        setUsers(UpdateData.data);
+      }
+    }
+  };
 
   const openModal = (item) => {
     setCurrentItem(item);
@@ -60,16 +68,22 @@ export default function Users() {
     setAddUser({ ...addUser, [name]: value });
   };
 
-  const handleDeleteUser = async () => {
-    if (currentItem && currentItem.UserId) {
-      const response = await axios.delete(`${API_URL}Delete.php`, {
-        params: { id: currentItem.UserId },
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API_URL}Create.php`, addUser);
+      setAddUser({
+        username: "",
+        password: "",
+        usertype: "",
+        email: "",
       });
-      if (response.data.success) {
-        closeDeleteModal();
-        const UpdateData = await axios.get(`${API_URL}Read.php`);
-        setUsers(UpdateData.data);
-      }
+      closeAddUserModal();
+      // Refresh users data
+      const response = await axios.get(`${API_URL}Read.php`);
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Failed to add user", error);
     }
   };
 
