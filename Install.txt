@@ -6,6 +6,7 @@ npm install axios
 ------------------------------------
 Daper set up
 
-dotnet new webapi -o Notado
+dotnet new webapi --use-controllers
 dotnet add package Microsoft.Data.Sqlite
 dotnet add package Dapper
+
