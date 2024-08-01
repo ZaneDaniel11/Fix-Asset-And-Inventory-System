@@ -5,16 +5,24 @@ import Home from "./Home";
 import Request from "./Request";
 import RBondRequest from "./RequestBon";
 import Historys from "./History";
+import ProtectedRoute from "./ProtectedRoute";
+import axios from "axios";
 
 function App() {
   return (
     <div>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/request" element={<Request />} />
-        <Route path="/bondpaper" element={<RBondRequest />} />
-        <Route path="/History" element={<Historys />} />
+        <Route path="/home" element={<ProtectedRoute element={Home} />} />
+        <Route path="/request" element={<ProtectedRoute element={Request} />} />
+        <Route
+          path="/bondpaper"
+          element={<ProtectedRoute element={RBondRequest} />}
+        />
+        <Route
+          path="/History"
+          element={<ProtectedRoute element={Historys} />}
+        />
       </Routes>
     </div>
   );

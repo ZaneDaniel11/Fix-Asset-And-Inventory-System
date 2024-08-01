@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FetchUserss } from "../Handlers/Users/Read";
 
-const API_URL = "http://localhost/Backend/Users/Read.php";
+const API_URL =
+  "http://localhost/Fix-Asset-And-Inventory-System/Backend/Users/";
 
 export default function Users() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -21,6 +22,7 @@ export default function Users() {
   const openDeleteModal = () => setDeleteModalOpen(true);
 
   const closeDeleteModal = () => setDeleteModalOpen(false);
+
   const [addUser, setAddUser] = useState({
     UserName: "",
     Password: "",
@@ -30,7 +32,15 @@ export default function Users() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      FetchUserss();
+      try {
+        const response = await axios.get(
+          `http://localhost/Fix-Asset-And-Inventory-System/Backend/Users/Read.php`
+        );
+        setUsers(response.data);
+        console.log(response);
+      } catch (error) {
+        console.error("Failed to fetch users", error);
+      }
     };
     fetchUsers();
   }, []);
@@ -70,18 +80,31 @@ export default function Users() {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
+    console.log("Data to be sent:", addUser); // Log the data to be sent
+
     try {
-      await axios.post(`${API_URL}Create.php`, addUser);
-      setAddUser({
-        username: "",
-        password: "",
-        usertype: "",
-        email: "",
+      const response = await axios.post(`${API_URL}Create.php`, addUser, {
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-      closeAddUserModal();
-      // Refresh users data
-      const response = await axios.get(`${API_URL}Read.php`);
-      setUsers(response.data);
+      console.log("Server response:", response.data); // Log the server response
+
+      if (response.data.status === "success") {
+        setAddUser({
+          UserName: "",
+          Password: "",
+          UserType: "",
+          Email: "",
+        });
+        closeAddUserModal();
+        // Refresh users data
+        const updatedUsers = await axios.get(`${API_URL}Read.php`);
+        setUsers(updatedUsers.data);
+      } else {
+        // Handle error response
+        console.error(response.data.message);
+      }
     } catch (error) {
       console.error("Failed to add user", error);
     }
