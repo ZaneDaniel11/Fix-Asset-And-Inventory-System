@@ -9,6 +9,7 @@ namespace Daper.Controllers
     [Route("api/[controller]")]
     public class ClientApiController : ControllerBase
     {
+        
           private SqliteConnection _connection = new SqliteConnection("Data Source = exampleData.db");
 
         [HttpGet("GetClients")]
