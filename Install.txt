@@ -2,3 +2,10 @@ npm i react-router-dom
 npm install react-transition-group
 npm install axios
 
+
+------------------------------------
+Daper set up
+
+dotnet new webapi -o Notado
+dotnet add package Microsoft.Data.Sqlite
+dotnet add package Dapper

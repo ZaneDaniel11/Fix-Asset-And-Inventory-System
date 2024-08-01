@@ -6,7 +6,6 @@ import Request from "./Request";
 import RBondRequest from "./RequestBon";
 import Historys from "./History";
 import ProtectedRoute from "./ProtectedRoute";
-import axios from "axios";
 
 function App() {
   return (
