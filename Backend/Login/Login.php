@@ -15,10 +15,10 @@ if (isset($data->username) && isset($data->password)) {
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        // Assuming the password is hashed, for example using password_hash()
+       
         if (password_verify($password, $row['Password'])) {
-            // Generate a session token (you can use JWT or any token generation logic)
-            $token = bin2hex(random_bytes(16)); // Simple token example
+           
+            $token = bin2hex(random_bytes(16));
 
             // Update the token in the database
             $sql = "UPDATE users_tb SET Token = '$token' WHERE UserId = " . $row['UserId'];

@@ -9,7 +9,6 @@ $UserType = $data['UserType'] ?? '';
 $Email = $data['Email'] ?? '';
 $CreatedDate = date('Y-m-d'); 
 
-// Log received data for debugging
 error_log("Received data: " . print_r($data, true));
 
 // Validate the input data
@@ -18,7 +17,7 @@ if(empty($UserName) || empty($Password) || empty($UserType) || empty($Email)) {
     exit();
 }
 
-// Hash the password
+
 $hashedPassword = password_hash($Password, PASSWORD_DEFAULT);
 
 // Prepare and execute the insert query

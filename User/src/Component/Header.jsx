@@ -1,45 +1,57 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+
 export default function Head() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    navigate("/");
+  };
+
   return (
     <>
-      <header class="shadow-md font-sans tracking-wide relative z-50 ">
-        <div class="flex flex-wrap items-center justify-between gap-4 px-10 py-4 bg-MainColor min-h-[70px]">
+      <header className="shadow-md font-sans tracking-wide relative z-50">
+        <div className="flex flex-wrap items-center justify-between gap-4 px-10 py-4 bg-MainColor min-h-[70px]">
           <a href="javascript:void(0)">Crmc</a>
 
           <div
             id="collapseMenu"
-            class="max-lg:hidden lg:!block max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50"
+            className="max-lg:hidden lg:!block max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50"
           >
-            <ul class="lg:flex lg:gap-x-5 max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50">
-              <li class="max-lg:border-b max-lg:py-3 px-3">
+            <ul className="lg:flex lg:gap-x-5 max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50">
+              <li className="max-lg:border-b max-lg:py-3 px-3">
                 <a
-                  href=""
-                  class="hover:text-[#007bff] text-white block font-bold text-[15px]"
+                  href="/home"
+                  className="hover:text-[#007bff] text-white block font-bold text-[15px]"
                 >
                   Home
                 </a>
               </li>
-              <li class="max-lg:border-b max-lg:py-3 px-3">
+              <li className="max-lg:border-b max-lg:py-3 px-3">
                 <a
                   href="/request"
-                  class="hover:text-[#007bff] text-white block font-bold text-[15px]"
+                  className="hover:text-[#007bff] text-white block font-bold text-[15px]"
                 >
                   Request
                 </a>
               </li>
-              <li class="max-lg:border-b max-lg:py-3 px-3">
-                <a
-                  href="/bondpaper"
-                  class="hover:text-[#007bff] text-white block font-bold text-[15px]"
-                >
-                  Request For Bondpaper
-                </a>
-              </li>
-              <li class="max-lg:border-b max-lg:py-3 px-3">
+              <li className="max-lg:border-b max-lg:py-3 px-3">
                 <a
                   href="/History"
-                  class="hover:text-[#007bff] text-white block font-bold text-[15px]"
+                  className="hover:text-[#007bff] text-white block font-bold text-[15px]"
                 >
                   Request History
+                </a>
+              </li>
+              <li className="max-lg:border-b max-lg:py-3 px-3">
+                <a
+                  href="#"
+                  onClick={handleLogout}
+                  className="hover:text-[#007bff] text-white block font-bold text-[15px]"
+                >
+                  Logout
                 </a>
               </li>
             </ul>

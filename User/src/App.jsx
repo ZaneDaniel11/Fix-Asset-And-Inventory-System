@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./Login";
 import Home from "./Home";
 import Request from "./Request";
-import RBondRequest from "./RequestBon";
 import Historys from "./History";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -14,10 +13,6 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/home" element={<ProtectedRoute element={Home} />} />
         <Route path="/request" element={<ProtectedRoute element={Request} />} />
-        <Route
-          path="/bondpaper"
-          element={<ProtectedRoute element={RBondRequest} />}
-        />
         <Route
           path="/History"
           element={<ProtectedRoute element={Historys} />}
