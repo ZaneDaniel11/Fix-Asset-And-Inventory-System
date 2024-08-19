@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
+import { fetchData } from "../utilities/ApiUti";
 const API_URL = "http://localhost:5075/api/UsersApi/";
 
 export default function Users() {
@@ -23,6 +23,7 @@ export default function Users() {
   });
 
   const toggleModal = (modalType, user = null) => {
+    console.log(`Toggling modal: ${modalType}, user:`, user);
     setModals((prevModals) => ({
       ...prevModals,
       [modalType]: !prevModals[modalType],
@@ -49,8 +50,8 @@ export default function Users() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(`${API_URL}GetUsers`);
-        setUsers(response.data);
+        const result = await fetchData(`${API_URL}GetUsers`, "GET");
+        setUsers(result);
       } catch (error) {
         console.error("Failed to fetch users", error);
       }
@@ -58,18 +59,31 @@ export default function Users() {
     fetchUsers();
   }, []);
 
+  async function handleAddUser(e) {
+    e.preventDefault();
+    await fetchData(`${API_URL}CreateUser`, "POST", {
+      userId: 0,
+      userName: addUser.userName,
+      password: addUser.password,
+      userType: addUser.userType,
+      email: addUser.email,
+    });
+    toggleModal("add");
+    getProducts();
+  }
+
   const handleDeleteUser = async () => {
     if (currentItem && currentItem.userId) {
       try {
-        const response = await axios.delete(`${API_URL}DeleteUser`, {
-          params: { UserId: currentItem.userId },
-        });
-        if (response.data.success) {
-          setUsers(users.filter((user) => user.userId !== currentItem.userId));
-          toggleModal("delete");
-        }
+        await fetchData(
+          `${API_URL}DeleteUser?UserId=${currentItem.userId}`,
+          "DELETE"
+        );
+        setUsers(users.filter((user) => user.userId !== currentItem.userId));
+        toggleModal("delete");
       } catch (error) {
         console.error("Failed to delete user", error);
+        alert(`Failed to delete user. Error: ${error.message}`);
       }
     }
   };
@@ -77,23 +91,6 @@ export default function Users() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setAddUser({ ...addUser, [name]: value });
-  };
-
-  const handleAddUser = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post(`${API_URL}CreateUser`, addUser, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.data) {
-        setUsers([...users, response.data]);
-        toggleModal("add");
-      }
-    } catch (error) {
-      console.error("Failed to add user", error);
-    }
   };
 
   const handleEditUser = async (e) => {
