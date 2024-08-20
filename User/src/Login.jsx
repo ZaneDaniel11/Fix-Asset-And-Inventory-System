@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -11,24 +10,29 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "http://localhost/Fix-Asset-And-Inventory-System/Backend/Login/Login.php",
+      const response = await fetch(
+        "http://localhost:5075/api/LoginApi/Authenticate",
         {
-          username,
-          password,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ UserName: username, Password: password }),
         }
       );
 
-      const data = response.data;
-
-      if (data.success) {
-        localStorage.setItem("token", data.token);
-        navigate("/home");
-      } else {
-        alert(data.message);
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.message || "Login failed");
+        return;
       }
+
+      const data = await response.json();
+      localStorage.setItem("token", data.token); // Store the token
+      navigate("/home"); // Navigate to the home page
     } catch (error) {
       console.error("There was an error making the request", error);
+      alert("An unexpected error occurred. Please try again later.");
     }
   };
 

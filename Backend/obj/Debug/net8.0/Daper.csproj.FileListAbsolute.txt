@@ -114,3 +114,8 @@ C:\Users\Administrator\Desktop\Fix-Asset-And-Inventory-System\backend\obj\Debug\
 C:\Users\Administrator\Desktop\Fix-Asset-And-Inventory-System\backend\obj\Debug\net8.0\Daper.csproj.CopyComplete
 C:\Users\Administrator\Desktop\Fix-Asset-And-Inventory-System\backend\obj\Debug\net8.0\Daper.genruntimeconfig.cache
 C:\Users\Administrator\Desktop\Fix-Asset-And-Inventory-System\backend\obj\Debug\net8.0\ref\Daper.dll
+C:\Users\Administrator\Desktop\Fix-Asset-And-Inventory-System\backend\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\Administrator\Desktop\Fix-Asset-And-Inventory-System\backend\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\Administrator\Desktop\Fix-Asset-And-Inventory-System\backend\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\Administrator\Desktop\Fix-Asset-And-Inventory-System\backend\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\Administrator\Desktop\Fix-Asset-And-Inventory-System\backend\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { fetchData } from "../utilities/ApiUti";
+
 const API_URL = "http://localhost:5075/api/UsersApi/";
 
 export default function Users() {
@@ -23,12 +24,11 @@ export default function Users() {
   });
 
   const toggleModal = (modalType, user = null) => {
-    console.log(`Toggling modal: ${modalType}, user:`, user);
+    setCurrentItem(user);
     setModals((prevModals) => ({
       ...prevModals,
       [modalType]: !prevModals[modalType],
     }));
-    setCurrentItem(user);
 
     if (modalType === "update" && user) {
       setAddUser({
@@ -47,30 +47,36 @@ export default function Users() {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const result = await fetchData(`${API_URL}GetUsers`, "GET");
+      setUsers(result);
+    } catch (error) {
+      console.error("Failed to fetch users", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const result = await fetchData(`${API_URL}GetUsers`, "GET");
-        setUsers(result);
-      } catch (error) {
-        console.error("Failed to fetch users", error);
-      }
-    };
     fetchUsers();
   }, []);
 
-  async function handleAddUser(e) {
+  const handleAddUser = async (e) => {
     e.preventDefault();
-    await fetchData(`${API_URL}CreateUser`, "POST", {
-      userId: 0,
-      userName: addUser.userName,
-      password: addUser.password,
-      userType: addUser.userType,
-      email: addUser.email,
-    });
-    toggleModal("add");
-    getProducts();
-  }
+    try {
+      await fetchData(`${API_URL}CreateUser`, "POST", {
+        userId: 0,
+        userName: addUser.userName,
+        password: addUser.password,
+        userType: addUser.userType,
+        email: addUser.email,
+        token: "1234", // Include the token
+      });
+      toggleModal("add");
+      fetchUsers(); // Refresh user list after adding
+    } catch (error) {
+      console.error("Failed to add user", error);
+    }
+  };
 
   const handleDeleteUser = async () => {
     if (currentItem && currentItem.userId) {
@@ -79,8 +85,8 @@ export default function Users() {
           `${API_URL}DeleteUser?UserId=${currentItem.userId}`,
           "DELETE"
         );
-        setUsers(users.filter((user) => user.userId !== currentItem.userId));
         toggleModal("delete");
+        fetchUsers();
       } catch (error) {
         console.error("Failed to delete user", error);
         alert(`Failed to delete user. Error: ${error.message}`);
@@ -95,22 +101,24 @@ export default function Users() {
 
   const handleEditUser = async (e) => {
     e.preventDefault();
-    if (currentItem && currentItem.userId) {
-      try {
-        const response = await axios.put(`${API_URL}UpdateUser`, currentItem, {
-          params: { UserId: currentItem.userId },
-        });
-        if (response.data) {
-          setUsers(
-            users.map((user) =>
-              user.userId === currentItem.userId ? response.data : user
-            )
-          );
-          toggleModal("update");
+    try {
+      await fetchData(
+        `${API_URL}UpdateUser?UserId=${currentItem.userId}`,
+        "PUT",
+        {
+          userId: currentItem.userId,
+          userName: addUser.userName,
+          password: addUser.password,
+          userType: addUser.userType,
+          email: addUser.email,
+          token: "1234",
         }
-      } catch (error) {
-        console.error("Failed to edit user", error);
-      }
+      );
+      toggleModal("update");
+      fetchUsers(); // Refresh user list after updating
+    } catch (error) {
+      console.error("Failed to update user:", error);
+      alert("Failed to update user. Please try again.");
     }
   };
 
@@ -180,21 +188,14 @@ export default function Users() {
                           <i className="fa-solid fa-pen"></i>
                         </button>
                         <button
-                          onClick={() => {
-                            setCurrentItem(user);
-                            toggleModal("delete");
-                          }}
+                          onClick={() => toggleModal("delete", user)}
                           type="button"
                           className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
                         >
                           <i className="fa-solid fa-trash"></i>
                         </button>
-
                         <button
-                          onClick={() => {
-                            setCurrentItem(user);
-                            toggleModal("view");
-                          }}
+                          onClick={() => toggleModal("view", user)}
                           type="button"
                           className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
                         >
@@ -210,7 +211,7 @@ export default function Users() {
         </div>
       </div>
 
-      {modals.update && (
+      {modals.update && currentItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
@@ -234,6 +235,7 @@ export default function Users() {
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
                       placeholder="User Name"
+                      required
                     />
                   </div>
                   <div className="relative">
@@ -244,6 +246,7 @@ export default function Users() {
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
                       placeholder="Password"
+                      required
                     />
                   </div>
                   <div className="relative">
@@ -254,6 +257,7 @@ export default function Users() {
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
                       placeholder="Email"
+                      required
                     />
                   </div>
                   <div className="relative">
@@ -262,24 +266,26 @@ export default function Users() {
                       value={addUser.userType}
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
+                      required
                     >
+                      <option value="">Select User Type</option>
                       <option value="Admin">Admin</option>
                       <option value="Member">Member</option>
                     </select>
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end mt-6">
+              <div className="mt-6 flex justify-end">
                 <button
                   type="button"
                   onClick={() => toggleModal("update")}
-                  className="text-gray-500 hover:text-gray-700 font-medium px-4 py-2"
+                  className="text-gray-600 hover:text-gray-800 me-4"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2 ml-4"
+                  className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
                 >
                   Save Changes
                 </button>
@@ -353,17 +359,17 @@ export default function Users() {
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end mt-6">
+              <div className="mt-6 flex justify-end">
                 <button
                   type="button"
                   onClick={() => toggleModal("add")}
-                  className="text-gray-500 hover:text-gray-700 font-medium px-4 py-2"
+                  className="text-gray-600 hover:text-gray-800 me-4"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2 ml-4"
+                  className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
                 >
                   Add User
                 </button>
@@ -386,23 +392,21 @@ export default function Users() {
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
-            <p className="mt-4">Are you sure you want to delete this user?</p>
-            <div className="flex justify-end mt-6">
+            <p>Are you sure you want to delete this user?</p>
+            <div className="mt-6 flex justify-end">
               <button
                 type="button"
                 onClick={() => toggleModal("delete")}
-                className="text-gray-500 hover:text-gray-700 font-medium px-4 py-2"
+                className="text-gray-600 hover:text-gray-800 me-4"
               >
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  console.log("Deleting user:", currentItem); // Debugging line
-                  handleDeleteUser();
-                }}
-                className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2 ml-4"
+                onClick={handleDeleteUser}
+                type="button"
+                className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2"
               >
-                Delete
+                Delete User
               </button>
             </div>
           </div>
@@ -413,7 +417,7 @@ export default function Users() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">View User</h5>
+              <h5 className="text-lg font-semibold">View User Details</h5>
               <button
                 type="button"
                 onClick={() => toggleModal("view")}
@@ -422,28 +426,14 @@ export default function Users() {
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
-            <div className="mt-4">
-              <p>
-                <strong>User ID:</strong> {currentItem.userId}
-              </p>
-              <p>
-                <strong>User Name:</strong> {currentItem.userName}
-              </p>
-              <p>
-                <strong>Email:</strong> {currentItem.email}
-              </p>
-              <p>
-                <strong>User Type:</strong> {currentItem.userType}
-              </p>
-              <p>
-                <strong>Created Date:</strong> {currentItem.createdDate}
-              </p>
-            </div>
-            <div className="flex justify-end mt-6">
+            <p>User Name: {currentItem.userName}</p>
+            <p>Email: {currentItem.email}</p>
+            <p>User Type: {currentItem.userType}</p>
+            <div className="mt-6 flex justify-end">
               <button
                 type="button"
                 onClick={() => toggleModal("view")}
-                className="text-gray-500 hover:text-gray-700 font-medium px-4 py-2"
+                className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
               >
                 Close
               </button>
