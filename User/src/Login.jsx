@@ -22,8 +22,8 @@ export default function Login() {
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.message || "Login failed");
+        const errorText = await response.text();
+        alert(errorText || "Login failed");
         return;
       }
 

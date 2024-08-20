@@ -3,6 +3,8 @@ using Dapper;
 using Microsoft.Data.Sqlite;
 using Backend.Models;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Backend.Controllers
 {
@@ -15,28 +17,53 @@ namespace Backend.Controllers
         [HttpPost("CreateUser")]
         public async Task<IActionResult> CreateUserAsync(User user)
         {
-            const string query = @"INSERT INTO users_tb (UserName, Password, CreatedDate, UserType, Email, Token)
-                                   VALUES (@UserName, @Password, @CreatedDate, @UserType, @Email, @Token);
-                                   SELECT * FROM users_tb ORDER BY UserId DESC LIMIT 1;";
-            
-            var result = await _connection.QuerySingleOrDefaultAsync<User>(query, user);
+            byte[] salt;
+            byte[] passwordHash = CreatePasswordHash(user.Password, out salt);
+
+            const string query = @"INSERT INTO users_tb (UserName, Password, Salt, CreatedDate, UserType, Email, Token)
+                           VALUES (@UserName, @Password, @Salt, @CreatedDate, @UserType, @Email, @Token);
+                           SELECT * FROM users_tb ORDER BY UserId DESC LIMIT 1;";
+
+            var result = await _connection.QuerySingleOrDefaultAsync<User>(query, new
+            {
+                user.UserName,
+                Password = Convert.ToBase64String(passwordHash),  // Convert to Base64 string
+                Salt = Convert.ToBase64String(salt),  // Convert to Base64 string
+                user.CreatedDate,
+                user.UserType,
+                user.Email,
+                user.Token
+            });
 
             return Ok(result);
+        }
+
+        private byte[] CreatePasswordHash(string password, out byte[] salt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                salt = hmac.Key;  // Generate the salt using the key
+                return hmac.ComputeHash(Encoding.UTF8.GetBytes(password));  // Return the hash as byte[]
+            }
         }
 
         [HttpPut("UpdateUser")]
         public async Task<IActionResult> UpdateUserAsync(int UserId, User user)
         {
+            byte[] salt;
+            byte[] passwordHash = CreatePasswordHash(user.Password, out salt);
+
             const string query = @"UPDATE users_tb 
-                                   SET UserName = @UserName, Password = @Password, 
+                                   SET UserName = @UserName, Password = @Password, Salt = @Salt, 
                                        UserType = @UserType, Email = @Email, Token = @Token 
                                    WHERE UserId = @UserId;
                                    SELECT * FROM users_tb WHERE UserId = @UserId LIMIT 1;";
-            
-            var result = await _connection.QuerySingleOrDefaultAsync<User>(query, new 
+
+            var result = await _connection.QuerySingleOrDefaultAsync<User>(query, new
             {
                 user.UserName,
-                user.Password,
+                Password = Convert.ToBase64String(passwordHash),  // Convert to Base64 string
+                Salt = Convert.ToBase64String(salt),  // Convert to Base64 string
                 user.UserType,
                 user.Email,
                 user.Token,
