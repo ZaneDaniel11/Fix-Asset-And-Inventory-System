@@ -54,5 +54,24 @@ namespace Backend.Controllers
             }
         }
 
+        [HttpPut("UpdateCategory")]
+        public async Task<IActionResult> UpdateCategoryAsync(int CategoryId, Category cat)
+        {
+
+            const string query = @"
+                UPDATE category_tb 
+                SET CategoryName = @CategoryName 
+                WHERE Id = @Id; SELECT * FROM category_tb WHERE Id = @Id LIMIT 1;";
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var result = await connection.ExecuteAsync(query, new { Id = CategoryId, CategoryName = cat.CategoryName });
+
+                return Ok(result);
+            }
+        }
+
+
     }
 }
