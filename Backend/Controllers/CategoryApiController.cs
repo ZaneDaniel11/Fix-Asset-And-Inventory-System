@@ -41,5 +41,18 @@ namespace Backend.Controllers
                 return Ok(result);
             }
         }
+
+        [HttpDelete("DeleteCategory")]
+        public async Task<IActionResult> DeleteCategoryAsync(int CategoryId)
+        {
+            const string query = "DELETE FROM category_tb WHERE Id = @Id";
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var result = await connection.ExecuteAsync(query, new { Id = CategoryId });
+                return Ok(new { success = true });
+            }
+        }
+
     }
 }
