@@ -61,17 +61,16 @@ namespace Backend.Controllers
             const string query = @"
                 UPDATE category_tb 
                 SET CategoryName = @CategoryName 
-                WHERE Id = @Id; SELECT * FROM category_tb WHERE Id = @Id LIMIT 1;";
+                WHERE Id = @Id; 
+                SELECT * FROM category_tb WHERE Id = @Id LIMIT 1;";
 
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-                var result = await connection.ExecuteAsync(query, new { Id = CategoryId, CategoryName = cat.CategoryName });
+                var result = await connection.QuerySingleOrDefaultAsync<Category>(query, new { Id = CategoryId, CategoryName = cat.CategoryName });
 
                 return Ok(result);
             }
         }
-
-
     }
 }
