@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { fetchData } from "../utilities/ApiUti";
 
 const API_URL = "http://localhost:5075/api/UsersApi/";
