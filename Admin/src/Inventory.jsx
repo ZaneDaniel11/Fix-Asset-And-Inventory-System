@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { fetchData } from "./utilities/ApiUti";
+import { FaEdit, FaTrash, FaPlus, FaTimes } from "react-icons/fa"; // Importing icons from react-icons
+
 const API_URL = "http://localhost:5075/api/CategoryApi/";
 
 export default function Inventory() {
@@ -37,10 +39,10 @@ export default function Inventory() {
     e.preventDefault();
     try {
       await fetchData(
-        `${API_URL}UpdateCategory?CategoryId=${editCategory.Id}`,
+        `${API_URL}UpdateCategory?CategoryId=${editCategory.id}`,
         "PUT",
         {
-          id: editCategory.Id,
+          id: editCategory.id,
           categoryName: newCategory,
         }
       );
@@ -86,24 +88,30 @@ export default function Inventory() {
         <div className="flex justify-end mb-4">
           <button
             onClick={toggleEditMode}
-            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
+            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300 flex items-center"
           >
+            {isEditMode ? (
+              <FaTimes className="mr-2" />
+            ) : (
+              <FaEdit className="mr-2" />
+            )}
             {isEditMode ? "Cancel" : "Edit"}
           </button>
         </div>
         <h1 className="text-3xl font-bold mb-8">Stocks and Inventory</h1>
         <button
           onClick={() => setShowModal(true)}
-          className={`mb-8 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 transition duration-300 ${
+          className={`mb-8 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 transition duration-300 flex items-center ${
             isEditMode ? "hidden" : ""
           }`}
         >
+          <FaPlus className="mr-2" />
           Add Category
         </button>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-20">
           {categories.map((category) => (
             <div
-              key={category.Id}
+              key={category.id}
               className="relative transition-transform duration-300 ease-in-out"
             >
               <button
@@ -111,7 +119,7 @@ export default function Inventory() {
                 onClick={() =>
                   isEditMode
                     ? handleEditClick(category)
-                    : handleCategoryClick(category.categoryName)
+                    : console.log(`Selected: ${category.categoryName}`)
                 }
               >
                 {category.categoryName}
@@ -120,15 +128,15 @@ export default function Inventory() {
                 <>
                   <button
                     onClick={() => handleEditClick(category)}
-                    className="absolute top-0 right-0 mt-2 mr-2 bg-yellow-500 p-2 rounded-full text-white hover:bg-yellow-700"
+                    className="absolute top-0 right-0 mt-2 mr-2 bg-yellow-500 p-2 rounded-full text-white hover:bg-yellow-700 flex items-center"
                   >
-                    ✏️
+                    <FaEdit />
                   </button>
                   <button
-                    onClick={() => handleDeleteCategory(category.Id)}
-                    className="absolute top-0 left-0 mt-2 ml-2 bg-red-500 p-2 rounded-full text-white hover:bg-red-700"
+                    onClick={() => handleDeleteCategory(category.id)}
+                    className="absolute top-0 left-0 mt-2 ml-2 bg-red-500 p-2 rounded-full text-white hover:bg-red-700 flex items-center"
                   >
-                    🗑️
+                    <FaTrash />
                   </button>
                 </>
               )}
