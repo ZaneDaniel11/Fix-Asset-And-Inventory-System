@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { fetchData } from "./utilities/ApiUti";
 import { FaEdit, FaTrash, FaPlus, FaTimes } from "react-icons/fa";
+import "./Css/Electronics.css";
 
 const API_URL = "http://localhost:5075/api/CategoryApi/";
 
@@ -143,38 +144,35 @@ export default function Inventory() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 ">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {categories.map((category) => (
             <div
               key={category.id}
-              className="relative transition-transform duration-300 ease-in-out"
+              className="relative bg-BlackNgadiliBlack text-white rounded-3xl shadow-md hover:bg-gray-800 transition duration-300 text-lg flex items-center justify-center"
+              style={{ width: "300px", height: "100px" }}
+              onClick={() =>
+                isEditMode
+                  ? handleEditClick(category)
+                  : console.log(`Selected: ${category.categoryName}`)
+              }
             >
-              <button
-                className="bg-BlackNgadiliBlack text-white py-8 px-16 rounded-3xl shadow-md hover:bg-gray-800 transition duration-300 text-3xl"
-                onClick={() =>
-                  isEditMode
-                    ? handleEditClick(category)
-                    : console.log(`Selected: ${category.categoryName}`)
-                }
-              >
-                {category.categoryName}
-              </button>
               {isEditMode && (
                 <>
                   <button
                     onClick={() => handleEditClick(category)}
-                    className="absolute top-0 right-0 mt-2 mr-2 bg-yellow-500 p-2 rounded-full text-white hover:bg-yellow-700 flex items-center"
+                    className="absolute top-0 left-0 mt-1 ml-1 bg-yellow-500 p-1 rounded-full text-white hover:bg-yellow-700 flex items-center"
                   >
                     <FaEdit />
                   </button>
                   <button
                     onClick={() => handleDeleteCategory(category.id)}
-                    className="absolute top-0 left-0 mt-2 ml-2 bg-red-500 p-2 rounded-full text-white hover:bg-red-700 flex items-center"
+                    className="absolute top-0 left-8 mt-1 ml-1 bg-red-500 p-1 rounded-full text-white hover:bg-red-700 flex items-center"
                   >
                     <FaTrash />
                   </button>
                 </>
               )}
+              <span>{category.categoryName}</span>
             </div>
           ))}
         </div>
