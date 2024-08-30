@@ -148,7 +148,7 @@ export default function Inventory() {
           {categories.map((category) => (
             <div
               key={category.id}
-              className="relative bg-BlackNgadiliBlack text-white rounded-3xl shadow-md hover:bg-gray-800 transition duration-300 text-lg flex items-center justify-center"
+              className="relative bg-BlackNgadiliBlack text-white rounded-3xl shadow-md hover:bg-gray-800 transition duration-300  flex items-center justify-center"
               style={{ width: "300px", height: "100px" }}
               onClick={() =>
                 isEditMode
@@ -156,23 +156,28 @@ export default function Inventory() {
                   : console.log(`Selected: ${category.categoryName}`)
               }
             >
-              {isEditMode && (
-                <>
-                  <button
-                    onClick={() => handleEditClick(category)}
-                    className="absolute top-0 left-0 mt-1 ml-1 bg-yellow-500 p-1 rounded-full text-white hover:bg-yellow-700 flex items-center"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteCategory(category.id)}
-                    className="absolute top-0 left-8 mt-1 ml-1 bg-red-500 p-1 rounded-full text-white hover:bg-red-700 flex items-center"
-                  >
-                    <FaTrash />
-                  </button>
-                </>
-              )}
-              <span>{category.categoryName}</span>
+              <div>
+                {isEditMode && (
+                  <div className="flex">
+                    <button
+                      onClick={() => handleEditClick(category)}
+                      className=" rounded-full text-blue hover:bg-yellow-700 flex items-center"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCategory(category.id)}
+                      className=" bg-red-500 p-1 rounded-full hover:bg-red-700 flex items-center"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="block">
+                <span>{category.categoryName}</span>
+              </div>
             </div>
           ))}
         </div>
