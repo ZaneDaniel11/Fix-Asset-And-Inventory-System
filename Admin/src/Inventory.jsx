@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { fetchData } from "./utilities/ApiUti";
 import { FaEdit, FaTrash, FaPlus, FaTimes } from "react-icons/fa";
 import "./Css/Electronics.css";
-import Inventory_Modal from "./Components/Inventory/Modal/Inventory_Modal"; // Import the modal component
-import Inventory_Card from "./Components/Inventory/Card/Inventory_Cards"; // Import the table component
+import Inventory_Modal from "./Components/Inventory/Modal/Inventory_Modal";
+import Inventory_Card from "./Components/Inventory/Card/Inventory_Cards";
 
 const API_URL = "http://localhost:5075/api/CategoryApi/";
 
@@ -87,21 +87,7 @@ export default function Inventory() {
       <div className="text-center mb-8 w-full">
         <h1 className="text-3xl font-bold mb-8">Stocks and Inventory</h1>
 
-        <div className="flex items-center">
-          <button
-            onClick={() =>
-              setModalState({
-                isVisible: true,
-                isEditMode: false,
-                category: null,
-              })
-            }
-            className="mb-8 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 transition duration-300 flex items-center"
-          >
-            <FaPlus className="mr-2" />
-            Add Category
-          </button>
-
+        <div className="flex items-center justify-center gap-4 mb-8">
           <button
             onClick={() =>
               setModalState({
@@ -118,6 +104,21 @@ export default function Inventory() {
             )}
             {modalState.isEditMode ? "Cancel" : "Edit"}
           </button>
+
+          {/* Add Category button comes second */}
+          <button
+            onClick={() =>
+              setModalState({
+                isVisible: true,
+                isEditMode: false,
+                category: null,
+              })
+            }
+            className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 transition duration-300 flex items-center"
+          >
+            <FaPlus className="mr-2" />
+            Add Category
+          </button>
         </div>
 
         {/* Render the table component */}
@@ -129,7 +130,6 @@ export default function Inventory() {
         />
       </div>
 
-      {/* Modal for adding/editing categories */}
       {modalState.isVisible && (
         <Inventory_Modal
           isEditMode={modalState.isEditMode}

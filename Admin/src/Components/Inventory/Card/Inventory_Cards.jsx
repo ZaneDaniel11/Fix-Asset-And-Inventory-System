@@ -8,7 +8,11 @@ const InventoryCards = ({
   isEditMode,
 }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-10 gap-y-8">
+    // Applying a consistent gap for both rows and columns for all screen sizes with inline styles as a fallback
+    <div
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
+      style={{ gap: "24px" }} // Fallback inline styles for gaps
+    >
       {categories.map((category) => (
         <div
           key={category.id}
