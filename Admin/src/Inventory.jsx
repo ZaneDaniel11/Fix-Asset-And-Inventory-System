@@ -119,6 +119,8 @@ export default function Inventory() {
             <FaPlus className="mr-2" />
             Add Category
           </button>
+
+          <a href="/InventoryTable">click</a>
         </div>
 
         {/* Render the table component */}
