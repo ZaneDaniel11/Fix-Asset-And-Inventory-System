@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Dapper;
 using Microsoft.Data.Sqlite;
-using Backend.Models;
+using Items.Models;
 using System.Threading.Tasks;
 
 namespace Backend.Controllers
@@ -12,7 +12,7 @@ namespace Backend.Controllers
     {
         private readonly string _connectionString = "Data Source=capstone.db";
 
-        // GET: api/ItemApi/GetItems
+        // GET: api/ItemApi/GetItemsn 
         [HttpGet("GetItems")]
         public async Task<IActionResult> GetItemsAsync()
         {
