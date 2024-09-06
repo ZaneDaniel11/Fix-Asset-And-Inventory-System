@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { fetchData } from "./utilities/ApiUti";
 import { FaEdit, FaTrash, FaPlus, FaTimes } from "react-icons/fa";
-import "./Css/Electronics.css";
+import { useNavigate } from "react-router-dom";
 import Inventory_Modal from "./Components/Inventory/Modal/Inventory_Modal";
 import Inventory_Card from "./Components/Inventory/Card/Inventory_Cards";
+import "./Css/Electronics.css";
 
 const API_URL = "http://localhost:5075/api/CategoryApi/";
 
@@ -15,6 +16,7 @@ export default function Inventory() {
     category: null,
   });
   const [newCategory, setNewCategory] = useState("");
+  const navigate = useNavigate(); // Use react-router-dom's useNavigate
 
   const FetchCategory = async () => {
     try {
@@ -78,6 +80,18 @@ export default function Inventory() {
     setNewCategory(category.categoryName);
   };
 
+  // When a category is selected, navigate to Inventory_table with the selected category
+  const handleCategoryClick = (category) => {
+    navigate(`/InventoryTable`, {
+      state: {
+        selectedCategory: {
+          id: category.id,
+          categoryName: category.categoryName,
+        },
+      },
+    });
+  };
+
   useEffect(() => {
     FetchCategory();
   }, []);
@@ -105,7 +119,6 @@ export default function Inventory() {
             {modalState.isEditMode ? "Cancel" : "Edit"}
           </button>
 
-          {/* Add Category button comes second */}
           <button
             onClick={() =>
               setModalState({
@@ -119,16 +132,14 @@ export default function Inventory() {
             <FaPlus className="mr-2" />
             Add Category
           </button>
-
-          <a href="/InventoryTable">click</a>
         </div>
 
-        {/* Render the table component */}
         <Inventory_Card
           categories={categories}
           handleEditClick={handleEditClick}
           handleDeleteCategory={handleDeleteCategory}
           isEditMode={modalState.isEditMode}
+          onCategoryClick={handleCategoryClick} // Pass the click handler to Inventory_Card
         />
       </div>
 

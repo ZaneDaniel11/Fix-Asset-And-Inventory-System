@@ -12,11 +12,11 @@ namespace Backend.Controllers
     {
         private readonly string _connectionString = "Data Source=capstone.db";
 
-        // GET: api/ItemApi/GetItemsn 
+        // GET: api/ItemApi/GetItems
         [HttpGet("GetItems")]
         public async Task<IActionResult> GetItemsAsync()
         {
-            const string query = "SELECT * FROM items_tb";
+            const string query = "SELECT * FROM items_db";
 
             using (var connection = new SqliteConnection(_connectionString))
             {
@@ -26,14 +26,28 @@ namespace Backend.Controllers
             }
         }
 
+        // GET: api/ItemApi/GetItemsByCategory?categoryID=1
+        [HttpGet("GetItemsByCategory")]
+        public async Task<IActionResult> GetItemsByCategoryAsync(int categoryID)
+        {
+            const string query = "SELECT * FROM items_db WHERE CategoryID = @CategoryID";
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var items = await connection.QueryAsync<Item>(query, new { CategoryID = categoryID });
+                return Ok(items); // Return filtered items based on CategoryID
+            }
+        }
+
         // POST: api/ItemApi/InsertItem
         [HttpPost("InsertItem")]
         public async Task<IActionResult> InsertItemAsync(Item newItem)
         {
             const string query = @"
-                INSERT INTO items_tb (CategoryID, ItemName, Quantity, Description, DateAdded) 
+                INSERT INTO items_db (CategoryID, ItemName, Quantity, Description, DateAdded) 
                 VALUES (@CategoryID, @ItemName, @Quantity, @Description, @DateAdded);
-                SELECT * FROM items_tb ORDER BY ItemID DESC LIMIT 1;";
+                SELECT * FROM items_db ORDER BY ItemID DESC LIMIT 1;";
 
             using (var connection = new SqliteConnection(_connectionString))
             {
@@ -55,7 +69,7 @@ namespace Backend.Controllers
         [HttpDelete("DeleteItem")]
         public async Task<IActionResult> DeleteItemAsync(int ItemID)
         {
-            const string query = "DELETE FROM items_tb WHERE ItemID = @ItemID";
+            const string query = "DELETE FROM items_db WHERE ItemID = @ItemID";
 
             using (var connection = new SqliteConnection(_connectionString))
             {
@@ -70,7 +84,7 @@ namespace Backend.Controllers
         public async Task<IActionResult> UpdateItemAsync(int ItemID, Item updatedItem)
         {
             const string query = @"
-                UPDATE items_tb 
+                UPDATE items_db 
                 SET 
                     CategoryID = @CategoryID,
                     ItemName = @ItemName, 
@@ -78,7 +92,7 @@ namespace Backend.Controllers
                     Description = @Description, 
                     DateAdded = @DateAdded
                 WHERE ItemID = @ItemID;
-                SELECT * FROM items_tb WHERE ItemID = @ItemID LIMIT 1;";
+                SELECT * FROM items_db WHERE ItemID = @ItemID LIMIT 1;";
 
             using (var connection = new SqliteConnection(_connectionString))
             {
