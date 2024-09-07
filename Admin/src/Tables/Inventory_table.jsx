@@ -3,6 +3,8 @@ import { useLocation } from "react-router-dom";
 import "../Css/Electronics.css";
 import { fetchData } from "../utilities/ApiUti";
 
+const API_URL = "http://localhost:5075/api/ItemApi/";
+
 export default function Inventory_table() {
   const location = useLocation();
   const selectedCategory = location.state?.selectedCategory;
@@ -28,7 +30,7 @@ export default function Inventory_table() {
     try {
       if (selectedCategory && selectedCategory.id) {
         const result = await fetchData(
-          `http://localhost:5075/api/ItemApi/GetItemsByCategory?categoryID=${selectedCategory.id}`,
+          `${API_URL}GetItemsByCategory?categoryID=${selectedCategory.id}`,
           "GET"
         );
         setItems(result); // Set all items
@@ -47,12 +49,7 @@ export default function Inventory_table() {
 
   useEffect(() => {
     if (selectedCategory) {
-      console.log("Category ID:", selectedCategory.id);
-      console.log("Category Name:", selectedCategory.categoryName);
       fetchItems(); // Fetch items when selectedCategory changes
-    } else {
-      console.error("No category selected.");
-      setLoading(false);
     }
   }, [selectedCategory]);
 
@@ -67,28 +64,25 @@ export default function Inventory_table() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setAddUser((prev) => ({ ...prev, [name]: value }));
+    setAddCategoryItem((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAddCategoryItem = async (e) => {
     e.preventDefault();
-
-    // Replace with actual API call to add a user
-    console.log("Add user details:", addUser);
-
-    // Close modal after adding user
-    toggleModal("add");
-
-    // Reset the form
-    setAddUser({
-      userName: "",
-      password: "",
-      email: "",
-      userType: "",
-    });
-
-    // Fetch updated items (or users)
-    fetchItems();
+    try {
+      await fetchData(`${API_URL}InsertItem`, "POST", {
+        itemID: 0,
+        categoryID: selectedCategory.id,
+        itemName: addItem.ItemName,
+        quantity: addItem.Quantity,
+        description: addItem.Description,
+        dateAdded: new Date().toISOString(),
+      });
+      toggleModal("add");
+      fetchItems();
+    } catch (error) {
+      console.error("Failed to add item", error);
+    }
   };
 
   return (
@@ -159,12 +153,12 @@ export default function Inventory_table() {
         </div>
       </div>
 
-      {/* Add User Modal */}
+      {/* Add Item Modal */}
       {modals.add && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">Add Category</h5>
+              <h5 className="text-lg font-semibold">Add Item</h5>
               <button
                 type="button"
                 onClick={() => toggleModal("add")}
