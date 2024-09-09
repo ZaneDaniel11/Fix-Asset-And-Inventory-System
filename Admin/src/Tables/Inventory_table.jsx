@@ -13,12 +13,22 @@ export default function Inventory_table() {
   const [loading, setLoading] = useState(true);
   const [modals, setModals] = useState({
     add: false,
+    update: false,
+    delete: false,
+    view: false,
   });
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const [addItem, setAddCategoryItem] = useState({
     ItemName: "",
     Quantity: "",
     Description: "",
+  });
+
+  const [updatedItem, setUpdatedItem] = useState({
+    itemName: "",
+    quantity: "",
+    description: "",
   });
 
   // Toggle modals
@@ -33,9 +43,9 @@ export default function Inventory_table() {
           `${API_URL}GetItemsByCategory?categoryID=${selectedCategory.id}`,
           "GET"
         );
-        setItems(result); // Set all items
-        setFilteredItems(result); // Initially, filteredItems will be the same as all items
-        setLoading(false); // Set loading to false after fetching
+        setItems(result);
+        setFilteredItems(result);
+        setLoading(false);
         console.log(result);
       } else {
         console.error("No selectedCategory or ID provided");
@@ -43,13 +53,13 @@ export default function Inventory_table() {
       }
     } catch (error) {
       console.error("Failed to fetch items", error);
-      setLoading(false); // Ensure loading is false even on error
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     if (selectedCategory) {
-      fetchItems(); // Fetch items when selectedCategory changes
+      fetchItems();
     }
   }, [selectedCategory]);
 
@@ -67,6 +77,11 @@ export default function Inventory_table() {
     setAddCategoryItem((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleUpdateInputChange = (e) => {
+    const { name, value } = e.target;
+    setUpdatedItem((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleAddCategoryItem = async (e) => {
     e.preventDefault();
     try {
@@ -82,6 +97,40 @@ export default function Inventory_table() {
       fetchItems();
     } catch (error) {
       console.error("Failed to add item", error);
+    }
+  };
+
+  const handleUpdateItem = async () => {
+    try {
+      await fetchData(
+        `${API_URL}UpdateItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`,
+        "PUT",
+        {
+          itemID: selectedItem.itemID,
+          categoryID: selectedCategory.id,
+          itemName: updatedItem.itemName,
+          quantity: updatedItem.quantity,
+          description: updatedItem.description,
+          dateAdded: selectedItem.dateAdded,
+        }
+      );
+      toggleModal("update");
+      fetchItems();
+    } catch (error) {
+      console.error("Failed to update item", error);
+    }
+  };
+
+  const handleDeleteItem = async () => {
+    try {
+      await fetchData(
+        `${API_URL}DeleteItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`,
+        "DELETE"
+      );
+      toggleModal("delete");
+      fetchItems();
+    } catch (error) {
+      console.error("Failed to delete item", error);
     }
   };
 
@@ -123,6 +172,7 @@ export default function Inventory_table() {
                       <th className="column3">Quantity</th>
                       <th className="column4">Unit Price</th>
                       <th className="column5">Date Added</th>
+                      <th className="column6">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -136,11 +186,45 @@ export default function Inventory_table() {
                           <td className="column5">
                             {new Date(item.dateAdded).toLocaleDateString()}
                           </td>
+                          <td className="column6">
+                            <button
+                              onClick={() => {
+                                setSelectedItem(item);
+                                setUpdatedItem({
+                                  itemName: item.itemName,
+                                  quantity: item.quantity,
+                                  description: item.description,
+                                });
+                                toggleModal("update");
+                              }}
+                              className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                            >
+                              <i className="fa-solid fa-pen"></i>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSelectedItem(item);
+                                toggleModal("delete");
+                              }}
+                              className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                            >
+                              <i className="fa-solid fa-trash"></i>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSelectedItem(item);
+                                toggleModal("view");
+                              }}
+                              className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
+                            >
+                              <i className="fa-solid fa-eye"></i>
+                            </button>
+                          </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="5" className="text-center">
+                        <td colSpan="6" className="text-center">
                           No items in this category.
                         </td>
                       </tr>
@@ -205,22 +289,158 @@ export default function Inventory_table() {
                   </div>
                 </div>
               </div>
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-end space-x-2">
                 <button
                   type="button"
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
                   onClick={() => toggleModal("add")}
-                  className="text-gray-600 hover:text-gray-800 me-4"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                 >
                   Add Item
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Update Item Modal */}
+      {modals.update && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
+            <div className="flex justify-between items-center">
+              <h5 className="text-lg font-semibold">Update Item</h5>
+              <button
+                type="button"
+                onClick={() => toggleModal("update")}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div className="mt-4">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="itemName"
+                    value={updatedItem.itemName}
+                    onChange={handleUpdateInputChange}
+                    className="p-2 border rounded border-black w-full"
+                    placeholder="Item Name"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <input
+                    type="number"
+                    name="quantity"
+                    value={updatedItem.quantity}
+                    onChange={handleUpdateInputChange}
+                    className="p-2 border rounded border-black w-full"
+                    placeholder="Quantity"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="description"
+                    value={updatedItem.description}
+                    onChange={handleUpdateInputChange}
+                    className="p-2 border rounded border-black w-full"
+                    placeholder="Description"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-2">
+              <button
+                type="button"
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+                onClick={() => toggleModal("update")}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                onClick={handleUpdateItem}
+              >
+                Update Item
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {modals.delete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
+            <div className="flex justify-between items-center">
+              <h5 className="text-lg font-semibold">Delete Item</h5>
+              <button
+                type="button"
+                onClick={() => toggleModal("delete")}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div className="mt-4">
+              <p>Are you sure you want to delete this item?</p>
+              <div className="mt-6 flex justify-end space-x-2">
+                <button
+                  type="button"
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+                  onClick={() => toggleModal("delete")}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={handleDeleteItem}
+                >
+                  Delete Item
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Item Modal */}
+      {modals.view && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
+            <div className="flex justify-between items-center">
+              <h5 className="text-lg font-semibold">View Item</h5>
+              <button
+                type="button"
+                onClick={() => toggleModal("view")}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div className="mt-4">
+              <p>Item ID: {selectedItem?.itemID}</p>
+              <p>Item Name: {selectedItem?.itemName}</p>
+              <p>Quantity: {selectedItem?.quantity}</p>
+              <p>Description: {selectedItem?.description}</p>
+              <p>
+                Date Added:{" "}
+                {new Date(selectedItem?.dateAdded).toLocaleDateString()}
+              </p>
+            </div>
           </div>
         </div>
       )}

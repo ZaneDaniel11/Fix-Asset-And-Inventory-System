@@ -11,20 +11,7 @@ namespace Backend.Controllers
     public class ItemApiController : ControllerBase
     {
         private readonly string _connectionString = "Data Source=capstone.db";
-
-        // GET: api/ItemApi/GetItems
-        [HttpGet("GetItems")]
-        public async Task<IActionResult> GetItemsAsync()
-        {
-            const string query = "SELECT * FROM items_db";
-
-            using (var connection = new SqliteConnection(_connectionString))
-            {
-                connection.Open();
-                var items = await connection.QueryAsync<Item>(query);
-                return Ok(items);
-            }
-        }
+    
 
         // GET: api/ItemApi/GetItemsByCategory?categoryID=1
         [HttpGet("GetItemsByCategory")]
@@ -66,49 +53,49 @@ namespace Backend.Controllers
         }
 
         // DELETE: api/ItemApi/DeleteItem?ItemID=1
-        [HttpDelete("DeleteItem")]
-        public async Task<IActionResult> DeleteItemAsync(int ItemID)
+      [HttpDelete("DeleteItem")]
+        public async Task<IActionResult> DeleteItemAsync(int ItemID, int CategoryID)
         {
-            const string query = "DELETE FROM items_db WHERE ItemID = @ItemID";
+            const string query = "DELETE FROM items_db WHERE ItemID = @ItemID AND CategoryID = @CategoryID";
 
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-                var result = await connection.ExecuteAsync(query, new { ItemID });
+                var result = await connection.ExecuteAsync(query, new { ItemID, CategoryID });
                 return Ok(new { success = result > 0 });
             }
         }
 
-        // PUT: api/ItemApi/UpdateItem?ItemID=1
+            
         [HttpPut("UpdateItem")]
-        public async Task<IActionResult> UpdateItemAsync(int ItemID, Item updatedItem)
+        public async Task<IActionResult> UpdateItemAsync(int ItemID, int CategoryID, Item updatedItem)
         {
             const string query = @"
                 UPDATE items_db 
                 SET 
-                    CategoryID = @CategoryID,
                     ItemName = @ItemName, 
                     Quantity = @Quantity, 
                     Description = @Description, 
                     DateAdded = @DateAdded
-                WHERE ItemID = @ItemID;
-                SELECT * FROM items_db WHERE ItemID = @ItemID LIMIT 1;";
+                WHERE ItemID = @ItemID AND CategoryID = @CategoryID;
+                SELECT * FROM items_db WHERE ItemID = @ItemID AND CategoryID = @CategoryID LIMIT 1;";
 
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
                 var result = await connection.QuerySingleOrDefaultAsync<Item>(query, new
                 {
-                    updatedItem.CategoryID,
                     updatedItem.ItemName,
                     updatedItem.Quantity,
                     updatedItem.Description,
                     updatedItem.DateAdded,
-                    ItemID
+                    ItemID,
+                    CategoryID
                 });
 
                 return Ok(result);
             }
         }
+
     }
 }
