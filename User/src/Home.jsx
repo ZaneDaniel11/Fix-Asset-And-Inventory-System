@@ -94,6 +94,8 @@ export default function Home() {
   return (
     <div className="flex gap-5">
       <Sidebar />
+
+      
       <ProductList
         products={products}
         onAddProduct={handleAddProduct}
