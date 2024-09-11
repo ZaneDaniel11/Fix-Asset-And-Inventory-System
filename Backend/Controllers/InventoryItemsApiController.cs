@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Dapper;
 using Microsoft.Data.Sqlite;
 using Items.Models;
+using Categorys.Models;
 using System.Threading.Tasks;
 
 namespace Backend.Controllers
@@ -11,7 +12,6 @@ namespace Backend.Controllers
     public class ItemApiController : ControllerBase
     {
         private readonly string _connectionString = "Data Source=capstone.db";
-    
 
         // GET: api/ItemApi/GetItemsByCategory?categoryID=1
         [HttpGet("GetItemsByCategory")]
@@ -26,6 +26,9 @@ namespace Backend.Controllers
                 return Ok(items); // Return filtered items based on CategoryID
             }
         }
+
+
+
 
         // POST: api/ItemApi/InsertItem
         [HttpPost("InsertItem")]
@@ -53,7 +56,7 @@ namespace Backend.Controllers
         }
 
         // DELETE: api/ItemApi/DeleteItem?ItemID=1
-      [HttpDelete("DeleteItem")]
+        [HttpDelete("DeleteItem")]
         public async Task<IActionResult> DeleteItemAsync(int ItemID, int CategoryID)
         {
             const string query = "DELETE FROM items_db WHERE ItemID = @ItemID AND CategoryID = @CategoryID";
@@ -66,7 +69,6 @@ namespace Backend.Controllers
             }
         }
 
-            
         [HttpPut("UpdateItem")]
         public async Task<IActionResult> UpdateItemAsync(int ItemID, int CategoryID, Item updatedItem)
         {
@@ -96,6 +98,5 @@ namespace Backend.Controllers
                 return Ok(result);
             }
         }
-
     }
 }

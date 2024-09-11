@@ -7,15 +7,13 @@ import Sidebar from "./components/Sidebar";
 export default function Home() {
   return (
     <>
-      <div className="flex h-screen">
+      <div className="flex gap-5">
         <Sidebar />
         {/* Main Content */}
-        <div className="w-full md:w-3/4 bg-white p-5 overflow-auto">
-          <div className="flex flex-col md:flex-row space-y-5 md:space-y-0 md:space-x-5">
-            <ProductList />
-            <RequestSummary />
-          </div>
-        </div>
+
+        <ProductList />
+
+        <RequestSummary />
       </div>
     </>
   );

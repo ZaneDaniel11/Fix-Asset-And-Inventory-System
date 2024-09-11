@@ -2,8 +2,8 @@ import React from "react";
 
 const RequestSummary = () => {
   return (
-    <div className="w-1/3 bg-gray-50 p-4 rounded-lg shadow-lg">
-      <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+    <div className="w-1/3 bg-gray-50 p-4 rounded-lg shadow-lg block">
+      <h2 className="text-xl font-bold mb-4">Request Summary</h2>
       <div className="space-y-4">
         <div className="flex justify-between">
           <span>Original Cheese Burger</span>
@@ -24,7 +24,7 @@ const RequestSummary = () => {
         </div>
       </div>
       <button className="mt-4 w-full bg-green-500 text-white py-2 rounded">
-        Place Order
+        Request
       </button>
     </div>
   );
