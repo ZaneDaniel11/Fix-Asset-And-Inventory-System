@@ -1,4 +1,4 @@
-import Head from "./Component/Header";
+import Head from "./Components/Header";
 import RequestTable from "./Table/Request_Trable";
 
 export default function Request() {
