@@ -1,10 +1,10 @@
-import Head from "./Components/Header";
 import RequestTable from "./Table/Request_Trable";
+import Sidebar from "./components/Sidebar";
 
 export default function Request() {
   return (
-    <div>
-      <Head />
+    <div className="flex h-screen">
+      <Sidebar />
       <RequestTable />
     </div>
   );
