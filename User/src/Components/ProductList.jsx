@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const API_URL = "http://localhost:5075/api/UserItemApi/";
 
-const ProductList = () => {
+const ProductList = ({ products, onAddProduct, setProducts }) => {
   const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(0); // Use ID for category filtering
+  const [selectedCategoryId, setSelectedCategoryId] = useState(0);
 
   // Fetch categories with their item counts from the API
   const FetchCategoryWithCounts = async () => {
@@ -18,12 +17,12 @@ const ProductList = () => {
       const mappedCategories = result.map((category) => ({
         id: category.categoryID,
         name: category.categoryName,
-        icon: "📦", // default icon for all categories
+        icon: "📦",
         count: category.itemCount,
       }));
 
       setCategories([
-        { id: 0, name: "All", icon: "📦", count: 0 }, // "All" category
+        { id: 0, name: "All", icon: "📦", count: 0 },
         ...mappedCategories,
       ]);
     } catch (error) {
@@ -31,41 +30,43 @@ const ProductList = () => {
     }
   };
 
-  // Fetch products based on the selected category ID
+  // Fetch products by category
   const FetchProductsByCategory = async (categoryId) => {
     try {
       let response;
       if (categoryId === 0) {
-        // Fetch all products if "All" is selected
         response = await fetch(`${API_URL}GetAllItems`);
       } else {
-        // Fetch products by category ID
         response = await fetch(
           `http://localhost:5075/api/ItemApi/GetItemsByCategory?categoryID=${categoryId}`
         );
       }
 
       const result = await response.json();
-      setProducts(result);
+
+      // Save both the initial quantity and available quantity for later manipulation
+      const processedProducts = result.map((product) => ({
+        ...product,
+        initialQuantity: product.quantity, // This saves the initial stock for reference
+      }));
+
+      setProducts(processedProducts);
     } catch (error) {
       console.error("Failed to fetch products", error);
     }
   };
 
-  // Fetch categories when the component mounts
   useEffect(() => {
     FetchCategoryWithCounts();
-    FetchProductsByCategory(0); // Fetch all products initially
+    FetchProductsByCategory(0); // Load all items initially
   }, []);
 
-  // Fetch products every time the selected category changes
   useEffect(() => {
     FetchProductsByCategory(selectedCategoryId);
   }, [selectedCategoryId]);
 
   return (
     <div className="w-full">
-      {/* Scrollable Category List UI */}
       <div className="overflow-x-auto mb-6">
         <div
           className="flex gap-4 w-full"
@@ -79,13 +80,10 @@ const ProductList = () => {
                   ? "bg-green-100 border-green-400"
                   : "bg-white border-gray-200"
               } hover:bg-green-50`}
-              onClick={() => setSelectedCategoryId(category.id)} // Set selectedCategoryId to category.id
+              onClick={() => setSelectedCategoryId(category.id)}
             >
-              {/* Category Icon */}
               <div className="text-3xl mb-2">{category.icon}</div>
-              {/* Category Name */}
               <div className="font-semibold">{category.name}</div>
-              {/* Item Count */}
               <div className="text-gray-500 text-sm">
                 {category.count} items
               </div>
@@ -94,7 +92,6 @@ const ProductList = () => {
         </div>
       </div>
 
-      {/* Product Grid */}
       <div className="grid grid-cols-4 gap-4">
         {products.map((product) => (
           <div key={product.itemID} className="border p-4 rounded-lg shadow-lg">
@@ -104,9 +101,13 @@ const ProductList = () => {
               className="mb-4"
             />
             <h3 className="text-lg font-bold">{product.itemName}</h3>
-            <p>{`Quantity:${product.quantity}`}</p>
-            <button className="mt-3 w-full bg-green-500 text-white py-2 rounded">
-              Add to Dish
+            <p>{`Available Quantity: ${product.quantity}`}</p>
+            <button
+              className="mt-3 w-full bg-green-500 text-white py-2 rounded"
+              onClick={() => onAddProduct(product)}
+              disabled={product.quantity <= 0} // Disable button if no more stock
+            >
+              Add Product
             </button>
           </div>
         ))}
