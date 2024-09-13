@@ -68,6 +68,29 @@ export default function Home() {
     }
   };
 
+  // Handle removing a product from the request summary
+  const handleRemoveProduct = (itemID) => {
+    const productInRequest = selectedProducts.find((p) => p.itemID === itemID);
+    if (productInRequest) {
+      // Update product quantity in the ProductList based on removed quantity
+      setProducts((prevProducts) =>
+        prevProducts.map((p) =>
+          p.itemID === itemID
+            ? {
+                ...p,
+                quantity: p.quantity + productInRequest.requestedQuantity,
+              }
+            : p
+        )
+      );
+
+      // Remove the product from selectedProducts
+      setSelectedProducts((prevProducts) =>
+        prevProducts.filter((p) => p.itemID !== itemID)
+      );
+    }
+  };
+
   return (
     <div className="flex gap-5">
       <Sidebar />
@@ -79,6 +102,7 @@ export default function Home() {
       <RequestSummary
         selectedProducts={selectedProducts}
         onQuantityChange={handleQuantityChange}
+        onRemoveProduct={handleRemoveProduct}
       />
     </div>
   );
