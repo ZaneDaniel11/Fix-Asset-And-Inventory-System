@@ -28,8 +28,13 @@ export default function Login() {
       }
 
       const data = await response.json();
-      localStorage.setItem("token", data.token); // Store the token
-      navigate("/home"); // Navigate to the home page
+
+      // Store the token, username, and userId in local storage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", username);
+      localStorage.setItem("userId", data.userId); // Store the userId
+
+      navigate("/home");
     } catch (error) {
       console.error("There was an error making the request", error);
       alert("An unexpected error occurred. Please try again later.");

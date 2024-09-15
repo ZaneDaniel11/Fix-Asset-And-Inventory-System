@@ -13,6 +13,7 @@ namespace Backend.Controllers
         private readonly string _connectionString = "Data Source=capstone.db";
 
         // POST: api/Borrow/Request
+        // POST: api/Borrow/Request
         [HttpPost("Request")]
         public async Task<IActionResult> BorrowRequest([FromBody] BorrowRequest borrowRequest)
         {
@@ -29,28 +30,48 @@ namespace Backend.Controllers
                 {
                     try
                     {
-                        // Insert into Borrowreq_tb
-                        const string insertBorrowRequestQuery = "INSERT INTO Borrowreq_tb (ReqBorrowDate, RequestedBy, Purpose, Status, Priority) VALUES (@ReqBorrowDate, @RequestedBy, @Purpose, @Status, @Priority); SELECT last_insert_rowid();";
+                        // Insert into Borrowreq_tb with BorrowerId
+                        const string insertBorrowRequestQuery = @"
+                            INSERT INTO Borrowreq_tb (ReqBorrowDate, RequestedBy, Purpose, Status, Priority, BorrowerId) 
+                            VALUES (@ReqBorrowDate, @RequestedBy, @Purpose, @Status, @Priority, @BorrowerId); 
+                            SELECT last_insert_rowid();";
+
                         var borrowId = await connection.ExecuteScalarAsync<int>(insertBorrowRequestQuery, new
                         {
                             ReqBorrowDate = borrowDate,
                             RequestedBy = borrowRequest.RequestedBy,
                             Purpose = borrowRequest.Purpose,
                             Status = borrowRequest.Status,
-                            Priority = borrowRequest.Priority
+                            Priority = borrowRequest.Priority,
+                            BorrowerId = borrowRequest.BorrowerId  // Set the BorrowerId here
                         }, transaction);
 
                         // Insert into BorrowItems_tb for each item
                         const string insertBorrowItemsQuery = "INSERT INTO BorrowItems_tb (BorrowId, ItemName, Quantity) VALUES (@BorrowId, @ItemName, @Quantity)";
+                        const string updateItemQuantityQuery = "UPDATE items_db SET Quantity = Quantity - @Quantity WHERE ItemName = @ItemName AND Quantity >= @Quantity";
 
                         foreach (var item in borrowRequest.Items)
                         {
+                            // Insert into BorrowItems_tb
                             await connection.ExecuteAsync(insertBorrowItemsQuery, new
                             {
                                 BorrowId = borrowId,
                                 ItemName = item.ItemName,
                                 Quantity = item.Quantity
                             }, transaction);
+
+                            // Update item quantity in items_db
+                            var rowsAffected = await connection.ExecuteAsync(updateItemQuantityQuery, new
+                            {
+                                ItemName = item.ItemName,
+                                Quantity = item.Quantity
+                            }, transaction);
+
+                            if (rowsAffected == 0)
+                            {
+                                transaction.Rollback();
+                                return BadRequest($"Not enough stock for {item.ItemName}.");
+                            }
                         }
 
                         transaction.Commit();
@@ -115,6 +136,7 @@ namespace Backend.Controllers
         public string Purpose { get; set; }
         public string Status { get; set; }
         public string Priority { get; set; }
+        public int BorrowerId { get; set; }  // BorrowerId added here
         public List<BorrowItem> Items { get; set; }
     }
 

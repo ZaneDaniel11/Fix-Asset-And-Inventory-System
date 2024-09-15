@@ -1,10 +1,71 @@
-import React from "react";
+import React, { useState } from "react";
+import Modal from "react-modal";
 
 const RequestSummary = ({
   selectedProducts,
   onQuantityChange,
   onRemoveProduct,
 }) => {
+  // State for controlling the modal
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [purpose, setPurpose] = useState("");
+  const [priority, setPriority] = useState("");
+
+  // Function to open the modal
+  const openModal = () => {
+    setModalIsOpen(true);
+  };
+
+  // Function to close the modal
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
+
+  const handleSave = async () => {
+    const loggedInUsername = localStorage.getItem("username"); // Get the username from localStorage
+    const borrowerId = localStorage.getItem("userId"); // Get the borrowerId from localStorage
+
+    // Log these values to ensure they're correct
+    console.log("LoggedIn Username:", loggedInUsername);
+    console.log("BorrowerId:", borrowerId);
+
+    const requestPayload = {
+      RequestedBy: loggedInUsername || "Unknown", // Use the username or a default value
+      BorrowerId: borrowerId, // Add the BorrowerId to the payload
+      Purpose: purpose,
+      Status: "Pending", // Default status
+      Priority: priority,
+      Items: selectedProducts.map((product) => ({
+        ItemName: product.itemName,
+        Quantity: product.requestedQuantity,
+      })),
+    };
+
+    try {
+      const response = await fetch(
+        "http://localhost:5075/api/BorrowRequestApi/Request",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestPayload),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Borrow request submitted successfully!", data);
+      } else {
+        console.error("Error submitting request:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error submitting request:", error);
+    }
+
+    closeModal();
+  };
+
   const handleIncrease = (itemID, availableQuantity) => {
     const product = selectedProducts.find((p) => p.itemID === itemID);
     if (product.requestedQuantity < availableQuantity) {
@@ -62,9 +123,65 @@ const RequestSummary = ({
       </div>
 
       {/* Request Button */}
-      <button className="w-full mt-4 bg-blue-500 text-white py-2 rounded">
+      <button
+        onClick={openModal}
+        className="w-full mt-4 bg-blue-500 text-white py-2 rounded"
+      >
         Request
       </button>
+
+      {/* Modal for Purpose and Priority */}
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        contentLabel="Borrow Request"
+      >
+        <h2 className="text-xl font-bold mb-4">Submit Borrow Request</h2>
+        <form>
+          <div className="mb-4">
+            <label className="block text-sm font-bold mb-2" htmlFor="purpose">
+              Purpose
+            </label>
+            <input
+              type="text"
+              id="purpose"
+              value={purpose}
+              onChange={(e) => setPurpose(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-bold mb-2" htmlFor="priority">
+              Priority
+            </label>
+            <select
+              id="priority"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+            >
+              <option value="">Select Priority</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={handleSave}
+            className="bg-green-500 text-white px-4 py-2 rounded mt-4"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            onClick={closeModal}
+            className="bg-gray-500 text-white px-4 py-2 rounded mt-4 ml-2"
+          >
+            Cancel
+          </button>
+        </form>
+      </Modal>
     </div>
   );
 };
