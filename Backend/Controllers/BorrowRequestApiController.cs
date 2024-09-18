@@ -12,7 +12,35 @@ namespace Backend.Controllers
     {
         private readonly string _connectionString = "Data Source=capstone.db";
 
-        // POST: api/Borrow/Request
+        [HttpGet("RequestsByBorrowerId")]
+        public async Task<IActionResult> GetRequestsByBorrowerId([FromQuery] int borrowerId)
+        {
+            try
+            {
+                using (var connection = new SqliteConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    const string query = @"
+                        SELECT br.BorrowId, br.ReqBorrowDate, br.RequestedBy, br.Purpose, br.Status, br.Priority, bi.ItemName, bi.Quantity
+                        FROM Borrowreq_tb br
+                        JOIN BorrowItems_tb bi ON br.BorrowId = bi.BorrowId
+                        WHERE br.BorrowerId = @BorrowerId";
+
+                    var borrowerRequests = await connection.QueryAsync(query, new { BorrowerId = borrowerId });
+
+                    if (!borrowerRequests.Any())
+                        return NotFound("No borrow requests found for this borrower.");
+
+                    return Ok(borrowerRequests);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         // POST: api/Borrow/Request
         [HttpPost("Request")]
         public async Task<IActionResult> BorrowRequest([FromBody] BorrowRequest borrowRequest)
@@ -43,7 +71,7 @@ namespace Backend.Controllers
                             Purpose = borrowRequest.Purpose,
                             Status = borrowRequest.Status,
                             Priority = borrowRequest.Priority,
-                            BorrowerId = borrowRequest.BorrowerId  // Set the BorrowerId here
+                            BorrowerId = borrowRequest.BorrowerId
                         }, transaction);
 
                         // Insert into BorrowItems_tb for each item
@@ -127,6 +155,31 @@ namespace Backend.Controllers
                 return Ok(allRequests);
             }
         }
+
+        // GET: api/Borrow/RequestsByBorrower/{borrowerId}
+        [HttpGet("RequestsByBorrower/{borrowerId}")]
+        public async Task<IActionResult> GetRequestsByBorrower(int borrowerId)
+        {
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                Console.WriteLine($"Fetching requests for borrowerId: {borrowerId}");  // Add this log
+
+                const string query = @"
+            SELECT br.BorrowId, br.ReqBorrowDate, br.RequestedBy, br.Purpose, br.Status, br.Priority, bi.ItemName, bi.Quantity
+            FROM Borrowreq_tb br
+            JOIN BorrowItems_tb bi ON br.BorrowId = bi.BorrowId
+            WHERE br.BorrowerId = @BorrowerId";
+
+                var borrowRequests = await connection.QueryAsync(query, new { BorrowerId = borrowerId });
+
+                if (!borrowRequests.Any())
+                    return NotFound("No borrow requests found for this borrower.");
+
+                return Ok(borrowRequests);
+            }
+        }
+
     }
 
     // Model for Borrow Request

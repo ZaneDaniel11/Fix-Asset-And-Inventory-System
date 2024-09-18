@@ -21,8 +21,9 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
         count: category.itemCount,
       }));
 
+      // Add "All" category at the beginning
       setCategories([
-        { id: 0, name: "All", icon: "📦", count: 0 },
+        { id: 0, name: "All", icon: "📦", count: 0 }, // 'All' category
         ...mappedCategories,
       ]);
     } catch (error) {
@@ -35,8 +36,10 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
     try {
       let response;
       if (categoryId === 0) {
+        // Fetch all items if "All" is selected
         response = await fetch(`${API_URL}GetAllItems`);
       } else {
+        // Fetch items by category
         response = await fetch(
           `http://localhost:5075/api/ItemApi/GetItemsByCategory?categoryID=${categoryId}`
         );
@@ -56,11 +59,13 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
     }
   };
 
+  // Fetch categories and all products initially
   useEffect(() => {
     FetchCategoryWithCounts();
     FetchProductsByCategory(0); // Load all items initially
   }, []);
 
+  // Fetch products by category whenever the selected category changes
   useEffect(() => {
     FetchProductsByCategory(selectedCategoryId);
   }, [selectedCategoryId]);
@@ -80,7 +85,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
                   ? "bg-green-100 border-green-400"
                   : "bg-white border-gray-200"
               } hover:bg-green-50`}
-              onClick={() => setSelectedCategoryId(category.id)}
+              onClick={() => setSelectedCategoryId(category.id)} // When "All" is clicked, fetch all items
             >
               <div className="text-3xl mb-2">{category.icon}</div>
               <div className="font-semibold">{category.name}</div>
@@ -92,6 +97,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
         </div>
       </div>
 
+      {/* Render products */}
       <div className="grid grid-cols-4 gap-4">
         {products.map((product) => (
           <div key={product.itemID} className="border p-4 rounded-lg shadow-lg">
@@ -102,13 +108,19 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
             />
             <h3 className="text-lg font-bold">{product.itemName}</h3>
             <p>{`Available Quantity: ${product.quantity}`}</p>
-            <button
-              className="mt-3 w-full bg-green-500 text-white py-2 rounded"
-              onClick={() => onAddProduct(product)}
-              disabled={product.quantity <= 0} // Disable button if no more stock
-            >
-              Add Product
-            </button>
+
+            {/* Show 'Out of Stock' if quantity is 0 */}
+            {product.quantity === 0 ? (
+              <p className="text-red-500 font-bold">Out of Stock</p>
+            ) : (
+              <button
+                className="mt-3 w-full bg-green-500 text-white py-2 rounded"
+                onClick={() => onAddProduct(product)}
+                disabled={product.quantity <= 0} // Disable button if no more stock
+              >
+                Add Product
+              </button>
+            )}
           </div>
         ))}
       </div>

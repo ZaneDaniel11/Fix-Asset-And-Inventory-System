@@ -2,9 +2,9 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Login from "./Login";
 import Home from "./Home";
-import Request from "./Request";
-import Historys from "./History";
+import RequestHistory from "./RequestHistory";
 import ProtectedRoute from "./ProtectedRoute";
+import Request from "./Request";
 
 function App() {
   return (
@@ -12,10 +12,13 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/home" element={<ProtectedRoute element={Home} />} />
-        <Route path="/request" element={<ProtectedRoute element={Request} />} />
         <Route
-          path="/History"
-          element={<ProtectedRoute element={Historys} />}
+          path="/requestHistory"
+          element={<ProtectedRoute element={RequestHistory} />}
+        />
+        <Route
+          path="/requestList"
+          element={<ProtectedRoute element={Request} />}
         />
       </Routes>
     </div>

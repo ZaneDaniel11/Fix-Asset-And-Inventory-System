@@ -13,6 +13,19 @@ namespace Backend.Controllers
         private readonly string _connectionString = "Data Source=capstone.db";
 
         // GET: api/ItemApi/GetItemCountsByCategory
+
+        [HttpGet("GetAllItems")]
+        public async Task<IActionResult> GetItemsAsync()
+        {
+            const string query = "SELECT *FROM items_db";
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var items = await connection.QueryAsync<Item>(query);
+                return Ok(items);
+            }
+        }
         [HttpGet("GetItemCountsByCategory")]
         public async Task<IActionResult> GetItemCountsByCategoryAsync()
         {

@@ -59,17 +59,20 @@ export default function Sidebar() {
                 </span>
               </li>
             </a>
-            <li className="flex items-center p-2 hover:bg-gray-700 cursor-pointer">
-              <HiUser size={24} />
-              <span
-                className={`ml-4 text-lg ${
-                  isOpen ? "block" : "hidden"
-                } transition-all`}
-              >
-                Request
-              </span>
-            </li>
-            <a href="/request">
+            <a href="/requestList">
+              <li className="flex items-center p-2 hover:bg-gray-700 cursor-pointer">
+                <HiUser size={24} />
+                <span
+                  className={`ml-4 text-lg ${
+                    isOpen ? "block" : "hidden"
+                  } transition-all`}
+                >
+                  Request
+                </span>
+              </li>
+            </a>
+
+            <a href="/requestHistory">
               <li className="flex items-center p-2 hover:bg-gray-700 cursor-pointer">
                 <HiCog size={24} />
                 <span
