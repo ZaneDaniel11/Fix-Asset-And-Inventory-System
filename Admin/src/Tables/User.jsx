@@ -164,7 +164,7 @@ export default function Users() {
                   <tr className="table100-head">
                     <th className="column1">User ID</th>
                     <th className="column2">User Name</th>
-                    <th className="column3">Password</th>
+                    <th className="column3">Email</th>
                     <th className="column5">Created Date</th>
                     <th className="column6">User Type</th>
                     <th className="column6">Operation</th>
@@ -175,7 +175,7 @@ export default function Users() {
                     <tr key={user.userId}>
                       <td className="column1">{user.userId}</td>
                       <td className="column2">{user.userName}</td>
-                      <td className="column3">{user.password}</td>
+                      <td className="column3">{user.email}</td>
                       <td className="column5">{user.createdDate}</td>
                       <td className="column6">{user.userType}</td>
                       <td className="column6">

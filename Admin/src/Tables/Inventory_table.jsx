@@ -136,20 +136,11 @@ export default function Inventory_table() {
 
   return (
     <div>
-      <div>
-        <h1>Inventory Table</h1>
-        {selectedCategory ? (
-          <p>Selected Category: {selectedCategory.categoryName}</p>
-        ) : (
-          <p>No category selected</p>
-        )}
-      </div>
-
       <div className="limiter">
         <div className="container-table100">
           <div className="wrap-table100">
             <div className="table100">
-              <div className="flex space justify-between">
+              <div className="flex space justify-between mb-4">
                 <h2 className="text-2xl mb-4">
                   Items in {selectedCategory?.categoryName || "All Categories"}
                 </h2>

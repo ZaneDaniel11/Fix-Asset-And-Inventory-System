@@ -24,15 +24,15 @@ const InventoryCards = ({
             <div className="absolute top-2 left-2 flex gap-2">
               <button
                 onClick={() => handleEditClick(category)}
-                className="bg-blue-500 p-1 rounded-full text-white hover:bg-blue-700 flex items-center"
+                className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
               >
-                <FaEdit />
+                <i className="fa-solid fa-pen"></i>
               </button>
               <button
                 onClick={() => handleDeleteCategory(category.id)}
-                className="bg-red-500 p-1 rounded-full text-white hover:bg-red-700 flex items-center"
+                className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
               >
-                <FaTrash />
+                <i className="fa-solid fa-trash"></i>
               </button>
             </div>
           )}

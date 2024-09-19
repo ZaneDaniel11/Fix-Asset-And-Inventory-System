@@ -98,7 +98,7 @@ export default function Inventory() {
 
   return (
     <div>
-      <div className="text-center mb-8 w-full">
+      <div className="text-center mb-8 w-full ml-5">
         <h1 className="text-3xl font-bold mb-8">Stocks and Inventory</h1>
 
         <div className="flex items-center justify-center gap-4 mb-8">
@@ -109,7 +109,7 @@ export default function Inventory() {
                 isEditMode: !modalState.isEditMode,
               })
             }
-            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300 flex items-center"
+            className="text-white  bg-green-700 hover:bg-green-800 font-medium rounded-lg text-base px-3 py-1.5 me-2  flex items-center"
           >
             {modalState.isEditMode ? (
               <FaTimes className="mr-2" />
@@ -127,7 +127,7 @@ export default function Inventory() {
                 category: null,
               })
             }
-            className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 transition duration-300 flex items-center"
+            className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2 flex items-center"
           >
             <FaPlus className="mr-2" />
             Add Category
