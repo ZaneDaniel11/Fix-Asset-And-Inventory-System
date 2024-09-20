@@ -64,7 +64,7 @@ export default function RequestList() {
 
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white">
-          <thead>
+          <thead className="text-white">
             <tr>
               <th className="py-2 px-4">Borrow ID</th>
               <th className="py-2 px-4">Requested By</th>

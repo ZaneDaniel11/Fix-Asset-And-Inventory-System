@@ -114,7 +114,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
               <p className="text-red-500 font-bold">Out of Stock</p>
             ) : (
               <button
-                className="mt-3 w-full bg-green-500 text-white py-2 rounded"
+                className="mt-3 w-full bg-green-700 hover:bg-green-800 text-white py-2 rounded"
                 onClick={() => onAddProduct(product)}
                 disabled={product.quantity <= 0} // Disable button if no more stock
               >

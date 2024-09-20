@@ -125,7 +125,7 @@ const RequestSummary = ({
       {/* Request Button */}
       <button
         onClick={openModal}
-        className="w-full mt-4 bg-blue-500 text-white py-2 rounded"
+        className="w-full mt-4 bg-blue-700 hover:bg-blue-800 text-white py-2 rounded"
       >
         Request
       </button>
@@ -169,7 +169,7 @@ const RequestSummary = ({
           <button
             type="button"
             onClick={handleSave}
-            className="bg-green-500 text-white px-4 py-2 rounded mt-4"
+            className=" bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded mt-4"
           >
             Save
           </button>

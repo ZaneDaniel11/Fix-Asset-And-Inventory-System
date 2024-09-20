@@ -37,7 +37,7 @@ const Inventory_Modal = ({
             </button>
             <button
               type="submit"
-              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
+              className=" bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded transition duration-300"
             >
               {isEditMode ? "Save Changes" : "Add Category"}
             </button>
