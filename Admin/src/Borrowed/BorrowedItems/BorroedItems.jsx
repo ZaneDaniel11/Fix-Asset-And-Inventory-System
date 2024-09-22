@@ -12,7 +12,9 @@ export default function BorrowedItems() {
   const [borrowedItems, setBorrowedItems] = useState([]);
   const [borrowLoading, setBorrowLoading] = useState(false);
   const [adminApproval, setAdminApproval] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false); // Track update state
 
+  // Fetch all borrow requests on component load
   useEffect(() => {
     const fetchBorrowRequests = async () => {
       try {
@@ -34,6 +36,7 @@ export default function BorrowedItems() {
     fetchBorrowRequests();
   }, []);
 
+  // Fetch the details of borrowed items for a specific borrow request
   const fetchBorrowItems = async (borrowId) => {
     setBorrowLoading(true);
     try {
@@ -52,30 +55,36 @@ export default function BorrowedItems() {
     }
   };
 
+  // Open the modal to view borrowed items
   const openViewModal = (item) => {
     setCurrentItem(item);
     setViewModalOpen(true);
     fetchBorrowItems(item.BorrowId);
   };
 
+  // Open the modal to update admin approval
   const openUpdateModal = (item) => {
     setCurrentItem(item);
     setAdminApproval(item.Admin1Approval); // Pre-fill admin approval
     setUpdateModalOpen(true);
   };
 
+  // Close the view modal
   const closeViewModal = () => {
     setViewModalOpen(false);
     setCurrentItem(null);
     setBorrowedItems([]);
   };
 
+  // Close the update modal
   const closeUpdateModal = () => {
     setUpdateModalOpen(false);
     setCurrentItem(null);
   };
 
+  // Handle admin approval update
   const handleUpdate = async () => {
+    setIsUpdating(true); // Set updating state to true
     try {
       const response = await fetch(
         `http://localhost:5075/api/BorrowRequestApi/UpdateApproval/${currentItem.BorrowId}`,
@@ -90,13 +99,29 @@ export default function BorrowedItems() {
       if (!response.ok) {
         throw new Error("Failed to update approval status");
       }
-      // Optionally refresh data or update UI
+
+      // Optionally refresh the items or display success notification
+      const updatedItems = items.map((item) =>
+        item.BorrowId === currentItem.BorrowId
+          ? {
+              ...item,
+              Admin1Approval: adminApproval,
+              Status:
+                adminApproval === "Approved" ? "In Progress" : item.Status,
+            }
+          : item
+      );
+      setItems(updatedItems);
+
       closeUpdateModal();
     } catch (error) {
       setError(error.message);
+    } finally {
+      setIsUpdating(false); // Reset updating state
     }
   };
 
+  // Filter items based on search and status query
   const filteredItems = items.filter(
     (item) =>
       item.RequestedBy.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -284,9 +309,12 @@ export default function BorrowedItems() {
             <div className="flex justify-end">
               <button
                 onClick={handleUpdate}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                disabled={isUpdating}
+                className={`bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 ${
+                  isUpdating ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
-                Save Changes
+                {isUpdating ? "Updating..." : "Save Changes"}
               </button>
             </div>
           </div>

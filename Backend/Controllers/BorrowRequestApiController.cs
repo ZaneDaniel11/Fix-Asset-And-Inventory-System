@@ -190,6 +190,55 @@ namespace Backend.Controllers
             }
         }
 
+        [HttpPut("UpdateApproval/{borrowId}")]
+        public async Task<IActionResult> UpdateApproval(int borrowId, [FromBody] UpdateApprovalRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.Admin1Approval))
+                return BadRequest("Invalid request. Admin1Approval must be provided.");
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // Update Admin1Approval
+                        string updateApprovalQuery = @"
+                        UPDATE Borrowreq_tb 
+                        SET Admin1Approval = @Admin1Approval
+                        WHERE BorrowId = @BorrowId";
+
+                        await connection.ExecuteAsync(updateApprovalQuery, new
+                        {
+                            Admin1Approval = request.Admin1Approval,
+                            BorrowId = borrowId
+                        }, transaction);
+
+                        // If Admin1Approval is "Approved", update Status to "In Progress"
+                        if (request.Admin1Approval == "Approved")
+                        {
+                            string updateStatusQuery = @"
+                            UPDATE Borrowreq_tb 
+                            SET Status = 'In Progress'
+                            WHERE BorrowId = @BorrowId";
+
+                            await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
+                        }
+
+                        transaction.Commit();
+                        return Ok("Approval and status updated successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return StatusCode(500, $"Internal server error: {ex.Message}");
+                    }
+                }
+            }
+        }
+
     }
 
     // Model for Borrow Request
@@ -208,5 +257,10 @@ namespace Backend.Controllers
     {
         public string ItemName { get; set; }
         public int Quantity { get; set; }
+    }
+
+    public class UpdateApprovalRequest
+    {
+        public string Admin1Approval { get; set; }
     }
 }
