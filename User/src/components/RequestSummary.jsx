@@ -6,34 +6,30 @@ const RequestSummary = ({
   onQuantityChange,
   onRemoveProduct,
 }) => {
-  // State for controlling the modal
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [purpose, setPurpose] = useState("");
   const [priority, setPriority] = useState("");
 
-  // Function to open the modal
   const openModal = () => {
     setModalIsOpen(true);
   };
 
-  // Function to close the modal
   const closeModal = () => {
     setModalIsOpen(false);
   };
 
   const handleSave = async () => {
-    const loggedInUsername = localStorage.getItem("username"); // Get the username from localStorage
-    const borrowerId = localStorage.getItem("userId"); // Get the borrowerId from localStorage
+    const loggedInUsername = localStorage.getItem("username");
+    const borrowerId = localStorage.getItem("userId");
 
-    // Log these values to ensure they're correct
     console.log("LoggedIn Username:", loggedInUsername);
     console.log("BorrowerId:", borrowerId);
 
     const requestPayload = {
-      RequestedBy: loggedInUsername || "Unknown", // Use the username or a default value
-      BorrowerId: borrowerId, // Add the BorrowerId to the payload
+      RequestedBy: loggedInUsername || "Unknown",
+      BorrowerId: borrowerId,
       Purpose: purpose,
-      Status: "Pending", // Default status
+      Status: "Pending",
       Priority: priority,
       Items: selectedProducts.map((product) => ({
         ItemName: product.itemName,

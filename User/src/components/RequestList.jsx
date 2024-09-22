@@ -3,15 +3,36 @@ import { FaEye } from "react-icons/fa";
 
 export default function RequestList() {
   const [requests, setRequests] = useState([]);
-  const [selectedRequestDetails, setSelectedRequestDetails] = useState(null);
+  const [selectedRequestDetails, setSelectedRequestDetails] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const API_URL = "http://localhost:5075/api/BorrowRequestApi";
 
-  // Fetch requests for the logged-in user (borrower)
+  // Function to group requests by BorrowId
+  const groupRequestsByBorrowId = (data) => {
+    const groupedRequests = data.reduce((acc, curr) => {
+      const { BorrowId, ItemName, Quantity } = curr;
+
+      if (!acc[BorrowId]) {
+        // Initialize a new request entry with common details and an empty items array
+        acc[BorrowId] = {
+          ...curr,
+          Items: [],
+        };
+      }
+
+      // Push each item into the corresponding BorrowId group
+      acc[BorrowId].Items.push({ ItemName, Quantity });
+
+      return acc;
+    }, {});
+
+    // Return the grouped requests as an array
+    return Object.values(groupedRequests);
+  };
+
   const getRequests = async () => {
     try {
-      // Retrieve userId (borrowerId) from localStorage
       const borrowerId = localStorage.getItem("userId");
 
       if (!borrowerId) {
@@ -28,30 +49,21 @@ export default function RequestList() {
       }
 
       const result = await response.json();
-      setRequests(result);
+      const groupedRequests = groupRequestsByBorrowId(result);
+      setRequests(groupedRequests); // Set grouped borrow requests
     } catch (error) {
       console.error("Error fetching requests", error);
     }
   };
 
-  // Fetch details for a specific request
-  const viewRequest = async (borrowId) => {
-    try {
-      const response = await fetch(`${API_URL}/ViewRequest/${borrowId}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch request details");
-      }
-      const result = await response.json();
-      setSelectedRequestDetails(result);
-      setIsModalOpen(true); // Open modal
-    } catch (error) {
-      console.error("Error fetching request details", error);
-    }
+  const viewRequest = (request) => {
+    setSelectedRequestDetails(request.Items); // Set the items of the selected request
+    setIsModalOpen(true); // Open modal
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setSelectedRequestDetails(null);
+    setSelectedRequestDetails([]); // Clear request details
   };
 
   useEffect(() => {
@@ -70,7 +82,7 @@ export default function RequestList() {
               <th className="py-2 px-4">Requested By</th>
               <th className="py-2 px-4">Purpose</th>
               <th className="py-2 px-4">Date</th>
-              <th className="py-2 px-4">Status</th> {/* Added Status column */}
+              <th className="py-2 px-4">Status</th>
               <th className="py-2 px-4">Actions</th>
             </tr>
           </thead>
@@ -81,11 +93,10 @@ export default function RequestList() {
                 <td className="py-2 px-4">{request.RequestedBy}</td>
                 <td className="py-2 px-4">{request.Purpose}</td>
                 <td className="py-2 px-4">{request.ReqBorrowDate}</td>
-                <td className="py-2 px-4">{request.Status}</td>{" "}
-                {/* Display Status */}
+                <td className="py-2 px-4">{request.Status}</td>
                 <td className="py-2 px-4">
-                  <button onClick={() => viewRequest(request.BorrowId)}>
-                    <FaEye className="text-blue-500 hover:text-blue-600" />
+                  <button onClick={() => viewRequest(request)}>
+                    <FaEye className="text-blue-700 hover:text-blue-800" />
                   </button>
                 </td>
               </tr>
@@ -94,7 +105,7 @@ export default function RequestList() {
         </table>
       </div>
 
-      {isModalOpen && selectedRequestDetails && (
+      {isModalOpen && selectedRequestDetails.length > 0 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg w-3/4 md:w-1/2">
             <div className="p-4 border-b flex justify-between items-center">
@@ -108,7 +119,7 @@ export default function RequestList() {
             </div>
             <div className="p-4">
               <table className="min-w-full">
-                <thead>
+                <thead className="text-white">
                   <tr>
                     <th className="p-5 text-left">Item Name</th>
                     <th className="p-5 text-left">Quantity</th>
@@ -127,7 +138,7 @@ export default function RequestList() {
             <div className="p-4 border-t">
               <button
                 onClick={closeModal}
-                className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+                className="bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded"
               >
                 Close
               </button>

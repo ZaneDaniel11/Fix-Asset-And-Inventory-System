@@ -59,13 +59,11 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
     }
   };
 
-  // Fetch categories and all products initially
   useEffect(() => {
     FetchCategoryWithCounts();
-    FetchProductsByCategory(0); // Load all items initially
+    FetchProductsByCategory(0);
   }, []);
 
-  // Fetch products by category whenever the selected category changes
   useEffect(() => {
     FetchProductsByCategory(selectedCategoryId);
   }, [selectedCategoryId]);
@@ -97,7 +95,6 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
         </div>
       </div>
 
-      {/* Render products */}
       <div className="grid grid-cols-4 gap-4">
         {products.map((product) => (
           <div key={product.itemID} className="border p-4 rounded-lg shadow-lg">
@@ -109,14 +106,13 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
             <h3 className="text-lg font-bold">{product.itemName}</h3>
             <p>{`Available Quantity: ${product.quantity}`}</p>
 
-            {/* Show 'Out of Stock' if quantity is 0 */}
             {product.quantity === 0 ? (
               <p className="text-red-500 font-bold">Out of Stock</p>
             ) : (
               <button
                 className="mt-3 w-full bg-green-700 hover:bg-green-800 text-white py-2 rounded"
                 onClick={() => onAddProduct(product)}
-                disabled={product.quantity <= 0} // Disable button if no more stock
+                disabled={product.quantity <= 0}
               >
                 Add Product
               </button>

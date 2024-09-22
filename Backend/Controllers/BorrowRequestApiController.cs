@@ -58,12 +58,13 @@ namespace Backend.Controllers
                 {
                     try
                     {
-                        // Insert into Borrowreq_tb with BorrowerId
+                        // Insert into Borrowreq_tb once
                         const string insertBorrowRequestQuery = @"
-                            INSERT INTO Borrowreq_tb (ReqBorrowDate, RequestedBy, Purpose, Status, Priority, BorrowerId) 
-                            VALUES (@ReqBorrowDate, @RequestedBy, @Purpose, @Status, @Priority, @BorrowerId); 
-                            SELECT last_insert_rowid();";
+                    INSERT INTO Borrowreq_tb (ReqBorrowDate, RequestedBy, Purpose, Status, Priority, BorrowerId) 
+                    VALUES (@ReqBorrowDate, @RequestedBy, @Purpose, @Status, @Priority, @BorrowerId); 
+                    SELECT last_insert_rowid();";
 
+                        // Insert into Borrowreq_tb and get the generated BorrowId
                         var borrowId = await connection.ExecuteScalarAsync<int>(insertBorrowRequestQuery, new
                         {
                             ReqBorrowDate = borrowDate,
@@ -74,13 +75,20 @@ namespace Backend.Controllers
                             BorrowerId = borrowRequest.BorrowerId
                         }, transaction);
 
-                        // Insert into BorrowItems_tb for each item
-                        const string insertBorrowItemsQuery = "INSERT INTO BorrowItems_tb (BorrowId, ItemName, Quantity) VALUES (@BorrowId, @ItemName, @Quantity)";
-                        const string updateItemQuantityQuery = "UPDATE items_db SET Quantity = Quantity - @Quantity WHERE ItemName = @ItemName AND Quantity >= @Quantity";
+                        // Prepare the query for inserting into BorrowItems_tb
+                        const string insertBorrowItemsQuery = @"
+                    INSERT INTO BorrowItems_tb (BorrowId, ItemName, Quantity) 
+                    VALUES (@BorrowId, @ItemName, @Quantity)";
 
+                        const string updateItemQuantityQuery = @"
+                    UPDATE items_db 
+                    SET Quantity = Quantity - @Quantity 
+                    WHERE ItemName = @ItemName AND Quantity >= @Quantity";
+
+                        // Loop through the items and insert into BorrowItems_tb, then update quantities
                         foreach (var item in borrowRequest.Items)
                         {
-                            // Insert into BorrowItems_tb
+                            // Insert each item into BorrowItems_tb
                             await connection.ExecuteAsync(insertBorrowItemsQuery, new
                             {
                                 BorrowId = borrowId,
@@ -88,13 +96,14 @@ namespace Backend.Controllers
                                 Quantity = item.Quantity
                             }, transaction);
 
-                            // Update item quantity in items_db
+                            // Update the quantity in items_db
                             var rowsAffected = await connection.ExecuteAsync(updateItemQuantityQuery, new
                             {
                                 ItemName = item.ItemName,
                                 Quantity = item.Quantity
                             }, transaction);
 
+                            // Rollback if not enough stock
                             if (rowsAffected == 0)
                             {
                                 transaction.Rollback();
@@ -102,6 +111,7 @@ namespace Backend.Controllers
                             }
                         }
 
+                        // Commit the transaction once after all items and borrow request are inserted/updated
                         transaction.Commit();
                         return Ok(new { BorrowId = borrowId });
                     }
