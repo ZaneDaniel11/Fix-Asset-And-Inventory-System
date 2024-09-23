@@ -239,6 +239,91 @@ namespace Backend.Controllers
             }
         }
 
+       [HttpPut("UpdateApprovalAdmin2/{borrowId}")]
+public async Task<IActionResult> UpdateApprovalAdmin2(int borrowId, [FromBody] UpdateApprovalRequestAdmin2 request)
+{
+    if (request == null || string.IsNullOrEmpty(request.Admin2Approval))
+        return BadRequest("Invalid request. Admin2Approval must be provided.");
+
+    using (var connection = new SqliteConnection(_connectionString))
+    {
+        await connection.OpenAsync();
+
+        using (var transaction = connection.BeginTransaction())
+        {
+            try
+            {
+                // Update Admin2Approval
+                string updateApprovalQuery = @"
+                UPDATE Borrowreq_tb 
+                SET Admin2Approval = @Admin2Approval
+                WHERE BorrowId = @BorrowId";
+
+                await connection.ExecuteAsync(updateApprovalQuery, new
+                {
+                    Admin2Approval = request.Admin2Approval,
+                    BorrowId = borrowId
+                }, transaction);
+
+                // Handle status update based on Admin2Approval
+                string updateStatusQuery = string.Empty;
+
+                if (request.Admin2Approval == "Rejected")
+                {
+                    updateStatusQuery = @"
+                    UPDATE Borrowreq_tb 
+                    SET Status = 'Rejected'
+                    WHERE BorrowId = @BorrowId";
+                }
+                else if (request.Admin2Approval == "Approved")
+                {
+                    updateStatusQuery = @"
+                    UPDATE Borrowreq_tb 
+                    SET Status = 'In Progress'
+                    WHERE BorrowId = @BorrowId";
+                }
+
+                if (!string.IsNullOrEmpty(updateStatusQuery))
+                {
+                    await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
+                }
+
+                transaction.Commit();
+                return Ok("Approval and status updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+    }
+}
+
+   [HttpGet("ApprovedByAdmin1")]
+public async Task<IActionResult> GetApprovedByAdmin1Requests()
+{
+    using (var connection = new SqliteConnection(_connectionString))
+    {
+        await connection.OpenAsync();
+
+        // SQL query to fetch only the requests where Admin1 has approved
+        const string query = @"
+            SELECT br.BorrowId, br.ReqBorrowDate, br.RequestedBy, br.Purpose, br.Status, br.Priority, br.Admin1Approval, br.Admin2Approval
+            FROM Borrowreq_tb br
+            WHERE br.Admin1Approval = 'Approved'";  // Check for Admin1 approval
+
+        var approvedRequests = await connection.QueryAsync(query);
+
+        if (!approvedRequests.Any())
+            return NotFound("No borrow requests approved by Admin1 found.");
+
+        return Ok(approvedRequests);
+    }
+}
+
+
+
     }
 
     // Model for Borrow Request
@@ -248,7 +333,7 @@ namespace Backend.Controllers
         public string Purpose { get; set; }
         public string Status { get; set; }
         public string Priority { get; set; }
-        public int BorrowerId { get; set; }  // BorrowerId added here
+        public int BorrowerId { get; set; }  
         public List<BorrowItem> Items { get; set; }
     }
 
@@ -263,4 +348,9 @@ namespace Backend.Controllers
     {
         public string Admin1Approval { get; set; }
     }
+   public class UpdateApprovalRequestAdmin2
+{
+    public string Admin2Approval { get; set; }
+}
+
 }
