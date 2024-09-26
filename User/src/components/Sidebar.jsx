@@ -55,7 +55,20 @@ export default function Sidebar() {
                     isOpen ? "block" : "hidden"
                   } transition-all`}
                 >
-                  Home
+                  Borrow
+                </span>
+              </li>
+            </a>
+
+            <a href="/home">
+              <li className="flex items-center p-2 hover:bg-gray-700 cursor-pointer">
+                <HiHome size={24} />
+                <span
+                  className={`ml-4 text-lg ${
+                    isOpen ? "block" : "hidden"
+                  } transition-all`}
+                >
+                  Make A request
                 </span>
               </li>
             </a>
@@ -67,7 +80,7 @@ export default function Sidebar() {
                     isOpen ? "block" : "hidden"
                   } transition-all`}
                 >
-                  Request
+                  Request Status
                 </span>
               </li>
             </a>
