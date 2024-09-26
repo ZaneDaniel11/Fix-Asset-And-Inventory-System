@@ -6,6 +6,7 @@ export default function SuperLogs() {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState(""); // For filtering the table
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,15 +15,14 @@ export default function SuperLogs() {
   const [adminApproval, setAdminApproval] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Fetch only approved borrow requests
+  // Fetch all borrow requests approved by both admins
   useEffect(() => {
     const fetchApprovedBorrowRequests = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5075/api/BorrowRequestApi/ApprovedByAdmin1"
+          "http://localhost:5075/api/BorrowRequestApi/ApprovedByBothAdmins"
         );
         const data = await response.json();
-        console.log(data); // Check data structure
         setItems(data);
       } catch (error) {
         setError(error.message);
@@ -34,20 +34,20 @@ export default function SuperLogs() {
     fetchApprovedBorrowRequests();
   }, []);
 
-  // Handle the Admin2 approval update
+  // Handle the Admin3 approval update
   const handleUpdateApproval = async () => {
     if (!adminApproval) return;
 
     try {
       setIsUpdating(true);
       const response = await fetch(
-        `http://localhost:5075/api/BorrowRequestApi/UpdateApprovalAdmin2/${currentItem.BorrowId}`,
+        `http://localhost:5075/api/BorrowRequestApi/UpdateApprovalAdmin3/${currentItem.BorrowId}`,
         {
-          method: "PUT", // <-- Change this to PUT
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ Admin2Approval: adminApproval }),
+          body: JSON.stringify({ Admin3Approval: adminApproval }),
         }
       );
 
@@ -55,7 +55,7 @@ export default function SuperLogs() {
         setItems((prevItems) =>
           prevItems.map((item) =>
             item.BorrowId === currentItem.BorrowId
-              ? { ...item, Admin2Approval: adminApproval }
+              ? { ...item, Admin3Approval: adminApproval }
               : item
           )
         );
@@ -70,11 +70,53 @@ export default function SuperLogs() {
     }
   };
 
-  // Filter items based on Admin2Approval being "Accepted" or "Rejected"
-  const filteredItems = items.filter(
-    (item) =>
-      item.Admin2Approval === "Approved" || item.Admin2Approval === "Rejected"
-  );
+  // Filter items based on selected filter status
+  const filteredItems = items.filter((item) => {
+    const matchesStatus =
+      filterStatus === "" || item.Admin3Approval === filterStatus;
+    const matchesSearch =
+      searchQuery === "" ||
+      item.RequestedBy.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
+  const openViewModal = async (item) => {
+    setCurrentItem(item);
+    setViewModalOpen(true);
+    setBorrowLoading(true); // Start loading while fetching data
+
+    try {
+      const response = await fetch(
+        `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setBorrowedItems(data); // Assuming the response contains the items
+      } else {
+        console.error("Failed to fetch borrowed items");
+      }
+    } catch (error) {
+      console.error("Error fetching borrowed items:", error);
+    } finally {
+      setBorrowLoading(false); // Stop loading once fetching is complete
+    }
+  };
+
+  const closeViewModal = () => {
+    setViewModalOpen(false);
+    setCurrentItem(null);
+  };
+
+  const openUpdateModal = (item) => {
+    setCurrentItem(item);
+    setUpdateModalOpen(true);
+  };
+
+  const closeUpdateModal = () => {
+    setUpdateModalOpen(false);
+    setCurrentItem(null);
+    setAdminApproval("");
+  };
 
   if (loading) {
     return <div>Loading approved borrow requests...</div>;
@@ -93,6 +135,7 @@ export default function SuperLogs() {
             <div className="wrap-table100">
               <div className="table100">
                 <div className="flex justify-between mb-4">
+                  {/* Search input */}
                   <input
                     type="text"
                     placeholder="Search by Requester Name"
@@ -100,6 +143,16 @@ export default function SuperLogs() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="p-2 border rounded border-black"
                   />
+                  {/* Filter Dropdown */}
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="p-2 border rounded border-gray-300"
+                  >
+                    <option value="">All</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
                 </div>
                 <table>
                   <thead>
@@ -111,6 +164,7 @@ export default function SuperLogs() {
                       <th className="column5">Status</th>
                       <th className="column6">Admin1</th>
                       <th className="column6">Admin2</th>
+                      <th className="column6">Admin3</th>
                       <th className="column7" style={{ paddingRight: 20 }}>
                         Actions
                       </th>
@@ -126,6 +180,7 @@ export default function SuperLogs() {
                         <td className="column5">{item.Status}</td>
                         <td className="column6">{item.Admin1Approval}</td>
                         <td className="column6">{item.Admin2Approval}</td>
+                        <td className="column6">{item.Admin3Approval}</td>
                         <td className="flex items-center justify-center mt-2 space-x-2">
                           <button
                             type="button"
@@ -241,7 +296,7 @@ export default function SuperLogs() {
                 className="p-2 border rounded border-gray-300 w-full"
               >
                 <option value="">Select Status</option>
-                <option value="Accepted">Accepted</option>
+                <option value="Approved">Approved</option>
                 <option value="Rejected">Rejected</option>
               </select>
               <div className="flex justify-end mt-4">

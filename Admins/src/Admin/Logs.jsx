@@ -13,6 +13,7 @@ export default function Admin1Logs() {
   const [borrowLoading, setBorrowLoading] = useState(false);
   const [adminApproval, setAdminApproval] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [filterStatus, setFilterStatus] = useState("");
 
   // Fetch only approved borrow requests
   useEffect(() => {
@@ -33,6 +34,45 @@ export default function Admin1Logs() {
 
     fetchApprovedBorrowRequests();
   }, []);
+
+  // Function to open view modal and fetch borrowed items
+  const openViewModal = async (item) => {
+    setCurrentItem(item);
+    setViewModalOpen(true);
+    setBorrowLoading(true);
+
+    try {
+      const response = await fetch(
+        `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`
+      );
+      const data = await response.json();
+      setBorrowedItems(data); // Assuming the response contains the items
+    } catch (error) {
+      console.error("Error fetching borrowed items:", error);
+    } finally {
+      setBorrowLoading(false);
+    }
+  };
+
+  // Function to close view modal
+  const closeViewModal = () => {
+    setViewModalOpen(false);
+    setCurrentItem(null);
+    setBorrowedItems([]);
+  };
+
+  // Function to open update modal
+  const openUpdateModal = (item) => {
+    setCurrentItem(item);
+    setUpdateModalOpen(true);
+  };
+
+  // Function to close update modal
+  const closeUpdateModal = () => {
+    setUpdateModalOpen(false);
+    setCurrentItem(null);
+    setAdminApproval("");
+  };
 
   // Handle the Admin2 approval update
   const handleUpdateApproval = async () => {
@@ -100,6 +140,17 @@ export default function Admin1Logs() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="p-2 border rounded border-black"
                   />
+
+                  {/* Filter by Admin2 Approval Status */}
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="p-2 border rounded border-black ml-4"
+                  >
+                    <option value="">All</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
                 </div>
                 <table>
                   <thead>
@@ -150,7 +201,6 @@ export default function Admin1Logs() {
             </div>
           </div>
         </div>
-
         {/* View Modal */}
         {viewModalOpen && currentItem && (
           <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
@@ -241,7 +291,7 @@ export default function Admin1Logs() {
                 className="p-2 border rounded border-gray-300 w-full"
               >
                 <option value="">Select Status</option>
-                <option value="Accepted">Accepted</option>
+                <option value="Approved">Accepted</option>
                 <option value="Rejected">Rejected</option>
               </select>
               <div className="flex justify-end mt-4">

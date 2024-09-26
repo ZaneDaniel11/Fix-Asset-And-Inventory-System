@@ -122,11 +122,9 @@ export default function SupperBorrow() {
   const closeUpdateModal = () => {
     setUpdateModalOpen(false);
     setCurrentItem(null);
-    setAdminApproval(""); // Reset the approval status
+    setAdminApproval("");
   };
 
-  // Filter items based on search and status query
-  // Filter items based on search and status query, and ensure Admin3Approval is Pending
   const filteredItems = items.filter(
     (item) =>
       item.Admin3Approval === "Pending" && // Ensure Admin3Approval is pending
@@ -315,7 +313,7 @@ export default function SupperBorrow() {
                 >
                   <option value="">Select Approval</option>
                   <option value="Approved">Approved</option>
-                  <option value="Denied">Denied</option>
+                  <option value="Denied">Rejected</option>
                 </select>
               </div>
               <div className="flex justify-end">
