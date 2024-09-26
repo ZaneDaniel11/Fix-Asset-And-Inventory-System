@@ -1,7 +1,7 @@
 import Sidebar from "../components/sidebar";
 import React, { useState, useEffect } from "react";
 
-export default function RequestItems() {
+export default function SupperBorrow() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
@@ -15,16 +15,26 @@ export default function RequestItems() {
   const [adminApproval, setAdminApproval] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Fetch only approved borrow requests
+  // Fetch only approved borrow requests and remove duplicates
   useEffect(() => {
     const fetchApprovedBorrowRequests = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5075/api/BorrowRequestApi/ApprovedByAdmin1"
+          "http://localhost:5075/api/BorrowRequestApi/ApprovedByBothAdmins"
         );
         const data = await response.json();
-        console.log(data); // Check data structure
-        setItems(data);
+
+        // Remove duplicates based on BorrowId
+        const uniqueItems = data.reduce((acc, current) => {
+          const x = acc.find((item) => item.BorrowId === current.BorrowId);
+          if (!x) {
+            return acc.concat([current]);
+          } else {
+            return acc;
+          }
+        }, []);
+
+        setItems(uniqueItems);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -35,20 +45,20 @@ export default function RequestItems() {
     fetchApprovedBorrowRequests();
   }, []);
 
-  // Handle the Admin2 approval update
+  // Handle the Admin3 approval update
   const handleUpdateApproval = async () => {
     if (!adminApproval) return;
 
     try {
       setIsUpdating(true);
       const response = await fetch(
-        `http://localhost:5075/api/BorrowRequestApi/UpdateApprovalAdmin2/${currentItem.BorrowId}`,
+        `http://localhost:5075/api/BorrowRequestApi/UpdateApprovalAdmin3/${currentItem.BorrowId}`,
         {
-          method: "PUT", // <-- Change this to PUT
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ Admin2Approval: adminApproval }),
+          body: JSON.stringify({ Admin3Approval: adminApproval }),
         }
       );
 
@@ -56,7 +66,7 @@ export default function RequestItems() {
         setItems((prevItems) =>
           prevItems.map((item) =>
             item.BorrowId === currentItem.BorrowId
-              ? { ...item, Admin2Approval: adminApproval }
+              ? { ...item, Admin3Approval: adminApproval }
               : item
           )
         );
@@ -116,8 +126,10 @@ export default function RequestItems() {
   };
 
   // Filter items based on search and status query
+  // Filter items based on search and status query, and ensure Admin3Approval is Pending
   const filteredItems = items.filter(
     (item) =>
+      item.Admin3Approval === "Pending" && // Ensure Admin3Approval is pending
       item.RequestedBy.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (statusQuery === "" || item.Status === statusQuery)
   );
@@ -165,9 +177,10 @@ export default function RequestItems() {
                       <th className="column3">Date</th>
                       <th className="column4">Purpose</th>
                       <th className="column5">Status</th>
-                      <th className="column6">Admin1</th>
-                      <th className="column6">Admin2</th>
-                      <th className="column7" style={{ paddingRight: 20 }}>
+                      <th className="column6">Admin1 Approval</th>
+                      <th className="column6">Admin2 Approval</th>
+                      <th className="column7">Admin3 Approval</th>
+                      <th className="column8" style={{ paddingRight: 20 }}>
                         Actions
                       </th>
                     </tr>
@@ -182,6 +195,7 @@ export default function RequestItems() {
                         <td className="column5">{item.Status}</td>
                         <td className="column6">{item.Admin1Approval}</td>
                         <td className="column6">{item.Admin2Approval}</td>
+                        <td className="column7">{item.Admin3Approval}</td>
                         <td className="flex items-center justify-center mt-2 space-x-2">
                           <button
                             type="button"
@@ -255,7 +269,7 @@ export default function RequestItems() {
               <div className="flex justify-end mt-4">
                 <button
                   onClick={closeViewModal}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                 >
                   Close
                 </button>
@@ -264,10 +278,10 @@ export default function RequestItems() {
           </div>
         )}
 
-        {/* Update Modal */}
+        {/* Update Approval Modal */}
         {updateModalOpen && currentItem && (
           <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
               <button
                 onClick={closeUpdateModal}
                 className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
@@ -288,22 +302,26 @@ export default function RequestItems() {
                 </svg>
               </button>
               <h2 className="text-2xl font-semibold mb-4">
-                Update Approval for Borrow ID: {currentItem.BorrowId}
+                Update Admin3 Approval for Borrow ID: {currentItem.BorrowId}
               </h2>
-              <label className="block mb-2">Admin2 Approval Status:</label>
-              <select
-                value={adminApproval}
-                onChange={(e) => setAdminApproval(e.target.value)}
-                className="p-2 border rounded border-gray-300 w-full"
-              >
-                <option value="">Select Status</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-              <div className="flex justify-end mt-4">
+              <div className="mb-4">
+                <label className="block font-medium text-gray-700">
+                  Admin3 Approval
+                </label>
+                <select
+                  value={adminApproval}
+                  onChange={(e) => setAdminApproval(e.target.value)}
+                  className="w-full border border-gray-300 p-2 rounded-md mt-1"
+                >
+                  <option value="">Select Approval</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Denied">Denied</option>
+                </select>
+              </div>
+              <div className="flex justify-end">
                 <button
                   onClick={handleUpdateApproval}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
                   disabled={isUpdating}
                 >
                   {isUpdating ? "Updating..." : "Update"}

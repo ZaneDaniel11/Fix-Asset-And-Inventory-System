@@ -5,7 +5,10 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
 
   const Menus = [
-    { title: "Logs", icon: "bx bx-book-alt", path: "/logs" },
+    { title: "Borrow", icon: "bx bx-book-alt", path: "/" },
+    { title: "SuperBorrow", icon: "bx bx-book-alt", path: "/SuperBorrow" },
+    { title: "Logs", icon: "bx bx-book-alt", path: "/Logs" },
+    { title: "SuperLogs", icon: "bx bx-book-alt", path: "/SuperLogs" },
     {
       title: "Maintenance",
       icon: "fa-solid fa-screwdriver-wrench",
