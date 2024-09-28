@@ -60,7 +60,7 @@ export default function Sidebar() {
               </li>
             </a>
 
-            <a href="/home">
+            <a href="/requestList">
               <li className="flex items-center p-2 hover:bg-gray-700 cursor-pointer">
                 <HiHome size={24} />
                 <span

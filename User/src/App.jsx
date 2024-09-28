@@ -4,7 +4,7 @@ import Login from "./Login";
 import Home from "./Home";
 import RequestHistory from "./RequestHistory";
 import ProtectedRoute from "./ProtectedRoute";
-import Request from "./Request";
+import Request from "./Request/Request";
 
 function App() {
   return (
