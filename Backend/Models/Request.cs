@@ -14,5 +14,6 @@ namespace Request.Models
         public string Admin1Approval { get; set; }
         public string Admin2Approval { get; set; }
         public string Admin3Approval { get; set; }
+        public int BorrowerId { get; set; }
     }
 }
