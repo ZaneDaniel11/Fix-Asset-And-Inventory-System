@@ -115,6 +115,7 @@ export default function BorrowedItems() {
 
       closeUpdateModal();
     } catch (error) {
+      console.error("Error updating approval:", error.message); // Log error for debugging
       setError(error.message);
     } finally {
       setIsUpdating(false); // Reset updating state
@@ -232,36 +233,20 @@ export default function BorrowedItems() {
                 />
               </svg>
             </button>
-            <h2 className="text-2xl font-semibold mb-4">
-              Borrowed Items for Borrow ID: {currentItem.BorrowId}
-            </h2>
+            <h2 className="text-2xl font-semibold mb-4">Borrowed Items</h2>
             {borrowLoading ? (
               <div>Loading borrowed items...</div>
-            ) : borrowedItems.length > 0 ? (
-              <ul className="space-y-2">
-                {borrowedItems.map((item) => (
-                  <li
-                    key={item.ItemId}
-                    className="border-b pb-2 border-gray-200"
-                  >
-                    <span className="font-medium">{item.ItemName}</span> -{" "}
-                    Quantity: {item.Quantity}
+            ) : borrowedItems.length === 0 ? (
+              <div>No borrowed items found</div>
+            ) : (
+              <ul>
+                {borrowedItems.map((borrowItem) => (
+                  <li key={borrowItem.ItemId}>
+                    Item: {borrowItem.ItemName} - Qty: {borrowItem.Quantity}
                   </li>
                 ))}
               </ul>
-            ) : (
-              <div className="text-gray-500">
-                No items found for this borrow request.
-              </div>
             )}
-            <div className="flex justify-end mt-4">
-              <button
-                onClick={closeViewModal}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-              >
-                Close
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -269,7 +254,7 @@ export default function BorrowedItems() {
       {/* Update Modal */}
       {updateModalOpen && currentItem && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
             <button
               onClick={closeUpdateModal}
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
@@ -290,33 +275,26 @@ export default function BorrowedItems() {
               </svg>
             </button>
             <h2 className="text-2xl font-semibold mb-4">
-              Update Borrow Request: {currentItem.BorrowId}
+              Update Admin Approval
             </h2>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">
-                Admin 1 Approval
-              </label>
-              <select
-                value={adminApproval}
-                onChange={(e) => setAdminApproval(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
-              >
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
-            <div className="flex justify-end">
-              <button
-                onClick={handleUpdate}
-                disabled={isUpdating}
-                className={`bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 ${
-                  isUpdating ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                {isUpdating ? "Updating..." : "Save Changes"}
-              </button>
-            </div>
+            <select
+              value={adminApproval}
+              onChange={(e) => setAdminApproval(e.target.value)}
+              className="p-2 border rounded border-black w-full mb-4"
+            >
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="Declined">Declined</option>
+            </select>
+            <button
+              onClick={handleUpdate}
+              className={`text-white ${
+                isUpdating ? "bg-gray-600" : "bg-green-600"
+              } hover:bg-green-700 font-medium rounded-lg text-sm px-4 py-2`}
+              disabled={isUpdating}
+            >
+              {isUpdating ? "Updating..." : "Update Approval"}
+            </button>
           </div>
         </div>
       )}
