@@ -38,12 +38,13 @@ namespace Backend.Controllers
                     Admin1Approval = "Pending",
                     Admin2Approval = "Pending",
                     Admin3Approval = "Pending",
-                    requestItem.BorrowerId
+                    requestItem.BorrowerId // Including BorrowerId in the insert
                 });
 
                 return Ok(result);
             }
         }
+
 
         // API for getting all request items
         [HttpGet("GetAllRequests")]

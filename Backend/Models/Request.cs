@@ -9,6 +9,7 @@ namespace Request.Models
         public string Purpose { get; set; }
         public decimal EstimatedCost { get; set; }
         public DateTime RequestedDate { get; set; }
+        public string Description { get; set; }
         public string Status { get; set; }
         public string Priority { get; set; }
         public string Admin1Approval { get; set; }
