@@ -152,8 +152,9 @@ export default function RequestItems() {
                     <th className="column5">Status</th>
                     <th className="column6">Priority</th>
                     <th className="column6">Admin1</th>
+                    <th className="column6">Admin2</th>
                     <th className="column7" style={{ paddingRight: 20 }}>
-                      Operation
+                      Actions
                     </th>
                   </tr>
                 </thead>
@@ -175,19 +176,20 @@ export default function RequestItems() {
                           {item.status}
                         </td>
                         <td className="column6">{item.priority}</td>
-                        <td className="column7">{item.Admin1}</td>
-                        <td className="column8 flex items-center justify-center mt-2">
+                        <td className="column6">{item.Admin1}</td>
+                        <td className="column6">{item.Admin2}</td>
+                        <td className="flex items-center justify-center mt-2 space-x-2">
                           <button
                             type="button"
                             onClick={() => openViewModal(item)}
-                            className="text-white bg-blue-500 hover:bg-blue-600 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                            className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
                           >
                             <i className="fa-solid fa-eye"></i>
                           </button>
                           <button
                             type="button"
                             onClick={() => openEditModal(item)}
-                            className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                            className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5"
                           >
                             <i className="fa-solid fa-pen"></i>
                           </button>

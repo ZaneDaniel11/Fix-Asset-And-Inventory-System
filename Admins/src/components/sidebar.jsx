@@ -15,6 +15,12 @@ const Sidebar = () => {
       path: "/maintenance",
     },
     { title: "Borrowed", icon: "fa-solid fa-box-archive", path: "/borrowed" },
+    { title: "Request", icon: "fa-solid fa-box-archive", path: "/Request" },
+    {
+      title: "SuperRequest",
+      icon: "fa-solid fa-box-archive",
+      path: "/SuperRequest",
+    },
   ];
 
   return (
