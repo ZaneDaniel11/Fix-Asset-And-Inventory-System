@@ -182,8 +182,8 @@ public async Task<IActionResult> UpdateAdmin1Approval(int requestId, [FromBody] 
                 UPDATE RequestItems_tb 
                 SET Admin2Approval = @Admin2Approval, 
                     Status = CASE 
-                        WHEN @Admin2Approval = 'Approve' AND Admin1Approval = 'Approve' THEN 'In Progress'
-                        WHEN @Admin2Approval = 'Denied' THEN 'Rejected'
+                        WHEN @Admin2Approval = 'Approved' AND Admin1Approval = 'Approved' THEN 'In Progress'
+                        WHEN @Admin2Approval = 'Declined' THEN 'Rejected'
                         ELSE Status 
                     END
                 WHERE RequestID = @RequestId;
@@ -215,8 +215,8 @@ public async Task<IActionResult> UpdateAdmin1Approval(int requestId, [FromBody] 
                 UPDATE RequestItems_tb 
                 SET Admin3Approval = @Admin3Approval, 
                     Status = CASE 
-                        WHEN @Admin3Approval = 'Approve' AND Admin1Approval = 'Approve' AND Admin2Approval = 'Approve' THEN 'Approved'
-                        WHEN @Admin3Approval = 'Denied' THEN 'Rejected'
+                        WHEN @Admin3Approval = 'Approved' AND Admin1Approval = 'Approved' AND Admin2Approval = 'Approved' THEN 'Approved'
+                        WHEN @Admin3Approval = 'Declined' THEN 'Rejected'
                         ELSE Status 
                     END
                 WHERE RequestID = @RequestId;
