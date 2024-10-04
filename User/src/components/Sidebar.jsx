@@ -28,7 +28,7 @@ export default function Sidebar() {
       <div
         className={`${
           isOpen ? "w-64" : "w-20"
-        } h-screen bg-gray-800 text-white transition-all duration-300`}
+        } h-screen bg-MainColor text-white transition-all duration-300`}
       >
         {/* Sidebar Header */}
         <div className="flex items-center justify-between p-4">
