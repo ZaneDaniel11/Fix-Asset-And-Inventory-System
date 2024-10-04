@@ -1,27 +1,82 @@
-import { useState } from "react";
-import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom"; // Import Link and useNavigate from react-router-dom
 
 import Logo from "../Assets/Logo.png"; // Path to the logo
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const [userType, setUserType] = useState("");
+  const navigate = useNavigate(); // Use navigate for redirection
 
+  useEffect(() => {
+    // Retrieve the userType from localStorage
+    const storedUserType = localStorage.getItem("userType");
+    setUserType(storedUserType);
+  }, []);
+
+  const handleLogout = () => {
+    // Clear all localStorage items
+    localStorage.clear();
+    // Redirect to the login page
+    navigate("/");
+  };
+
+  // Menu items with userType-specific visibility
   const Menus = [
-    { title: "Borrow", icon: "bx bx-book-alt", path: "/" },
-    { title: "SuperBorrow", icon: "bx bx-book-reader", path: "/SuperBorrow" },
-    { title: "Logs", icon: "bx bx-list-ul", path: "/Logs" },
-    { title: "SuperLogs", icon: "bx bx-clipboard", path: "/SuperLogs" },
+    {
+      title: "Borrow",
+      icon: "bx bx-book-alt",
+      path: "/home",
+      visibleTo: ["Senior_Admin"],
+    },
+    {
+      title: "SuperBorrow",
+      icon: "bx bx-book-reader",
+      path: "/SuperBorrow",
+      visibleTo: ["Head_Admin"],
+    },
+    {
+      title: "Logs",
+      icon: "bx bx-list-ul",
+      path: "/Logs",
+      visibleTo: ["Senior_Admin"],
+    },
+    {
+      title: "SuperLogs",
+      icon: "bx bx-clipboard",
+      path: "/SuperLogs",
+      visibleTo: ["Head_Admin"],
+    },
     {
       title: "Maintenance",
-      icon: "fas fa-screwdriver-wrench", // FontAwesome icon for wrench
+      icon: "fas fa-screwdriver-wrench",
       path: "/maintenance",
+      visibleTo: ["Senior_Admin"],
     },
-    { title: "Borrowed", icon: "fas fa-box-archive", path: "/borrowed" }, // FontAwesome icon for archive
-    { title: "Request", icon: "fas fa-box-archive", path: "/Request" }, // FontAwesome icon for archive
+    {
+      title: "Borrowed",
+      icon: "fas fa-box-archive",
+      path: "/borrowed",
+      visibleTo: ["Senior_Admin"],
+    },
+    {
+      title: "Request",
+      icon: "fas fa-box-archive",
+      path: "/Request",
+      visibleTo: ["Senior_Admin"],
+    },
     {
       title: "SuperRequest",
-      icon: "fas fa-box-archive", // FontAwesome icon for archive
+      icon: "fas fa-box-archive",
       path: "/SuperRequest",
+      visibleTo: ["Head_Admin"],
+    },
+    {
+      title: "Logout", // New Logout item
+      icon: "bx bx-log-out",
+      path: "#",
+      visibleTo: ["Senior_Admin", "Head_Admin"],
+      action: handleLogout, // Link the logout action
     },
   ];
 
@@ -57,19 +112,33 @@ const Sidebar = () => {
         </div>
 
         <ul className="pt-6">
-          {Menus.map((menu, index) => (
-            <li key={index} className="relative mb-2">
-              <Link
-                to={menu.path} // Use Link component to navigate
-                className={`flex items-center gap-x-4 p-2 cursor-pointer hover:bg-HoverSide text-white rounded-md ${
-                  isOpen ? "justify-start" : "justify-center"
-                }`}
-              >
-                <i className={`${menu.icon} text-xl`} />
-                {isOpen && <span>{menu.title}</span>}
-              </Link>
-            </li>
-          ))}
+          {Menus.filter((menu) => menu.visibleTo.includes(userType)).map(
+            (menu, index) => (
+              <li key={index} className="relative mb-2">
+                {menu.action ? ( // Check if the menu has an action (for logout)
+                  <button
+                    onClick={menu.action}
+                    className={`flex items-center gap-x-4 p-2 cursor-pointer hover:bg-HoverSide text-white rounded-md ${
+                      isOpen ? "justify-start" : "justify-center"
+                    }`}
+                  >
+                    <i className={`${menu.icon} text-xl`} />
+                    {isOpen && <span>{menu.title}</span>}
+                  </button>
+                ) : (
+                  <Link
+                    to={menu.path} // Use Link component to navigate
+                    className={`flex items-center gap-x-4 p-2 cursor-pointer hover:bg-HoverSide text-white rounded-md ${
+                      isOpen ? "justify-start" : "justify-center"
+                    }`}
+                  >
+                    <i className={`${menu.icon} text-xl`} />
+                    {isOpen && <span>{menu.title}</span>}
+                  </Link>
+                )}
+              </li>
+            )
+          )}
         </ul>
       </div>
     </div>

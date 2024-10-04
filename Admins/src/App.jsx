@@ -5,12 +5,14 @@ import Request from "./Admin/RequestItems";
 import SuperBorrow from "./SuperiorAdmin/SuperBorrow";
 import SuperLogs from "./SuperiorAdmin/SuperLogs";
 import SuperRequest from "./SuperiorAdmin/SuperRequestItems";
+import Login from "./Login";
 
 function App() {
   return (
     <div>
       <Routes>
-        <Route exact path="/" element={<Borrow />} />
+        <Route exact path="/" element={<Login />} />
+        <Route exact path="/home" element={<Borrow />} />
         <Route exact path="/Logs" element={<Admin1Logs />} />
         <Route exact path="/Request" element={<Request />} />
 
