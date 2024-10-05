@@ -60,6 +60,19 @@ export default function Sidebar() {
               </li>
             </a>
 
+            <a href="/BorrowStatus">
+              <li className="flex items-center p-2 hover:bg-gray-700 cursor-pointer">
+                <HiUser size={24} />
+                <span
+                  className={`ml-4 text-lg ${
+                    isOpen ? "block" : "hidden"
+                  } transition-all`}
+                >
+                  Borrow Status
+                </span>
+              </li>
+            </a>
+
             <a href="/requestList">
               <li className="flex items-center p-2 hover:bg-gray-700 cursor-pointer">
                 <HiHome size={24} />
@@ -69,18 +82,6 @@ export default function Sidebar() {
                   } transition-all`}
                 >
                   Make A request
-                </span>
-              </li>
-            </a>
-            <a href="/requestList">
-              <li className="flex items-center p-2 hover:bg-gray-700 cursor-pointer">
-                <HiUser size={24} />
-                <span
-                  className={`ml-4 text-lg ${
-                    isOpen ? "block" : "hidden"
-                  } transition-all`}
-                >
-                  Request Status
                 </span>
               </li>
             </a>
