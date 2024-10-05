@@ -91,11 +91,14 @@ export default function Home() {
     }
   };
 
+  // New function to reset selected products after request completion
+  const handleRequestCompleted = () => {
+    setSelectedProducts([]); // Clear all selected products
+  };
+
   return (
     <div className="flex gap-5">
       <Sidebar />
-
-      
       <ProductList
         products={products}
         onAddProduct={handleAddProduct}
@@ -105,6 +108,7 @@ export default function Home() {
         selectedProducts={selectedProducts}
         onQuantityChange={handleQuantityChange}
         onRemoveProduct={handleRemoveProduct}
+        onRequestCompleted={handleRequestCompleted} // Pass to RequestSummary
       />
     </div>
   );

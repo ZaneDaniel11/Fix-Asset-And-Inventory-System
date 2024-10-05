@@ -5,6 +5,7 @@ const RequestSummary = ({
   selectedProducts,
   onQuantityChange,
   onRemoveProduct,
+  onRequestCompleted, // New prop for resetting products
 }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [purpose, setPurpose] = useState("");
@@ -52,6 +53,9 @@ const RequestSummary = ({
       if (response.ok) {
         const data = await response.json();
         console.log("Borrow request submitted successfully!", data);
+
+        // Clear the selected products after successful request
+        onRequestCompleted();
       } else {
         console.error("Error submitting request:", response.statusText);
       }

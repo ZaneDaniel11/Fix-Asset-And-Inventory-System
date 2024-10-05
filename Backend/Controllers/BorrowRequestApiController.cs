@@ -166,23 +166,24 @@ namespace Backend.Controllers
             }
         }
 
-        [HttpGet("RequestById/{borrowId}")]
-        public async Task<IActionResult> GetRequestById(int borrowId)
-        {
-            using (var connection = new SqliteConnection(_connectionString))
-            {
-                await connection.OpenAsync();
+[HttpGet("RequestById/{borrowId}")]
+public async Task<IActionResult> GetRequestById(int borrowId)
+{
+    using (var connection = new SqliteConnection(_connectionString))
+    {
+        await connection.OpenAsync();
 
-                const string query = "SELECT * FROM Borrowreq_tb WHERE BorrowId = @BorrowId";
+        const string query = "SELECT * FROM Borrowreq_tb WHERE BorrowerId = @borrowId";
 
-                var request = await connection.QuerySingleOrDefaultAsync(query, new { BorrowId = borrowId });
+        var request = await connection.QueryFirstOrDefaultAsync(query, new { borrowId });
 
-                if (request == null)
-                    return NotFound($"No borrow request found with BorrowId {borrowId}.");
+        if (request == null)
+            return NotFound($"No borrow request found with BorrowId {borrowId}.");
 
-                return Ok(request);
-            }
-        }
+        return Ok(request);
+    }
+}
+
 
 
         // GET: api/Borrow/RequestsByBorrower/{borrowerId}

@@ -11,6 +11,7 @@ export default function BorrowStatus() {
   const [error, setError] = useState(null);
   const [borrowedItems, setBorrowedItems] = useState([]);
   const [borrowLoading, setBorrowLoading] = useState(false);
+
   useEffect(() => {
     const fetchBorrowRequests = async () => {
       const borrowerId = localStorage.getItem("userId");
@@ -31,15 +32,12 @@ export default function BorrowStatus() {
         }
 
         const data = await response.json();
-
-        // Log the response to check its structure
         console.log("API Response:", data);
 
-        // Check if the response is an array; if not, convert it to an array
         if (Array.isArray(data)) {
-          setItems(data); // If the response is already an array
+          setItems(data);
         } else if (data && typeof data === "object") {
-          setItems([data]); // Convert the single object into an array
+          setItems([data]);
         } else {
           throw new Error(
             "Unexpected response format, expected an array or object"
@@ -55,7 +53,6 @@ export default function BorrowStatus() {
     fetchBorrowRequests();
   }, []);
 
-  // Fetch the details of borrowed items for a specific borrow request
   const fetchBorrowItems = async (borrowId) => {
     setBorrowLoading(true);
     try {
@@ -74,21 +71,18 @@ export default function BorrowStatus() {
     }
   };
 
-  // Open the modal to view borrowed items
   const openViewModal = (item) => {
     setCurrentItem(item);
     setViewModalOpen(true);
     fetchBorrowItems(item.BorrowId);
   };
 
-  // Close the view modal
   const closeViewModal = () => {
     setViewModalOpen(false);
     setCurrentItem(null);
     setBorrowedItems([]);
   };
 
-  // Filter items based on search and status query
   const filteredItems = Array.isArray(items)
     ? items.filter(
         (item) =>
@@ -101,76 +95,78 @@ export default function BorrowStatus() {
     return <div>Loading borrow requests...</div>;
   }
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
   return (
-    <>
-      <div className="flex">
-        <Sidebar />
-        <div className="limiter">
-          <div className="container-table100">
-            <div className="wrap-table100">
-              <div className="table100">
-                <div className="flex justify-between mb-4">
-                  <input
-                    type="text"
-                    placeholder="Search by Requester Name"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="p-2 border rounded border-black"
-                  />
-                  <select
-                    value={statusQuery}
-                    onChange={(e) => setStatusQuery(e.target.value)}
-                    className="p-2 border rounded border-black"
-                  >
-                    <option value="">All Statuses</option>
-                    <option value="Complete">Complete</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Pending">Pending</option>
-                  </select>
-                </div>
-                <table>
-                  <thead>
-                    <tr className="table100-head">
-                      <th className="column1">Borrow ID</th>
-                      <th className="column2">Requested By</th>
-                      <th className="column3">Date</th>
-                      <th className="column4">Purpose</th>
-                      <th className="column5">Status</th>
-                      <th className="column6">Approval</th>
-                      <th className="column7" style={{ paddingRight: 20 }}>
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredItems.map((item) => (
-                      <tr key={item.BorrowId}>
-                        <td className="column1">{item.BorrowId}</td>
-                        <td className="column2">{item.RequestedBy}</td>
-                        <td className="column3">{item.ReqBorrowDate}</td>
-                        <td className="column4">{item.Purpose}</td>
-                        <td className="column5">{item.Status}</td>
-                        <td className="column6">{item.Admin1Approval}</td>
-                        <td className="flex items-center justify-center mt-2 space-x-2">
-                          <button
-                            type="button"
-                            onClick={() => openViewModal(item)}
-                            className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
-                          >
-                            <i className="fa-solid fa-eye"></i>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+    <div className="flex">
+      {/* Sidebar */}
+      <Sidebar />
+
+      {/* Main Content */}
+      <div className="flex-grow p-6">
+        <div className="bg-gray-200 p-4 shadow-lg rounded-lg mb-6 text-center">
+          <h2 className="text-2xl font-bold">Borrow Overview</h2>
+        </div>
+
+        {/* Search Bar with Shadow */}
+        <div className="p-4 mb-4 bg-white shadow-md rounded-md">
+          <div className="flex justify-between">
+            <input
+              type="text"
+              placeholder="Search by Requester Name"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="p-2 border rounded border-gray-400 w-1/2"
+            />
+            <select
+              value={statusQuery}
+              onChange={(e) => setStatusQuery(e.target.value)}
+              className="p-2 border rounded border-gray-400"
+            >
+              <option value="">All Statuses</option>
+              <option value="Complete">Complete</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Pending">Pending</option>
+            </select>
           </div>
+        </div>
+
+        {/* Borrow Request Table */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr className="table100-head">
+                <th className="column1">Borrow ID</th>
+                <th className="column2">Requested By</th>
+                <th className="column3">Date</th>
+                <th className="column4">Purpose</th>
+                <th className="column5">Status</th>
+                <th className="column6">Approval</th>
+                <th className="column7" style={{ paddingRight: 20 }}>
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredItems.map((item) => (
+                <tr key={item.BorrowId}>
+                  <td className="column1">{item.BorrowId}</td>
+                  <td className="column2">{item.RequestedBy}</td>
+                  <td className="column3">{item.ReqBorrowDate}</td>
+                  <td className="column4">{item.Purpose}</td>
+                  <td className="column5">{item.Status}</td>
+                  <td className="column6">{item.Admin1Approval}</td>
+                  <td className="flex items-center justify-center mt-2 space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => openViewModal(item)}
+                      className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
+                    >
+                      <i className="fa-solid fa-eye"></i>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         {/* View Modal */}
@@ -214,6 +210,6 @@ export default function BorrowStatus() {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
