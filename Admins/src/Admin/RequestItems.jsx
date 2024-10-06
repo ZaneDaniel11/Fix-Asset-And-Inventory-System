@@ -53,14 +53,14 @@ export default function RequestItems() {
 
   const getStatusInfo = (status) => {
     switch (status) {
-      case "Complete":
+      case "Approved":
         return {
           className: "text-green-500",
           icon: "fa-check-circle",
           spin: false,
         };
       case "In Progress":
-        return { className: "text-yellow-500", icon: "fa-spinner", spin: true };
+        return { className: "text-yellow-500", icon: "fa-spinner" };
       case "Pending":
         return {
           className: "text-red-500",
@@ -111,87 +111,89 @@ export default function RequestItems() {
     <>
       <div className="flex">
         <Sidebar />
-        <div className="limiter">
-          <div className="container-table100">
-            <div className="wrap-table100">
-              <div className="table100">
-                <div className="flex justify-between mb-4">
-                  <input
-                    type="text"
-                    placeholder="Search by Item Name"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="p-2 border rounded border-black"
-                  />
-                  <select
-                    value={statusQuery}
-                    onChange={(e) => setStatusQuery(e.target.value)}
-                    className="p-2 border rounded border-black"
-                  >
-                    <option value="">All Statuses</option>
-                    <option value="Complete">Complete</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Pending">Pending</option>
-                  </select>
-                </div>
-                <table>
-                  <thead>
-                    <tr className="table100-head">
-                      <th className="column1">Request ID</th>
-                      <th className="column2">Item Name</th>
-                      <th className="column3">Requested By</th>
-                      <th className="column4">Requested Date</th>
-                      <th className="column5">Status</th>
-                      <th className="column6">Priority</th>
-                      <th className="column6">Admin1</th>
-                      <th className="column6">Admin2</th>
-                      <th className="column7" style={{ paddingRight: 20 }}>
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredItems.map((item) => {
-                      const statusInfo = getStatusInfo(item.status);
-                      return (
-                        <tr key={item.id}>
-                          <td className="column1">{item.id}</td>
-                          <td className="column2">{item.name}</td>
-                          <td className="column3">{item.requestedBy}</td>
-                          <td className="column4">{item.requestedDate}</td>
-                          <td className={`column5 ${statusInfo.className}`}>
-                            <i
-                              className={`fa ${statusInfo.icon} ${
-                                statusInfo.spin ? "spin" : ""
-                              } mr-2`}
-                            ></i>
-                            {item.status}
-                          </td>
-                          <td className="column6">{item.priority}</td>
-                          <td className="column6">{item.Admin1}</td>
-                          <td className="column6">{item.Admin2}</td>
-                          <td className="flex items-center justify-center mt-2 space-x-2">
-                            <button
-                              type="button"
-                              onClick={() => openViewModal(item)}
-                              className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
-                            >
-                              <i className="fa-solid fa-eye"></i>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openEditModal(item)}
-                              className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5"
-                            >
-                              <i className="fa-solid fa-pen"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+        <div className="flex-1 p-6">
+          <div className="container mx-auto bg-white shadow-md rounded-lg p-6">
+            <div className="bg-gray-200 p-4 shadow-lg rounded-lg mb-6 text-center">
+              <h2 className="text-2xl font-bold">Request Overview</h2>
+            </div>
+
+            <div className="flex justify-between mb-4 shadow-lg p-6 bg-white rounded-lg mb-6">
+              <input
+                type="text"
+                placeholder="Search by Item Name"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="p-2 border rounded border-black"
+              />
+              <select
+                value={statusQuery}
+                onChange={(e) => setStatusQuery(e.target.value)}
+                className="p-2 border rounded border-black"
+              >
+                <option value="">All Statuses</option>
+                <option value="Complete">Complete</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Pending">Pending</option>
+              </select>
+            </div>
+            <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+              <table>
+                <thead>
+                  <tr className="table100-head">
+                    <th className="column1">Request ID</th>
+                    <th className="column2">Item Name</th>
+                    <th className="column3">Requested By</th>
+                    <th className="column4">Requested Date</th>
+                    <th className="column5">Status</th>
+                    <th className="column6">Priority</th>
+                    <th className="column6">Admin1</th>
+                    <th className="column6">Admin2</th>
+                    <th className="column7" style={{ paddingRight: 20 }}>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredItems.map((item) => {
+                    const statusInfo = getStatusInfo(item.status);
+                    return (
+                      <tr key={item.id}>
+                        <td className="column1">{item.id}</td>
+                        <td className="column2">{item.name}</td>
+                        <td className="column3">{item.requestedBy}</td>
+                        <td className="column4">{item.requestedDate}</td>
+                        <td className={`column5 ${statusInfo.className}`}>
+                          <i
+                            className={`fa ${statusInfo.icon} ${
+                              statusInfo.spin ? "spin" : ""
+                            } mr-2`}
+                          ></i>
+                          {item.status}
+                        </td>
+                        <td className="column6">{item.priority}</td>
+                        <td className="column6">{item.Admin1}</td>
+                        <td className="column6">{item.Admin2}</td>
+                        <td className="flex items-center justify-center mt-2 space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => openViewModal(item)}
+                            className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
+                          >
+                            <i className="fa-solid fa-eye"></i>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(item)}
+                            className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5"
+                          >
+                            <i className="fa-solid fa-pen"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

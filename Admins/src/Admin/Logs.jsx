@@ -127,80 +127,86 @@ export default function Admin1Logs() {
   return (
     <>
       <div className="flex">
+        {/* Sidebar */}
         <Sidebar />
-        <div className="limiter">
-          <div className="container-table100">
-            <div className="wrap-table100">
-              <div className="table100">
-                <div className="flex justify-between mb-4">
-                  <input
-                    type="text"
-                    placeholder="Search by Requester Name"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="p-2 border rounded border-black"
-                  />
 
-                  {/* Filter by Admin2 Approval Status */}
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="p-2 border rounded border-black ml-4"
-                  >
-                    <option value="">All</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                  </select>
-                </div>
-                <table>
-                  <thead>
-                    <tr className="table100-head">
-                      <th className="column1">Borrow ID</th>
-                      <th className="column2">Requested By</th>
-                      <th className="column3">Date</th>
-                      <th className="column4">Purpose</th>
-                      <th className="column5">Status</th>
-                      <th className="column6">Admin1</th>
-                      <th className="column6">Admin2</th>
-                      <th className="column7" style={{ paddingRight: 20 }}>
-                        Actions
-                      </th>
+        {/* Main content */}
+        <div className="flex-1 p-6">
+          <div className="container mx-auto bg-white shadow-md rounded-lg p-6">
+            <div className="bg-gray-200 p-4 shadow-lg rounded-lg mb-6 text-center">
+              <h2 className="text-2xl font-bold">Logs Overview</h2>
+            </div>
+            {/* Search and Filter Section */}
+            <div className="flex justify-between mb-4 shadow-lg p-6 bg-white rounded-lg mb-6">
+              <input
+                type="text"
+                placeholder="Search by Requester Name"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="p-3 border rounded-lg shadow-sm border-gray-300"
+              />
+
+              {/* Filter by Admin2 Approval Status */}
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="p-3 border rounded-lg shadow-sm border-gray-300 ml-4"
+              >
+                <option value="">All</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+
+            {/* Table */}
+            <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+              <table className="w-full text-sm text-left text-gray-600">
+                <thead className="bg-gray-100 text-white">
+                  <tr>
+                    <th className="px-6 py-3">Borrow ID</th>
+                    <th className="px-6 py-3">Requested By</th>
+                    <th className="px-6 py-3">Date</th>
+                    <th className="px-6 py-3">Purpose</th>
+                    <th className="px-6 py-3">Status</th>
+                    <th className="px-6 py-3">Admin1</th>
+                    <th className="px-6 py-3">Admin2</th>
+                    <th className="px-6 py-3 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredItems.map((item) => (
+                    <tr key={item.BorrowId} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">{item.BorrowId}</td>
+                      <td className="px-6 py-4">{item.RequestedBy}</td>
+                      <td className="px-6 py-4">{item.ReqBorrowDate}</td>
+                      <td className="px-6 py-4">{item.Purpose}</td>
+                      <td className="px-6 py-4">{item.Status}</td>
+                      <td className="px-6 py-4">{item.Admin1Approval}</td>
+                      <td className="px-6 py-4">{item.Admin2Approval}</td>
+                      <td className="flex justify-center items-center space-x-2 py-4">
+                        <button
+                          type="button"
+                          onClick={() => openViewModal(item)}
+                          className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-3 py-2 rounded-lg"
+                        >
+                          <i className="fa-solid fa-eye"></i>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openUpdateModal(item)}
+                          className="bg-green-500 hover:bg-green-600 text-white font-bold px-3 py-2 rounded-lg"
+                        >
+                          Update Approval
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {filteredItems.map((item) => (
-                      <tr key={item.BorrowId}>
-                        <td className="column1">{item.BorrowId}</td>
-                        <td className="column2">{item.RequestedBy}</td>
-                        <td className="column3">{item.ReqBorrowDate}</td>
-                        <td className="column4">{item.Purpose}</td>
-                        <td className="column5">{item.Status}</td>
-                        <td className="column6">{item.Admin1Approval}</td>
-                        <td className="column6">{item.Admin2Approval}</td>
-                        <td className="flex items-center justify-center mt-2 space-x-2">
-                          <button
-                            type="button"
-                            onClick={() => openViewModal(item)}
-                            className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
-                          >
-                            <i className="fa-solid fa-eye"></i>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => openUpdateModal(item)}
-                            className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5"
-                          >
-                            Update Approval
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
+
         {/* View Modal */}
         {viewModalOpen && currentItem && (
           <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
@@ -236,7 +242,7 @@ export default function Admin1Logs() {
                       key={item.ItemId}
                       className="border-b pb-2 border-gray-200"
                     >
-                      <span className="font-medium">{item.ItemName}</span> -{" "}
+                      <span className="font-medium">{item.ItemName}</span> -
                       Quantity: {item.Quantity}
                     </li>
                   ))}
