@@ -131,6 +131,33 @@ export default function Admin1Logs() {
     return <div>Error: {error}</div>;
   }
 
+  const getAdminApprovalInfo = (approval) => {
+    switch (approval) {
+      case "Approved":
+        return { className: "text-green-500", icon: "fa-check-circle" };
+      case "Pending":
+        return { className: "text-yellow-500", icon: "fa-hourglass-half" };
+      case "Declined":
+        return { className: "text-red-500", icon: "fa-times-circle" };
+      default:
+        return { className: "", icon: null };
+    }
+  };
+  const getStatusInfo = (status) => {
+    switch (status) {
+      case "Approved":
+        return "text-green-500 font-semibold";
+      case "Pending":
+        return "text-yellow-500 font-semibold";
+      case "Rejected":
+        return "text-red-500 font-semibold";
+      case "In Progress":
+        return "text-orange-300 font-semibold";
+      default:
+        return "";
+    }
+  };
+
   return (
     <>
       <div className="flex">
@@ -193,26 +220,40 @@ export default function Admin1Logs() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredItems.map((item) => (
-                      <tr key={item.id}>
-                        <td className="column1">{item.id}</td>
-                        <td className="column2">{item.name}</td>
-                        <td className="column3">{item.requestedBy}</td>
-                        <td className="column4">{item.requestedDate}</td>
-                        <td className="column5">{item.status}</td>
-                        <td className="column6">{item.priority}</td>
-                        <td className="column6">{item.Admin1}</td>
-                        <td className="column6">{item.Admin2}</td>
-                        <td className="column7">
-                          <button
-                            onClick={() => openViewRequestModal(item)}
-                            className="cursor-pointer"
-                          >
-                            <i className="fa-solid fa-eye"></i>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {filteredItems.map((item) => {
+                      const admin1Info = getAdminApprovalInfo(item.Admin1);
+                      const admin2Info = getAdminApprovalInfo(item.Admin2);
+                      const statusClass = getStatusInfo(item.status);
+
+                      return (
+                        <tr key={item.id}>
+                          <td className="column1">{item.id}</td>
+                          <td className="column2">{item.name}</td>
+                          <td className="column3">{item.requestedBy}</td>
+                          <td className="column4">{item.requestedDate}</td>
+                          <td className={`column5 ${statusClass}`}>
+                            {item.status}
+                          </td>
+                          <td className="column6">{item.priority}</td>
+                          <td className={`column6 ${admin1Info.className}`}>
+                            <i className={`fa ${admin1Info.icon} mr-1`}></i>{" "}
+                            {item.Admin1}
+                          </td>
+                          <td className={`column6 ${admin2Info.className}`}>
+                            <i className={`fa ${admin2Info.icon} mr-1`}></i>{" "}
+                            {item.Admin2}
+                          </td>
+                          <td className="column7">
+                            <button
+                              onClick={() => openViewRequestModal(item)}
+                              className="cursor-pointer"
+                            >
+                              <i className="fa-solid fa-eye"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -232,25 +273,43 @@ export default function Admin1Logs() {
                     </tr>
                   </thead>
                   <tbody>
-                    {borrowRequests.map((item) => (
-                      <tr key={item.BorrowId}>
-                        <td className="column1">{item.BorrowId}</td>
-                        <td className="column2">{item.RequestedBy}</td>
-                        <td className="column3">{item.ReqBorrowDate}</td>
-                        <td className="column4">{item.Purpose}</td>
-                        <td className="column5">{item.Status}</td>
-                        <td className="column6">{item.Admin1Approval}</td>
-                        <td className="column6">{item.Admin2Approval}</td>
-                        <td className="column7">
-                          <button
-                            onClick={() => openViewBorrowModal(item)}
-                            className="cursor-pointer"
-                          >
-                            <i className="fa-solid fa-eye"></i>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {borrowRequests.map((item) => {
+                      const admin1Info = getAdminApprovalInfo(
+                        item.Admin1Approval
+                      );
+                      const admin2Info = getAdminApprovalInfo(
+                        item.Admin2Approval
+                      );
+                      const statusClass = getStatusInfo(item.Status);
+
+                      return (
+                        <tr key={item.BorrowId}>
+                          <td className="column1">{item.BorrowId}</td>
+                          <td className="column2">{item.RequestedBy}</td>
+                          <td className="column3">{item.ReqBorrowDate}</td>
+                          <td className="column4">{item.Purpose}</td>
+                          <td className={`column5 ${statusClass}`}>
+                            {item.Status}
+                          </td>
+                          <td className={`column6 ${admin1Info.className}`}>
+                            <i className={`fa ${admin1Info.icon} mr-1`}></i>{" "}
+                            {item.Admin1Approval}
+                          </td>
+                          <td className={`column6 ${admin2Info.className}`}>
+                            <i className={`fa ${admin2Info.icon} mr-1`}></i>{" "}
+                            {item.Admin2Approval}
+                          </td>
+                          <td className="column7">
+                            <button
+                              onClick={() => openViewBorrowModal(item)}
+                              className="cursor-pointer"
+                            >
+                              <i className="fa-solid fa-eye"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

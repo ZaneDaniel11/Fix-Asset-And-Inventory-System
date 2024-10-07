@@ -403,10 +403,10 @@ public async Task<IActionResult> GetRequestById(int borrowId)
                         }
                         else if (request.Admin3Approval == "Approved")
                         {
-                            // Only move to 'Completed' if all three admins have approved
+                           
                             updateStatusQuery = @"
                     UPDATE Borrowreq_tb 
-                    SET Status = 'Completed'
+                    SET Status = 'Approved'
                     WHERE BorrowId = @BorrowId 
                     AND Admin1Approval = 'Approved' 
                     AND Admin2Approval = 'Approved'";

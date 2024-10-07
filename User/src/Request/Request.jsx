@@ -29,9 +29,9 @@ export default function Request() {
   const closeDeleteModal = () => setDeleteModalOpen(false);
 
   const statusColors = {
-    Pending: "bg-yellow-200 text-yellow-700",
-    Approved: "bg-green-200 text-green-700",
-    Rejected: "bg-red-200 text-red-700",
+    Pending: " text-orange-400",
+    Approved: " text-green-700",
+    Rejected: " text-red-700",
   };
 
   const statusIcons = {
