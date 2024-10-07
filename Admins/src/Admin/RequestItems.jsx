@@ -47,7 +47,8 @@ export default function RequestItems() {
     (item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (statusQuery === "" || item.status === statusQuery) &&
-      item.Admin1 === "Approved" // Only show approved items
+      item.Admin1 === "Approved" && // Only show items where Admin1 is Approved
+      item.Admin2 === "Pending" // Only show items where Admin2 is Pending
   );
 
   const getStatusInfo = (status) => {
@@ -64,10 +65,34 @@ export default function RequestItems() {
         return {
           className: "text-red-500",
           icon: "fa-exclamation-circle",
-          spin: false,
         };
       default:
         return { className: "", icon: null, spin: false };
+    }
+  };
+
+  const getAdminApprovalInfo = (approval) => {
+    switch (approval) {
+      case "Approved":
+        return {
+          className: "text-green-500",
+          icon: "fa-check-circle", // Icon for Approved
+        };
+      case "Pending":
+        return {
+          className: "text-red-500",
+          icon: "fa-hourglass-half", // Icon for Pending
+        };
+      case "Declined":
+        return {
+          className: "text-gray-500",
+          icon: "fa-times-circle", // Icon for Declined
+        };
+      default:
+        return {
+          className: "",
+          icon: null, // No icon for other statuses
+        };
     }
   };
 
@@ -135,7 +160,7 @@ export default function RequestItems() {
                 <option value="Pending">Pending</option>
               </select>
             </div>
-            
+
             <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
               <table>
                 <thead>
@@ -156,6 +181,8 @@ export default function RequestItems() {
                 <tbody>
                   {filteredItems.map((item) => {
                     const statusInfo = getStatusInfo(item.status);
+                    const admin1Info = getAdminApprovalInfo(item.Admin1);
+                    const admin2Info = getAdminApprovalInfo(item.Admin2);
                     return (
                       <tr key={item.id}>
                         <td className="column1">{item.id}</td>
@@ -171,8 +198,16 @@ export default function RequestItems() {
                           {item.status}
                         </td>
                         <td className="column6">{item.priority}</td>
-                        <td className="column6">{item.Admin1}</td>
-                        <td className="column6">{item.Admin2}</td>
+                        {/* Admin1 cell with color and icon */}
+                        <td className={`column6 ${admin1Info.className}`}>
+                          <i className={`fa ${admin1Info.icon} mr-1`}></i>
+                          {item.Admin1}
+                        </td>
+                        {/* Admin2 cell with color and icon */}
+                        <td className={`column6 ${admin2Info.className}`}>
+                          <i className={`fa ${admin2Info.icon} mr-1`}></i>
+                          {item.Admin2}
+                        </td>
                         <td className="flex items-center justify-center mt-2 space-x-2">
                           <button
                             type="button"

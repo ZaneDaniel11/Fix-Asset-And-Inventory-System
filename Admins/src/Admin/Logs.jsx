@@ -2,17 +2,17 @@ import Sidebar from "../components/sidebar";
 import React, { useState, useEffect } from "react";
 
 export default function Admin1Logs() {
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [viewRequestModalOpen, setViewRequestModalOpen] = useState(false);
+  const [viewBorrowModalOpen, setViewBorrowModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [requestItems, setRequestItems] = useState([]); // State for request items
-  const [borrowRequests, setBorrowRequests] = useState([]); // State for borrow requests
+  const [requestItems, setRequestItems] = useState([]);
+  const [borrowRequests, setBorrowRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [borrowedItems, setBorrowedItems] = useState([]);
   const [borrowLoading, setBorrowLoading] = useState(false);
-  const [selectedTable, setSelectedTable] = useState("requestItems"); // State to track which table to show
+  const [selectedTable, setSelectedTable] = useState("requestItems");
 
   // Fetch approved borrow requests (initial load)
   useEffect(() => {
@@ -33,7 +33,6 @@ export default function Admin1Logs() {
     fetchApprovedBorrowRequests();
   }, []);
 
-  // Fetch request items for "Request Items" button
   const fetchRequestItems = async () => {
     try {
       setLoading(true);
@@ -50,7 +49,7 @@ export default function Admin1Logs() {
             Admin1: item.admin1Approval,
             Admin2: item.admin2Approval,
           }));
-          setRequestItems(mappedItems); // Set request items data
+          setRequestItems(mappedItems);
         })
         .catch((error) => console.error("Error fetching data:", error));
     } catch (error) {
@@ -60,7 +59,6 @@ export default function Admin1Logs() {
     }
   };
 
-  // Fetch borrow requests for "Borrow Request" button
   const fetchBorrowRequests = async () => {
     try {
       setLoading(true);
@@ -76,7 +74,7 @@ export default function Admin1Logs() {
             Admin1Approval: item.Admin1Approval,
             Admin2Approval: item.Admin2Approval,
           }));
-          setBorrowRequests(mappedItems); // Set borrow requests data
+          setBorrowRequests(mappedItems);
         })
         .catch((error) => console.error("Error fetching data:", error));
     } catch (error) {
@@ -86,45 +84,43 @@ export default function Admin1Logs() {
     }
   };
 
-  // Function to open view modal and display details
-  const openViewModal = async (item) => {
-    setCurrentItem(item); // Set current item for viewing
-    setViewModalOpen(true); // Open view modal
+  const openViewRequestModal = (item) => {
+    setCurrentItem(item);
+    setViewRequestModalOpen(true);
+  };
 
-    // If it's a borrow request, fetch additional items
-    if (selectedTable === "borrowRequests") {
-      setBorrowLoading(true);
+  const openViewBorrowModal = async (item) => {
+    setCurrentItem(item);
+    setViewBorrowModalOpen(true);
+    setBorrowLoading(true);
 
-      try {
-        const response = await fetch(
-          `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`
-        );
-        const data = await response.json();
-        setBorrowedItems(data);
-      } catch (error) {
-        console.error("Error fetching borrowed items:", error);
-      } finally {
-        setBorrowLoading(false);
-      }
+    try {
+      const response = await fetch(
+        `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`
+      );
+      const data = await response.json();
+      setBorrowedItems(data);
+    } catch (error) {
+      console.error("Error fetching borrowed items:", error);
+    } finally {
+      setBorrowLoading(false);
     }
   };
 
-  // Function to handle button clicks to show tables
   const handleTableChange = (table) => {
     setSelectedTable(table);
     if (table === "requestItems") {
-      fetchRequestItems(); // Fetch request items when "Request Item" button is clicked
+      fetchRequestItems();
     } else if (table === "borrowRequests") {
-      fetchBorrowRequests(); // Fetch borrow requests when "Borrow Request" button is clicked
+      fetchBorrowRequests();
     }
   };
 
-  // Filtered request items for Admin1-approved and declined requests
   const filteredItems = requestItems.filter(
     (item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (item.Admin2 === "Approved" || item.Admin2 === "Declined") && // Only show approved or declined
-      item.Admin1 === "Approved" // Ensure it's approved by Admin1
+      (item.Admin2 === "Approved" || item.Admin2 === "Declined") &&
+      item.Admin1 === "Approved"
   );
 
   if (loading) {
@@ -140,11 +136,10 @@ export default function Admin1Logs() {
       <div className="flex">
         <Sidebar />
 
-        {/* Main content */}
         <div className="flex-1 p-6">
           <div className="container mx-auto bg-white shadow-md rounded-lg p-6">
             <div className="bg-gray-200 p-4 shadow-lg rounded-lg mb-6 text-center">
-              <h2 className="text-2xl font-bold"> Overview</h2>
+              <h2 className="text-2xl font-bold">Overview</h2>
             </div>
 
             <div className="flex justify-between mb-4 shadow-lg p-6 bg-white rounded-lg mb-6">
@@ -157,7 +152,6 @@ export default function Admin1Logs() {
               />
             </div>
 
-            {/* Buttons to switch between tables */}
             <div>
               <button
                 onClick={() => handleTableChange("requestItems")}
@@ -182,7 +176,6 @@ export default function Admin1Logs() {
               </button>
             </div>
 
-            {/* Conditionally render the correct table based on selectedTable state */}
             {selectedTable === "requestItems" ? (
               <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
                 <table>
@@ -211,8 +204,11 @@ export default function Admin1Logs() {
                         <td className="column6">{item.Admin1}</td>
                         <td className="column6">{item.Admin2}</td>
                         <td className="column7">
-                          <button onClick={() => openViewModal(item)}>
-                            View
+                          <button
+                            onClick={() => openViewRequestModal(item)}
+                            className="cursor-pointer"
+                          >
+                            <i className="fa-solid fa-eye"></i>
                           </button>
                         </td>
                       </tr>
@@ -246,8 +242,11 @@ export default function Admin1Logs() {
                         <td className="column6">{item.Admin1Approval}</td>
                         <td className="column6">{item.Admin2Approval}</td>
                         <td className="column7">
-                          <button onClick={() => openViewModal(item)}>
-                            View
+                          <button
+                            onClick={() => openViewBorrowModal(item)}
+                            className="cursor-pointer"
+                          >
+                            <i className="fa-solid fa-eye"></i>
                           </button>
                         </td>
                       </tr>
@@ -260,8 +259,46 @@ export default function Admin1Logs() {
         </div>
       </div>
 
-      {/* View Modal */}
-      {viewModalOpen && (
+      {/* View Modal for Request Items */}
+      {viewRequestModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg">
+            <h2 className="text-2xl font-bold mb-4">
+              Viewing Request Details for Request ID: {currentItem.id}
+            </h2>
+            <p>
+              <strong>Item Name:</strong> {currentItem.name}
+            </p>
+            <p>
+              <strong>Requested By:</strong> {currentItem.requestedBy}
+            </p>
+            <p>
+              <strong>Requested Date:</strong> {currentItem.requestedDate}
+            </p>
+            <p>
+              <strong>Status:</strong> {currentItem.status}
+            </p>
+            <p>
+              <strong>Priority:</strong> {currentItem.priority}
+            </p>
+            <p>
+              <strong>Admin1 Approval:</strong> {currentItem.Admin1}
+            </p>
+            <p>
+              <strong>Admin2 Approval:</strong> {currentItem.Admin2}
+            </p>
+            <button
+              onClick={() => setViewRequestModalOpen(false)}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal for Borrow Requests */}
+      {viewBorrowModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg">
             <h2 className="text-2xl font-bold mb-4">
@@ -276,7 +313,7 @@ export default function Admin1Logs() {
             </ul>
             {borrowLoading && <p>Loading borrowed items...</p>}
             <button
-              onClick={() => setViewModalOpen(false)}
+              onClick={() => setViewBorrowModalOpen(false)}
               className="mt-4 px-4 py-2 bg-blue-500 text-white"
             >
               Close
