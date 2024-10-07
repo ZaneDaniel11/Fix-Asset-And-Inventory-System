@@ -6,7 +6,6 @@ export default function Borrow() {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusQuery, setStatusQuery] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -144,16 +143,6 @@ export default function Borrow() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="p-2 border border-gray-300 rounded w-full max-w-sm"
             />
-            <select
-              value={statusQuery}
-              onChange={(e) => setStatusQuery(e.target.value)}
-              className="p-2 border border-gray-300 rounded w-full max-w-sm ml-4"
-            >
-              <option value="">All Statuses</option>
-              <option value="Complete">Complete</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Pending">Pending</option>
-            </select>
           </div>
 
           <div className="relative overflow-x-auto shadow-md sm:rounded-lg">

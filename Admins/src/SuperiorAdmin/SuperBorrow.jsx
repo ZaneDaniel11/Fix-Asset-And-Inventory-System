@@ -178,9 +178,9 @@ export default function SupperBorrow() {
                     <th className="column3">Date</th>
                     <th className="column4">Purpose</th>
                     <th className="column5">Status</th>
-                    <th className="column6">Admin1 Approval</th>
-                    <th className="column6">Admin2 Approval</th>
-                    <th className="column7">Admin3 Approval</th>
+                    <th className="column6">Admin1 </th>
+                    <th className="column6">Admin2 </th>
+                    <th className="column7">Admin3 </th>
                     <th className="column8" style={{ paddingRight: 20 }}>
                       Actions
                     </th>

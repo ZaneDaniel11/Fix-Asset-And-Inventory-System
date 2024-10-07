@@ -6,7 +6,7 @@ export default function RequestItems() {
   const [viewModal, setViewModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusQuery, setStatusQuery] = useState("");
+
   const [items, setItems] = useState([]);
   const [adminApprovals, setAdminApproval] = useState(""); // State for approval selection
 
@@ -149,16 +149,6 @@ export default function RequestItems() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="p-2 border rounded border-black"
               />
-              <select
-                value={statusQuery}
-                onChange={(e) => setStatusQuery(e.target.value)}
-                className="p-2 border rounded border-black"
-              >
-                <option value="">All Statuses</option>
-                <option value="Complete">Complete</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Pending">Pending</option>
-              </select>
             </div>
 
             <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
