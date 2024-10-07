@@ -332,6 +332,9 @@ export default function RequestItems() {
                 <strong>Status:</strong> {currentItem.status}
               </p>
               <p>
+                <strong>Status:</strong> {currentItem.estimatedCost}
+              </p>
+              <p>
                 <strong>Priority:</strong> {currentItem.priority}
               </p>
               <p>

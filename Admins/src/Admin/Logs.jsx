@@ -6,16 +6,15 @@ export default function Admin1Logs() {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [items, setItems] = useState([]);
+  const [requestItems, setRequestItems] = useState([]); // State for request items
+  const [borrowRequests, setBorrowRequests] = useState([]); // State for borrow requests
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [borrowedItems, setBorrowedItems] = useState([]);
   const [borrowLoading, setBorrowLoading] = useState(false);
-  const [adminApproval, setAdminApproval] = useState("");
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [filterStatus, setFilterStatus] = useState("");
+  const [selectedTable, setSelectedTable] = useState("requestItems"); // State to track which table to show
 
-  // Fetch only approved borrow requests
+  // Fetch approved borrow requests (initial load)
   useEffect(() => {
     const fetchApprovedBorrowRequests = async () => {
       try {
@@ -23,8 +22,7 @@ export default function Admin1Logs() {
           "http://localhost:5075/api/BorrowRequestApi/ApprovedByAdmin1"
         );
         const data = await response.json();
-        console.log(data); // Check data structure
-        setItems(data);
+        setBorrowRequests(data);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -35,89 +33,102 @@ export default function Admin1Logs() {
     fetchApprovedBorrowRequests();
   }, []);
 
-  // Function to open view modal and fetch borrowed items
+  // Fetch request items for "Request Items" button
+  const fetchRequestItems = async () => {
+    try {
+      setLoading(true);
+      fetch("http://localhost:5075/api/RequestItemsApi/GetAllRequests")
+        .then((response) => response.json())
+        .then((data) => {
+          const mappedItems = data.map((item) => ({
+            id: item.requestID,
+            name: item.requestedItem,
+            requestedBy: item.requestedBy,
+            requestedDate: new Date(item.requestedDate).toLocaleString(),
+            status: item.status,
+            priority: item.priority,
+            Admin1: item.admin1Approval,
+            Admin2: item.admin2Approval,
+          }));
+          setRequestItems(mappedItems); // Set request items data
+        })
+        .catch((error) => console.error("Error fetching data:", error));
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch borrow requests for "Borrow Request" button
+  const fetchBorrowRequests = async () => {
+    try {
+      setLoading(true);
+      fetch("http://localhost:5075/api/BorrowRequestApi/GetAllBorrowRequests")
+        .then((response) => response.json())
+        .then((data) => {
+          const mappedItems = data.map((item) => ({
+            BorrowId: item.BorrowId,
+            RequestedBy: item.RequestedBy,
+            ReqBorrowDate: new Date(item.ReqBorrowDate).toLocaleString(),
+            Purpose: item.Purpose,
+            Status: item.Status,
+            Admin1Approval: item.Admin1Approval,
+            Admin2Approval: item.Admin2Approval,
+          }));
+          setBorrowRequests(mappedItems); // Set borrow requests data
+        })
+        .catch((error) => console.error("Error fetching data:", error));
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to open view modal and display details
   const openViewModal = async (item) => {
-    setCurrentItem(item);
-    setViewModalOpen(true);
-    setBorrowLoading(true);
+    setCurrentItem(item); // Set current item for viewing
+    setViewModalOpen(true); // Open view modal
 
-    try {
-      const response = await fetch(
-        `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`
-      );
-      const data = await response.json();
-      setBorrowedItems(data); // Assuming the response contains the items
-    } catch (error) {
-      console.error("Error fetching borrowed items:", error);
-    } finally {
-      setBorrowLoading(false);
-    }
-  };
+    // If it's a borrow request, fetch additional items
+    if (selectedTable === "borrowRequests") {
+      setBorrowLoading(true);
 
-  // Function to close view modal
-  const closeViewModal = () => {
-    setViewModalOpen(false);
-    setCurrentItem(null);
-    setBorrowedItems([]);
-  };
-
-  // Function to open update modal
-  const openUpdateModal = (item) => {
-    setCurrentItem(item);
-    setUpdateModalOpen(true);
-  };
-
-  // Function to close update modal
-  const closeUpdateModal = () => {
-    setUpdateModalOpen(false);
-    setCurrentItem(null);
-    setAdminApproval("");
-  };
-
-  // Handle the Admin2 approval update
-  const handleUpdateApproval = async () => {
-    if (!adminApproval) return;
-
-    try {
-      setIsUpdating(true);
-      const response = await fetch(
-        `http://localhost:5075/api/BorrowRequestApi/UpdateApprovalAdmin2/${currentItem.BorrowId}`,
-        {
-          method: "PUT", // <-- Change this to PUT
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ Admin2Approval: adminApproval }),
-        }
-      );
-
-      if (response.ok) {
-        setItems((prevItems) =>
-          prevItems.map((item) =>
-            item.BorrowId === currentItem.BorrowId
-              ? { ...item, Admin2Approval: adminApproval }
-              : item
-          )
+      try {
+        const response = await fetch(
+          `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`
         );
-        closeUpdateModal();
-      } else {
-        console.error("Failed to update approval");
+        const data = await response.json();
+        setBorrowedItems(data);
+      } catch (error) {
+        console.error("Error fetching borrowed items:", error);
+      } finally {
+        setBorrowLoading(false);
       }
-    } catch (error) {
-      console.error("Error updating approval", error);
-    } finally {
-      setIsUpdating(false);
     }
   };
 
-  // Filter items based on Admin2Approval being "Accepted" or "Rejected"
-  const filteredItems = items.filter(
+  // Function to handle button clicks to show tables
+  const handleTableChange = (table) => {
+    setSelectedTable(table);
+    if (table === "requestItems") {
+      fetchRequestItems(); // Fetch request items when "Request Item" button is clicked
+    } else if (table === "borrowRequests") {
+      fetchBorrowRequests(); // Fetch borrow requests when "Borrow Request" button is clicked
+    }
+  };
+
+  // Filtered request items for Admin1-approved and declined requests
+  const filteredItems = requestItems.filter(
     (item) =>
-      item.Admin2Approval === "Approved" || item.Admin2Approval === "Rejected"
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (item.Admin2 === "Approved" || item.Admin2 === "Declined") && // Only show approved or declined
+      item.Admin1 === "Approved" // Ensure it's approved by Admin1
   );
 
   if (loading) {
-    return <div>Loading approved borrow requests...</div>;
+    return <div>Loading data...</div>;
   }
 
   if (error) {
@@ -127,16 +138,15 @@ export default function Admin1Logs() {
   return (
     <>
       <div className="flex">
-        {/* Sidebar */}
         <Sidebar />
 
         {/* Main content */}
         <div className="flex-1 p-6">
           <div className="container mx-auto bg-white shadow-md rounded-lg p-6">
             <div className="bg-gray-200 p-4 shadow-lg rounded-lg mb-6 text-center">
-              <h2 className="text-2xl font-bold">Logs Overview</h2>
+              <h2 className="text-2xl font-bold"> Overview</h2>
             </div>
-            {/* Search and Filter Section */}
+
             <div className="flex justify-between mb-4 shadow-lg p-6 bg-white rounded-lg mb-6">
               <input
                 type="text"
@@ -145,174 +155,135 @@ export default function Admin1Logs() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="p-3 border rounded-lg shadow-sm border-gray-300"
               />
+            </div>
 
-              {/* Filter by Admin2 Approval Status */}
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="p-3 border rounded-lg shadow-sm border-gray-300 ml-4"
+            {/* Buttons to switch between tables */}
+            <div>
+              <button
+                onClick={() => handleTableChange("requestItems")}
+                className={`px-4 py-2 font-bold ${
+                  selectedTable === "requestItems"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-300"
+                }`}
               >
-                <option value="">All</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-              </select>
+                Request Item
+              </button>
+
+              <button
+                onClick={() => handleTableChange("borrowRequests")}
+                className={`px-4 py-2 font-bold ${
+                  selectedTable === "borrowRequests"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-300"
+                } ml-4`}
+              >
+                Borrow Request
+              </button>
             </div>
 
-            {/* Table */}
-            <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-              <table className="w-full text-sm text-left text-gray-600">
-                <thead className="bg-gray-100 text-white">
-                  <tr>
-                    <th className="px-6 py-3">Borrow ID</th>
-                    <th className="px-6 py-3">Requested By</th>
-                    <th className="px-6 py-3">Date</th>
-                    <th className="px-6 py-3">Purpose</th>
-                    <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3">Admin1</th>
-                    <th className="px-6 py-3">Admin2</th>
-                    <th className="px-6 py-3 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredItems.map((item) => (
-                    <tr key={item.BorrowId} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">{item.BorrowId}</td>
-                      <td className="px-6 py-4">{item.RequestedBy}</td>
-                      <td className="px-6 py-4">{item.ReqBorrowDate}</td>
-                      <td className="px-6 py-4">{item.Purpose}</td>
-                      <td className="px-6 py-4">{item.Status}</td>
-                      <td className="px-6 py-4">{item.Admin1Approval}</td>
-                      <td className="px-6 py-4">{item.Admin2Approval}</td>
-                      <td className="flex justify-center items-center space-x-2 py-4">
-                        <button
-                          type="button"
-                          onClick={() => openViewModal(item)}
-                          className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-3 py-2 rounded-lg"
-                        >
-                          <i className="fa-solid fa-eye"></i>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => openUpdateModal(item)}
-                          className="bg-green-500 hover:bg-green-600 text-white font-bold px-3 py-2 rounded-lg"
-                        >
-                          Update Approval
-                        </button>
-                      </td>
+            {/* Conditionally render the correct table based on selectedTable state */}
+            {selectedTable === "requestItems" ? (
+              <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                <table>
+                  <thead>
+                    <tr className="table100-head">
+                      <th className="column1">Request ID</th>
+                      <th className="column2">Item Name</th>
+                      <th className="column3">Requested By</th>
+                      <th className="column4">Requested Date</th>
+                      <th className="column5">Status</th>
+                      <th className="column6">Priority</th>
+                      <th className="column6">Admin1</th>
+                      <th className="column6">Admin2</th>
+                      <th className="column7">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {filteredItems.map((item) => (
+                      <tr key={item.id}>
+                        <td className="column1">{item.id}</td>
+                        <td className="column2">{item.name}</td>
+                        <td className="column3">{item.requestedBy}</td>
+                        <td className="column4">{item.requestedDate}</td>
+                        <td className="column5">{item.status}</td>
+                        <td className="column6">{item.priority}</td>
+                        <td className="column6">{item.Admin1}</td>
+                        <td className="column6">{item.Admin2}</td>
+                        <td className="column7">
+                          <button onClick={() => openViewModal(item)}>
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                <table>
+                  <thead>
+                    <tr className="table100-head">
+                      <th className="column1">Borrow ID</th>
+                      <th className="column2">Requested By</th>
+                      <th className="column3">Requested Date</th>
+                      <th className="column4">Purpose</th>
+                      <th className="column5">Status</th>
+                      <th className="column6">Admin1 Approval</th>
+                      <th className="column6">Admin2 Approval</th>
+                      <th className="column7">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {borrowRequests.map((item) => (
+                      <tr key={item.BorrowId}>
+                        <td className="column1">{item.BorrowId}</td>
+                        <td className="column2">{item.RequestedBy}</td>
+                        <td className="column3">{item.ReqBorrowDate}</td>
+                        <td className="column4">{item.Purpose}</td>
+                        <td className="column5">{item.Status}</td>
+                        <td className="column6">{item.Admin1Approval}</td>
+                        <td className="column6">{item.Admin2Approval}</td>
+                        <td className="column7">
+                          <button onClick={() => openViewModal(item)}>
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* View Modal */}
-        {viewModalOpen && currentItem && (
-          <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
-              <button
-                onClick={closeViewModal}
-                className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-              <h2 className="text-2xl font-semibold mb-4">
-                Borrowed Items for Borrow ID: {currentItem.BorrowId}
-              </h2>
-              {borrowLoading ? (
-                <div>Loading borrowed items...</div>
-              ) : borrowedItems.length > 0 ? (
-                <ul className="space-y-2">
-                  {borrowedItems.map((item) => (
-                    <li
-                      key={item.ItemId}
-                      className="border-b pb-2 border-gray-200"
-                    >
-                      <span className="font-medium">{item.ItemName}</span> -
-                      Quantity: {item.Quantity}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="text-gray-500">
-                  No items found for this borrow request.
-                </div>
-              )}
-              <div className="flex justify-end mt-4">
-                <button
-                  onClick={closeViewModal}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Update Modal */}
-        {updateModalOpen && currentItem && (
-          <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
-              <button
-                onClick={closeUpdateModal}
-                className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-              <h2 className="text-2xl font-semibold mb-4">
-                Update Approval for Borrow ID: {currentItem.BorrowId}
-              </h2>
-              <label className="block mb-2">Admin2 Approval Status:</label>
-              <select
-                value={adminApproval}
-                onChange={(e) => setAdminApproval(e.target.value)}
-                className="p-2 border rounded border-gray-300 w-full"
-              >
-                <option value="">Select Status</option>
-                <option value="Approved">Accepted</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-              <div className="flex justify-end mt-4">
-                <button
-                  onClick={handleUpdateApproval}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                  disabled={isUpdating}
-                >
-                  {isUpdating ? "Updating..." : "Update"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* View Modal */}
+      {viewModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg">
+            <h2 className="text-2xl font-bold mb-4">
+              Viewing Borrowed Items for Borrow ID: {currentItem.BorrowId}
+            </h2>
+            <ul>
+              {borrowedItems.map((item) => (
+                <li key={item.id}>
+                  {item.ItemName} - {item.Quantity}
+                </li>
+              ))}
+            </ul>
+            {borrowLoading && <p>Loading borrowed items...</p>}
+            <button
+              onClick={() => setViewModalOpen(false)}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

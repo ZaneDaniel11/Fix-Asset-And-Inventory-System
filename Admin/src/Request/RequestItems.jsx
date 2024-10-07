@@ -24,9 +24,12 @@ export default function RequestItems() {
           status: item.status,
           priority: item.priority,
           Admin1: item.admin1Approval,
+          Cost: item.estimatedCost,
+          dealer: item.suggestedDealer,
         }));
         setItems(mappedItems);
       })
+
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
@@ -342,6 +345,14 @@ export default function RequestItems() {
               </p>
               <p>
                 <strong>Priority:</strong> {currentItem.priority}
+              </p>
+
+              <p>
+                <strong>Suggested Dealer:</strong> {currentItem.dealer}
+              </p>
+
+              <p>
+                <strong>Estimated Cost:</strong> {currentItem.Cost}
               </p>
               <p>
                 <strong>Description:</strong> Lorem ipsum dolor sit amet,

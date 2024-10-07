@@ -43,7 +43,6 @@ export default function RequestItems() {
   };
   const closeViewModal = () => setViewModalOpen(false);
 
-  // Filter items by search query, status, and Admin1 approval
   const filteredItems = items.filter(
     (item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -136,6 +135,7 @@ export default function RequestItems() {
                 <option value="Pending">Pending</option>
               </select>
             </div>
+            
             <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
               <table>
                 <thead>

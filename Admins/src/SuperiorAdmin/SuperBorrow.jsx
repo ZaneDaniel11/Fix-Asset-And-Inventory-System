@@ -144,77 +144,79 @@ export default function SupperBorrow() {
     <>
       <div className="flex">
         <Sidebar />
-        <div className="limiter">
-          <div className="container-table100">
-            <div className="wrap-table100">
-              <div className="table100">
-                <div className="flex justify-between mb-4">
-                  <input
-                    type="text"
-                    placeholder="Search by Requester Name"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="p-2 border rounded border-black"
-                  />
-                  <select
-                    value={statusQuery}
-                    onChange={(e) => setStatusQuery(e.target.value)}
-                    className="p-2 border rounded border-black"
-                  >
-                    <option value="">All Statuses</option>
-                    <option value="Complete">Complete</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Pending">Pending</option>
-                  </select>
-                </div>
-                <table>
-                  <thead>
-                    <tr className="table100-head">
-                      <th className="column1">Borrow ID</th>
-                      <th className="column2">Requested By</th>
-                      <th className="column3">Date</th>
-                      <th className="column4">Purpose</th>
-                      <th className="column5">Status</th>
-                      <th className="column6">Admin1 Approval</th>
-                      <th className="column6">Admin2 Approval</th>
-                      <th className="column7">Admin3 Approval</th>
-                      <th className="column8" style={{ paddingRight: 20 }}>
-                        Actions
-                      </th>
+        <div className="flex-1 p-6">
+          <div className="container mx-auto bg-white shadow-md rounded-lg p-6">
+            <div className="bg-gray-200 p-4 shadow-lg rounded-lg mb-6 text-center">
+              <h2 className="text-2xl font-bold">Borrow Overview</h2>
+            </div>
+            <div className="flex justify-between mb-4 shadow-lg p-6 bg-white rounded-lg mb-6">
+              <input
+                type="text"
+                placeholder="Search by Requester Name"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="p-2 border rounded border-black"
+              />
+              <select
+                value={statusQuery}
+                onChange={(e) => setStatusQuery(e.target.value)}
+                className="p-2 border rounded border-black"
+              >
+                <option value="">All Statuses</option>
+                <option value="Complete">Complete</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Pending">Pending</option>
+              </select>
+            </div>
+
+            <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+              <table>
+                <thead>
+                  <tr className="table100-head">
+                    <th className="column1">Borrow ID</th>
+                    <th className="column2">Requested By</th>
+                    <th className="column3">Date</th>
+                    <th className="column4">Purpose</th>
+                    <th className="column5">Status</th>
+                    <th className="column6">Admin1 Approval</th>
+                    <th className="column6">Admin2 Approval</th>
+                    <th className="column7">Admin3 Approval</th>
+                    <th className="column8" style={{ paddingRight: 20 }}>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredItems.map((item) => (
+                    <tr key={item.BorrowId}>
+                      <td className="column1">{item.BorrowId}</td>
+                      <td className="column2">{item.RequestedBy}</td>
+                      <td className="column3">{item.ReqBorrowDate}</td>
+                      <td className="column4">{item.Purpose}</td>
+                      <td className="column5">{item.Status}</td>
+                      <td className="column6">{item.Admin1Approval}</td>
+                      <td className="column6">{item.Admin2Approval}</td>
+                      <td className="column7">{item.Admin3Approval}</td>
+                      <td className="flex items-center justify-center mt-2 space-x-2">
+                        <button
+                          type="button"
+                          onClick={() => openViewModal(item)}
+                          className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
+                        >
+                          <i className="fa-solid fa-eye"></i>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openUpdateModal(item)}
+                          className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5"
+                        >
+                          Update Approval
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {filteredItems.map((item) => (
-                      <tr key={item.BorrowId}>
-                        <td className="column1">{item.BorrowId}</td>
-                        <td className="column2">{item.RequestedBy}</td>
-                        <td className="column3">{item.ReqBorrowDate}</td>
-                        <td className="column4">{item.Purpose}</td>
-                        <td className="column5">{item.Status}</td>
-                        <td className="column6">{item.Admin1Approval}</td>
-                        <td className="column6">{item.Admin2Approval}</td>
-                        <td className="column7">{item.Admin3Approval}</td>
-                        <td className="flex items-center justify-center mt-2 space-x-2">
-                          <button
-                            type="button"
-                            onClick={() => openViewModal(item)}
-                            className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
-                          >
-                            <i className="fa-solid fa-eye"></i>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => openUpdateModal(item)}
-                            className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5"
-                          >
-                            Update Approval
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

@@ -51,16 +51,17 @@ const Sidebar = () => {
       path: "/Logs",
       visibleTo: ["Senior_Admin"],
     },
-    {
-      title: "SuperLogs",
-      icon: "bx bx-clipboard",
-      path: "/SuperLogs",
-      visibleTo: ["Head_Admin"],
-    },
+
     {
       title: "SuperRequest",
       icon: "fas fa-box-archive",
       path: "/SuperRequest",
+      visibleTo: ["Head_Admin"],
+    },
+    {
+      title: "SuperLogs",
+      icon: "bx bx-clipboard",
+      path: "/SuperLogs",
       visibleTo: ["Head_Admin"],
     },
   ];

@@ -352,6 +352,7 @@ export default function Users() {
                       required
                     >
                       <option value="">Select User Type</option>
+                      <option value="Member">Member</option>
                       <option value="Admin">Admin</option>
                       <option value="Senior_Admin">Senior Admin</option>
                       <option value="Head_Admin">Head Admin</option>
