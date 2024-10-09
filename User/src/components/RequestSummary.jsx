@@ -23,18 +23,22 @@ const RequestSummary = ({
     const loggedInUsername = localStorage.getItem("username");
     const borrowerId = localStorage.getItem("userId");
 
-    console.log("LoggedIn Username:", loggedInUsername);
-    console.log("BorrowerId:", borrowerId);
+    if (!borrowerId) {
+      alert("User is not logged in. Please log in again.");
+      return;
+    }
 
     const requestPayload = {
-      RequestedBy: loggedInUsername || "Unknown",
-      BorrowerId: borrowerId,
-      Purpose: purpose,
-      Status: "Pending",
-      Priority: priority,
-      Items: selectedProducts.map((product) => ({
-        ItemName: product.itemName,
-        Quantity: product.requestedQuantity,
+      requestedBy: loggedInUsername || "Unknown",
+      borrowerId: parseInt(borrowerId), // Always convert to a number
+      purpose: purpose,
+      status: "Pending",
+      priority: priority,
+      items: selectedProducts.map((product) => ({
+        itemName: product.itemName,
+        quantity: product.requestedQuantity,
+        itemID: product.itemID,
+        categoryID: product.categoryID,
       })),
     };
 

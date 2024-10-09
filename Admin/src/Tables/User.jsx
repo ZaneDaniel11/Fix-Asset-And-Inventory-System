@@ -353,9 +353,10 @@ export default function Users() {
                     >
                       <option value="">Select User Type</option>
                       <option value="Member">Member</option>
-                      <option value="Admin">Admin</option>
+                      <option value="Inventory_Admin">Inventory Admin</option>
                       <option value="Senior_Admin">Senior Admin</option>
                       <option value="Head_Admin">Head Admin</option>
+                      <option value="Asset_Admin ">Asset Admin</option>
                     </select>
                   </div>
                 </div>

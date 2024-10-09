@@ -86,6 +86,19 @@ export default function Sidebar() {
               </li>
             </a>
 
+            <a href="/Maintenance">
+              <li className="flex items-center p-2 hover:bg-gray-700 cursor-pointer">
+                <HiHome size={24} />
+                <span
+                  className={`ml-4 text-lg ${
+                    isOpen ? "block" : "hidden"
+                  } transition-all`}
+                >
+                  Request Maintenance
+                </span>
+              </li>
+            </a>
+
             <a href="/requestHistory">
               <li className="flex items-center p-2 hover:bg-gray-700 cursor-pointer">
                 <HiCog size={24} />

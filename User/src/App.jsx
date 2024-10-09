@@ -6,6 +6,7 @@ import RequestHistory from "./RequestHistory";
 import ProtectedRoute from "./ProtectedRoute";
 import Request from "./Request/Request";
 import BorrowStatus from "./Borrow/BorrowStatus/Borrows";
+import Maintenance from "./Maintenance/Maintenance";
 
 function App() {
   return (
@@ -24,6 +25,10 @@ function App() {
         <Route
           path="/BorrowStatus"
           element={<ProtectedRoute element={BorrowStatus} />}
+        />
+        <Route
+          path="/Maintenance"
+          element={<ProtectedRoute element={Maintenance} />}
         />
       </Routes>
     </div>

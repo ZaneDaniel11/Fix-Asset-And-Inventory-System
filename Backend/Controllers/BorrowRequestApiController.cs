@@ -41,7 +41,6 @@ namespace Backend.Controllers
             }
         }
 
-        // POST: api/Borrow/Request
         [HttpPost("Request")]
         public async Task<IActionResult> BorrowRequest([FromBody] BorrowRequest borrowRequest)
         {
@@ -60,9 +59,9 @@ namespace Backend.Controllers
                     {
                         // Insert into Borrowreq_tb once
                         const string insertBorrowRequestQuery = @"
-                    INSERT INTO Borrowreq_tb (ReqBorrowDate, RequestedBy, Purpose, Status, Priority, BorrowerId) 
-                    VALUES (@ReqBorrowDate, @RequestedBy, @Purpose, @Status, @Priority, @BorrowerId); 
-                    SELECT last_insert_rowid();";
+                            INSERT INTO Borrowreq_tb (ReqBorrowDate, RequestedBy, Purpose, Status, Priority, BorrowerId) 
+                            VALUES (@ReqBorrowDate, @RequestedBy, @Purpose, @Status, @Priority, @BorrowerId); 
+                            SELECT last_insert_rowid();";
 
                         // Insert into Borrowreq_tb and get the generated BorrowId
                         var borrowId = await connection.ExecuteScalarAsync<int>(insertBorrowRequestQuery, new
@@ -77,13 +76,13 @@ namespace Backend.Controllers
 
                         // Prepare the query for inserting into BorrowItems_tb
                         const string insertBorrowItemsQuery = @"
-                    INSERT INTO BorrowItems_tb (BorrowId, ItemName, Quantity) 
-                    VALUES (@BorrowId, @ItemName, @Quantity)";
+                            INSERT INTO BorrowItems_tb (BorrowId, ItemID, CategoryID, ItemName, Quantity) 
+                            VALUES (@BorrowId, @ItemID, @CategoryID, @ItemName, @Quantity)";
 
                         const string updateItemQuantityQuery = @"
-                    UPDATE items_db 
-                    SET Quantity = Quantity - @Quantity 
-                    WHERE ItemName = @ItemName AND Quantity >= @Quantity";
+                            UPDATE items_db 
+                            SET Quantity = Quantity - @Quantity 
+                            WHERE ItemID = @ItemID AND Quantity >= @Quantity";
 
                         // Loop through the items and insert into BorrowItems_tb, then update quantities
                         foreach (var item in borrowRequest.Items)
@@ -92,6 +91,8 @@ namespace Backend.Controllers
                             await connection.ExecuteAsync(insertBorrowItemsQuery, new
                             {
                                 BorrowId = borrowId,
+                                ItemID = item.ItemID,
+                                CategoryID = item.CategoryID,
                                 ItemName = item.ItemName,
                                 Quantity = item.Quantity
                             }, transaction);
@@ -99,7 +100,7 @@ namespace Backend.Controllers
                             // Update the quantity in items_db
                             var rowsAffected = await connection.ExecuteAsync(updateItemQuantityQuery, new
                             {
-                                ItemName = item.ItemName,
+                                ItemID = item.ItemID,
                                 Quantity = item.Quantity
                             }, transaction);
 
@@ -166,21 +167,21 @@ namespace Backend.Controllers
             }
         }
 
-[HttpGet("RequestById/{borrowId}")]
-public async Task<IActionResult> GetRequestById(int borrowId)
+   [HttpGet("RequestById/{borrowerId}")]
+public async Task<IActionResult> GetRequestsByBorrowerId1(int borrowerId)
 {
     using (var connection = new SqliteConnection(_connectionString))
     {
         await connection.OpenAsync();
 
-        const string query = "SELECT * FROM Borrowreq_tb WHERE BorrowerId = @borrowId";
+        const string query = "SELECT * FROM Borrowreq_tb WHERE BorrowerId = @borrowerId";
 
-        var request = await connection.QueryFirstOrDefaultAsync(query, new { borrowId });
+        var requests = await connection.QueryAsync(query, new { borrowerId });
 
-        if (request == null)
-            return NotFound($"No borrow request found with BorrowId {borrowId}.");
+        if (!requests.Any())
+            return NotFound($"No borrow requests found for BorrowerId {borrowerId}.");
 
-        return Ok(request);
+        return Ok(requests);
     }
 }
 
@@ -365,69 +366,66 @@ public async Task<IActionResult> GetRequestById(int borrowId)
             }
         }
 
-        [HttpPut("UpdateApprovalAdmin3/{borrowId}")]
-        public async Task<IActionResult> UpdateApprovalAdmin3(int borrowId, [FromBody] UpdateApprovalRequestAdmin3 request)
+      [HttpPut("UpdateApprovalAdmin3/{borrowId}")]
+public async Task<IActionResult> UpdateApprovalAdmin3(int borrowId, [FromBody] UpdateApprovalRequestAdmin3 request)
+{
+    if (request == null || string.IsNullOrEmpty(request.Admin3Approval))
+        return BadRequest("Invalid request. Admin3Approval must be provided.");
+
+    using (var connection = new SqliteConnection(_connectionString))
+    {
+        await connection.OpenAsync();
+
+        using (var transaction = connection.BeginTransaction())
         {
-            if (request == null || string.IsNullOrEmpty(request.Admin3Approval))
-                return BadRequest("Invalid request. Admin3Approval must be provided.");
-
-            using (var connection = new SqliteConnection(_connectionString))
+            try
             {
-                await connection.OpenAsync();
-
-                using (var transaction = connection.BeginTransaction())
-                {
-                    try
-                    {
-                        // Update Admin3Approval
-                        string updateApprovalQuery = @"
+                // Update Admin3Approval
+                string updateApprovalQuery = @"
                 UPDATE Borrowreq_tb 
                 SET Admin3Approval = @Admin3Approval
                 WHERE BorrowId = @BorrowId";
 
-                        await connection.ExecuteAsync(updateApprovalQuery, new
-                        {
-                            Admin3Approval = request.Admin3Approval,
-                            BorrowId = borrowId
-                        }, transaction);
+                await connection.ExecuteAsync(updateApprovalQuery, new
+                {
+                    Admin3Approval = request.Admin3Approval,
+                    BorrowId = borrowId
+                }, transaction);
 
-                        // Handle status update based on Admin3Approval
-                        string updateStatusQuery = string.Empty;
-
-                        if (request.Admin3Approval == "Rejected")
-                        {
-                            updateStatusQuery = @"
+                // Handle status and ReturnStatus update based on Admin3Approval
+                if (request.Admin3Approval == "Approved")
+                {
+                    string updateStatusQuery = @"
                     UPDATE Borrowreq_tb 
-                    SET Status = 'Rejected'
-                    WHERE BorrowId = @BorrowId";
-                        }
-                        else if (request.Admin3Approval == "Approved")
-                        {
-                           
-                            updateStatusQuery = @"
-                    UPDATE Borrowreq_tb 
-                    SET Status = 'Approved'
+                    SET Status = 'Approved', ReturnStatus = 'Not Returned'
                     WHERE BorrowId = @BorrowId 
                     AND Admin1Approval = 'Approved' 
                     AND Admin2Approval = 'Approved'";
-                        }
 
-                        if (!string.IsNullOrEmpty(updateStatusQuery))
-                        {
-                            await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
-                        }
-
-                        transaction.Commit();
-                        return Ok("Admin 3 approval and status updated successfully.");
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        return StatusCode(500, $"Internal server error: {ex.Message}");
-                    }
+                    await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
                 }
+                else if (request.Admin3Approval == "Rejected")
+                {
+                    string updateStatusQuery = @"
+                    UPDATE Borrowreq_tb 
+                    SET Status = 'Rejected'
+                    WHERE BorrowId = @BorrowId";
+
+                    await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
+                }
+
+                transaction.Commit();
+                return Ok("Admin 3 approval, status, and return status updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+    }
+}
+
 
 
 
@@ -448,6 +446,8 @@ public async Task<IActionResult> GetRequestById(int borrowId)
     // Model for Borrowed Items
     public class BorrowItem
     {
+           public int ItemID { get; set; }      // New field for ItemID
+            public int CategoryID { get; set; } 
         public string ItemName { get; set; }
         public int Quantity { get; set; }
     }
