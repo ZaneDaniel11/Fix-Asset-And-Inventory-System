@@ -16,6 +16,7 @@ export default function Inventory_table() {
     update: false,
     delete: false,
     view: false,
+    addQuantity: false, // New modal for adding quantity
   });
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -30,6 +31,8 @@ export default function Inventory_table() {
     quantity: "",
     description: "",
   });
+
+  const [addQuantity, setAddQuantity] = useState(0); // New state for additional quantity
 
   // Toggle modals
   const toggleModal = (type) => {
@@ -134,6 +137,28 @@ export default function Inventory_table() {
     }
   };
 
+  const handleAddQuantity = async () => {
+    try {
+      const newQuantity = selectedItem.quantity + addQuantity;
+      await fetchData(
+        `${API_URL}UpdateItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`,
+        "PUT",
+        {
+          itemID: selectedItem.itemID,
+          categoryID: selectedCategory.id,
+          itemName: selectedItem.itemName,
+          quantity: newQuantity,
+          description: selectedItem.description,
+          dateAdded: selectedItem.dateAdded,
+        }
+      );
+      toggleModal("addQuantity");
+      fetchItems();
+    } catch (error) {
+      console.error("Failed to add quantity", error);
+    }
+  };
+
   return (
     <div>
       <div className="limiter">
@@ -204,6 +229,15 @@ export default function Inventory_table() {
                             <button
                               onClick={() => {
                                 setSelectedItem(item);
+                                toggleModal("addQuantity"); // Open the add quantity modal
+                              }}
+                              className="text-white bg-orange-500 hover:bg-orange-600 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                            >
+                              <i className="fa-solid fa-plus"></i>
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSelectedItem(item);
                                 toggleModal("view");
                               }}
                               className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
@@ -227,6 +261,39 @@ export default function Inventory_table() {
           </div>
         </div>
       </div>
+
+      {modals.addQuantity && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
+            <h2 className="text-xl font-semibold mb-4">
+              Add Quantity to {selectedItem?.itemName}
+            </h2>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Quantity</label>
+              <input
+                type="number"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                value={addQuantity}
+                onChange={(e) => setAddQuantity(parseInt(e.target.value))}
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                onClick={() => toggleModal("addQuantity")}
+                className="text-gray-700 bg-gray-200 hover:bg-gray-300 font-medium rounded-lg text-sm px-4 py-2 me-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddQuantity}
+                className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
+              >
+                Add Quantity
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Item Modal */}
       {modals.add && (

@@ -69,6 +69,30 @@ namespace Backend.Controllers
             }
         }
 
+        // PUT: api/ItemApi/AddQuantity?ItemID=1&CategoryID=1
+        [HttpPut("AddQuantity")]
+        public async Task<IActionResult> AddQuantityAsync(int ItemID, int CategoryID, int quantityToAdd)
+        {
+            const string query = @"
+                UPDATE items_db 
+                SET Quantity = Quantity + @QuantityToAdd 
+                WHERE ItemID = @ItemID AND CategoryID = @CategoryID;
+                SELECT * FROM items_db WHERE ItemID = @ItemID AND CategoryID = @CategoryID LIMIT 1;";
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var result = await connection.QuerySingleOrDefaultAsync<Item>(query, new
+                {
+                    QuantityToAdd = quantityToAdd,
+                    ItemID,
+                    CategoryID
+                });
+
+                return Ok(result);
+            }
+        }
+
         [HttpPut("UpdateItem")]
         public async Task<IActionResult> UpdateItemAsync(int ItemID, int CategoryID, Item updatedItem)
         {
