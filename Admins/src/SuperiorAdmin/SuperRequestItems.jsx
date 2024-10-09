@@ -196,7 +196,7 @@ export default function RequestItems() {
                   })}
                 </tbody>
               </table>
-            </div>
+            </div> 
           </div>
         </div>
 
