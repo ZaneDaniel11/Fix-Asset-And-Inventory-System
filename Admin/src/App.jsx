@@ -1,3 +1,4 @@
+// Inventory Admin
 import { Route, Routes, useLocation } from "react-router-dom";
 import Login from "./Login.jsx";
 import Maintenance from "./Tables/Maintenance.jsx";
@@ -10,7 +11,9 @@ import RequestItems from "./Request/RequestItems.jsx";
 import Sidebar from "./Components/Sidebar.jsx";
 import BorrowedItems from "./Borrowed/BorrowedItems/BorrowedItems.jsx";
 
+// Asset Admin
 import AssetInventory from "./Asset/Inventory/AInventory.jsx";
+import AssetInvenTable from "./Asset/Inventory/Components/CategoryItem/InventoryItemTable.jsx";
 
 function App() {
   const location = useLocation();
@@ -38,6 +41,7 @@ function App() {
           <Route exact path="/BorrowedTable" element={<BorrowedItems />} />
           {/* Asset Section */}
           <Route exact path="/AssetInventory" element={<AssetInventory />} />
+          <Route exact path="/AssetItemTable" element={<AssetInvenTable />} />
         </Routes>
       </div>
     </div>

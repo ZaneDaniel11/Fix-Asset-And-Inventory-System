@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { fetchData } from "../utilities/ApiUti";
 import { FaEdit, FaTrash, FaPlus, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import Inventory_Modal from "./Components/Inventory_Modal";
-import Inventory_Card from "./Components/Inventory_Cards";
+import Inventory_Modal from "./Components/Category/Inventory_Modal";
+import Inventory_Card from "./Components/Category/Inventory_Cards";
 // import "./Css/Electronics.css";
 
-const API_URL = "http://localhost:5075/api/CategoryApi/";
+const API_URL = "http://localhost:5075/api/CategoryAssetApi/";
 
 export default function Inventory() {
   const [categories, setCategories] = useState([]);
@@ -20,7 +20,7 @@ export default function Inventory() {
 
   const FetchCategory = async () => {
     try {
-      const result = await fetchData(`${API_URL}GetCategory`, "GET");
+      const result = await fetchData(`${API_URL}GetAssetCategory`, "GET");
       setCategories(result);
     } catch (error) {
       console.error("Failed to fetch categories", error);
@@ -30,7 +30,7 @@ export default function Inventory() {
   const handleAddCategory = async (e) => {
     e.preventDefault();
     try {
-      await fetchData(`${API_URL}InsertCategory`, "POST", {
+      await fetchData(`${API_URL}InsertAssetCategory`, "POST", {
         id: 0,
         categoryName: newCategory,
       });
@@ -46,7 +46,7 @@ export default function Inventory() {
     e.preventDefault();
     try {
       await fetchData(
-        `${API_URL}UpdateCategory?CategoryId=${modalState.category.id}`,
+        `${API_URL}UpdateAssetCategory?CategoryId=${modalState.category.id}`,
         "PUT",
         {
           id: modalState.category.id,
@@ -65,7 +65,7 @@ export default function Inventory() {
     if (window.confirm("Are you sure you want to delete this category?")) {
       try {
         await fetchData(
-          `${API_URL}DeleteCategory?CategoryId=${categoryId}`,
+          `${API_URL}DeleteAssetCategory?CategoryId=${categoryId}`,
           "DELETE"
         );
         FetchCategory();
@@ -82,7 +82,7 @@ export default function Inventory() {
 
   // When a category is selected, navigate to Inventory_table with the selected category
   const handleCategoryClick = (category) => {
-    navigate(`/InventoryTable`, {
+    navigate(`/AssetItemTable`, {
       state: {
         selectedCategory: {
           id: category.id,
