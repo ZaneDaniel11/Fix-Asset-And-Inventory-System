@@ -55,6 +55,19 @@ const Sidebar = () => {
       </div>
       <ul className="nav-links">
         <li>
+          <a href="/AssetInventory">
+            <i className="fa-solid fa-boxes-stacked"></i>
+            <span className="link_name">Asset Inventory</span>
+          </a>
+          <ul className="sub-menu blank">
+            <li>
+              <a className="link_name" href="#">
+                Asset Inventory
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li>
           <a href="/">
             <i className="bx bx-grid-alt"></i>
             <span className="link_name">Dashboard</span>

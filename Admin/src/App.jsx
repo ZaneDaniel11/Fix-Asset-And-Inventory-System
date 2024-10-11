@@ -2,7 +2,6 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import Login from "./Login.jsx";
 import Maintenance from "./Tables/Maintenance.jsx";
 import Users from "./Tables/User.jsx";
-import RequestItem from "./Tables/Request.jsx";
 import Inventory from "./Inventory.jsx";
 import Dashboard from "./Dashboard.jsx";
 import Inventory_table from "./Tables/Inventory_table.jsx";
@@ -10,6 +9,8 @@ import BorrowedRequest from "./Request/BorrowRequest.jsx";
 import RequestItems from "./Request/RequestItems.jsx";
 import Sidebar from "./Components/Sidebar.jsx";
 import BorrowedItems from "./Borrowed/BorrowedItems/BorrowedItems.jsx";
+
+import AssetInventory from "./Asset/Inventory/AInventory.jsx";
 
 function App() {
   const location = useLocation();
@@ -35,6 +36,8 @@ function App() {
           <Route exact path="/BorrowedRequest" element={<BorrowedRequest />} />
           <Route exact path="/RequestItem" element={<RequestItems />} />
           <Route exact path="/BorrowedTable" element={<BorrowedItems />} />
+          {/* Asset Section */}
+          <Route exact path="/AssetInventory" element={<AssetInventory />} />
         </Routes>
       </div>
     </div>
