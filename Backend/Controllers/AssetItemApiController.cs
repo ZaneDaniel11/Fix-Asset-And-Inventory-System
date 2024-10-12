@@ -3,6 +3,7 @@ using Dapper;
 using Microsoft.Data.Sqlite;
 using AssetItems.Models;
 using System.Threading.Tasks;
+using System;
 
 namespace Backend.Controllers
 {
@@ -42,21 +43,21 @@ namespace Backend.Controllers
                 connection.Open();
                 var result = await connection.QuerySingleOrDefaultAsync<AssetItem>(query, new
                 {
-                    newItem.CategoryID,
-                    newItem.AssetName,
-                    newItem.DatePurchased,
-                    newItem.DateIssued,
-                    newItem.IssuedTo,
-                    newItem.CheckedBy,
-                    newItem.Cost,
-                    newItem.Location,
-                    newItem.AssetCode,
-                    newItem.Remarks,
-                    newItem.DepreciationRate,
-                    newItem.DepreciationPeriodType, // "month" or "year"
-                    newItem.DepreciationPeriodValue  // number of months or years
+                    newAsset.CategoryID,
+                    newAsset.AssetName,
+                    newAsset.DatePurchased,
+                    newAsset.DateIssued,
+                    newAsset.IssuedTo,
+                    newAsset.CheckedBy,
+                    newAsset.Cost,
+                    newAsset.Location,
+                    newAsset.AssetCode,
+                    newAsset.Remarks,
+                    newAsset.DepreciationRate,
+                    newAsset.DepreciationValue,
+                    newAsset.DepreciationPeriodType, // "month" or "year"
+                    newAsset.DepreciationPeriodValue  // number of months or years
                 });
-
 
                 return Ok(result); // Return the newly inserted asset
             }
@@ -117,6 +118,65 @@ namespace Backend.Controllers
 
                 return Ok(result);
             }
+        }
+
+        // Scheduled task to calculate depreciation
+        [HttpPut("UpdateDepreciationValues")]
+        public async Task<IActionResult> UpdateDepreciationValuesAsync()
+        {
+            const string query = @"
+                SELECT * FROM asset_item_tb 
+                WHERE 
+                (DepreciationPeriodType = 'year' AND DatePurchased <= @TargetDateForYears)
+                OR 
+                (DepreciationPeriodType = 'month' AND DatePurchased <= @TargetDateForMonths);";
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                var assets = await connection.QueryAsync<AssetItem>(query, new
+                {
+                    TargetDateForYears = DateTime.Now.AddYears(-1),
+                    TargetDateForMonths = DateTime.Now.AddMonths(-1)
+                });
+
+                foreach (var asset in assets)
+                {
+                    // Calculate depreciation
+                    decimal depreciationValue = CalculateDepreciation(asset);
+
+                    // Update the asset's depreciation value in the database
+                    const string updateQuery = @"
+                        UPDATE asset_item_tb 
+                        SET DepreciationValue = @DepreciationValue 
+                        WHERE AssetId = @AssetId";
+
+                    await connection.ExecuteAsync(updateQuery, new
+                    {
+                        DepreciationValue = depreciationValue,
+                        AssetId = asset.AssetId
+                    });
+                }
+                return Ok("Depreciation values updated.");
+            }
+        }
+
+        private decimal CalculateDepreciation(AssetItem asset)
+        {
+            decimal depreciationValue = 0;
+            decimal rate = asset.DepreciationRate / 100;
+
+            if (asset.DepreciationPeriodType == "year")
+            {
+                depreciationValue = asset.Cost * rate * asset.DepreciationPeriodValue;
+            }
+            else if (asset.DepreciationPeriodType == "month")
+            {
+                depreciationValue = asset.Cost * rate * (asset.DepreciationPeriodValue / 12);
+            }
+
+            return depreciationValue;
         }
     }
 }
