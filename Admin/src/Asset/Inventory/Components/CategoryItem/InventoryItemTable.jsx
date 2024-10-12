@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-const API_URL = "http://localhost:5075/api/ItemApi/";
+const API_URL = "http://localhost:5075/api/AssetItemApi/";
 const fetchData = async (url, method = "GET", body = null) => {
   const options = {
     method,
@@ -58,7 +58,7 @@ export default function Inventory_table() {
     try {
       if (selectedCategory && selectedCategory.id) {
         const result = await fetchData(
-          `${API_URL}GetItemsByCategory?categoryID=${selectedCategory.id}`,
+          `${API_URL}GetAssetsByCategory?categoryID=${selectedCategory.id}`,
           "GET"
         );
         setItems(result);
@@ -317,7 +317,7 @@ export default function Inventory_table() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">Add Item</h5>
+              <h5 className="text-lg font-semibold">Add Asset</h5>
               <button
                 type="button"
                 onClick={() => toggleModal("add")}
@@ -329,118 +329,165 @@ export default function Inventory_table() {
             <form onSubmit={handleAddCategoryItem}>
               <div className="mt-4">
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
+                  {/* AssetName */}
                   <div className="relative">
                     <input
                       type="text"
-                      name="ItemName"
-                      value={addItem.ItemName}
+                      name="AssetName"
+                      value={addItem.AssetName}
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
-                      placeholder="Item Name"
+                      placeholder="Asset Name"
                       required
                     />
                   </div>
+
+                  {/* DatePurchased */}
+                  <div className="relative">
+                    <input
+                      type="date"
+                      name="DatePurchased"
+                      value={addItem.DatePurchased}
+                      onChange={handleInputChange}
+                      className="p-2 border rounded border-black w-full"
+                      required
+                    />
+                  </div>
+
+                  {/* DateIssued */}
+                  <div className="relative">
+                    <input
+                      type="date"
+                      name="DateIssued"
+                      value={addItem.DateIssued}
+                      onChange={handleInputChange}
+                      className="p-2 border rounded border-black w-full"
+                    />
+                  </div>
+
+                  {/* IssuedTo */}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="IssuedTo"
+                      value={addItem.IssuedTo}
+                      onChange={handleInputChange}
+                      className="p-2 border rounded border-black w-full"
+                      placeholder="Issued To"
+                    />
+                  </div>
+
+                  {/* CheckedBy */}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="CheckedBy"
+                      value={addItem.CheckedBy}
+                      onChange={handleInputChange}
+                      className="p-2 border rounded border-black w-full"
+                      placeholder="Checked By"
+                    />
+                  </div>
+
+                  {/* Cost */}
                   <div className="relative">
                     <input
                       type="number"
-                      name="Quantity"
-                      value={addItem.Quantity}
+                      name="Cost"
+                      value={addItem.Cost}
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
-                      placeholder="Quantity"
+                      placeholder="Cost"
                       required
                     />
                   </div>
+
+                  {/* Location */}
                   <div className="relative">
                     <input
                       type="text"
-                      name="Description"
-                      value={addItem.Description}
+                      name="Location"
+                      value={addItem.Location}
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
-                      placeholder="Description"
+                      placeholder="Location"
+                    />
+                  </div>
+
+                  {/* AssetCode */}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="AssetCode"
+                      value={addItem.AssetCode}
+                      onChange={handleInputChange}
+                      className="p-2 border rounded border-black w-full"
+                      placeholder="Asset Code"
                       required
                     />
                   </div>
+
+                  {/* Remarks */}
                   <div className="relative">
                     <input
                       type="text"
-                      name="Description"
-                      value={addItem.Description}
+                      name="Remarks"
+                      value={addItem.Remarks}
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
-                      placeholder="Description"
-                      required
+                      placeholder="Remarks"
                     />
                   </div>
+
+                  {/* DepreciationRate */}
+
+                  {/* Depreciation Period */}
                   <div className="relative">
-                    <input
-                      type="text"
-                      name="Description"
-                      value={addItem.Description}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Description"
-                      required
-                    />
+                    <div className="flex space-x-2">
+                      {/* Select between months or years */}
+                      <select
+                        name="DepreciationPeriodType"
+                        value={addItem.DepreciationPeriodType} // A new state for tracking period type (month/year)
+                        onChange={handleInputChange}
+                        className="p-2 border rounded border-black w-full"
+                        required
+                      >
+                        <option value="month">Month(s)</option>
+                        <option value="year">Year(s)</option>
+                      </select>
+
+                      {/* Input for number of months/years */}
+                      <input
+                        type="number"
+                        name="DepreciationPeriodValue"
+                        value={addItem.DepreciationPeriodValue} // The value (e.g., 3 months, 2 years)
+                        onChange={handleInputChange}
+                        className="p-2 border rounded border-black w-full"
+                        placeholder={
+                          addItem.DepreciationPeriodType === "month"
+                            ? "Enter months"
+                            : "Enter years"
+                        } // Placeholder changes dynamically
+                        required
+                        min="1"
+                      />
+                    </div>
                   </div>
+
                   <div className="relative">
                     <input
-                      type="text"
-                      name="Description"
-                      value={addItem.Description}
+                      type="number"
+                      name="DepreciationRate"
+                      value={addItem.DepreciationValue}
                       onChange={handleInputChange}
                       className="p-2 border rounded border-black w-full"
-                      placeholder="Description"
-                      required
-                    />
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="Description"
-                      value={addItem.Description}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Description"
-                      required
-                    />
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="Description"
-                      value={addItem.Description}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Description"
-                      required
-                    />
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="Description"
-                      value={addItem.Description}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Description"
-                      required
-                    />
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="Description"
-                      value={addItem.Description}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Description"
+                      placeholder="Depreciation Rate"
                       required
                     />
                   </div>
                 </div>
               </div>
+
               <div className="mt-6 flex justify-end space-x-2">
                 <button
                   type="button"
@@ -453,7 +500,7 @@ export default function Inventory_table() {
                   type="submit"
                   className=" bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded"
                 >
-                  Add Item
+                  Add Asset
                 </button>
               </div>
             </form>
