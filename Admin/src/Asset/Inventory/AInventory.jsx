@@ -22,6 +22,7 @@ export default function Inventory() {
     try {
       const result = await fetchData(`${API_URL}GetAssetCategory`, "GET");
       setCategories(result);
+      console.log(result);
     } catch (error) {
       console.error("Failed to fetch categories", error);
     }
@@ -85,7 +86,7 @@ export default function Inventory() {
     navigate(`/AssetItemTable`, {
       state: {
         selectedCategory: {
-          id: category.id,
+          categoryId: category.categoryId, // Consistently use CategoryId
           categoryName: category.categoryName,
         },
       },

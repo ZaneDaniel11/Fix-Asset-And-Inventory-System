@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const API_URL = "http://localhost:5075/api/AssetItemApi/";
+
 const fetchData = async (url, method = "GET", body = null) => {
   const options = {
     method,
@@ -22,7 +23,9 @@ const fetchData = async (url, method = "GET", body = null) => {
 
 export default function Inventory_table() {
   const location = useLocation();
-  const selectedCategory = location.state?.selectedCategory;
+  const navigate = useNavigate(); // Use navigate to redirect if necessary
+  const { selectedCategory } = location.state || {};
+  const categoryId = selectedCategory?.categoryId;
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,147 +34,83 @@ export default function Inventory_table() {
     update: false,
     delete: false,
     view: false,
-    addQuantity: false, // New modal for adding quantity
+    addQuantity: false,
   });
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const [addItem, setAddCategoryItem] = useState({
-    ItemName: "",
-    Quantity: "",
-    Description: "",
+  const [addItem, setAddItem] = useState({
+    AssetName: "",
+    DatePurchased: "",
+    DateIssued: "",
+    IssuedTo: "",
+    CheckedBy: "",
+    Cost: "",
+    Location: "",
+    AssetCode: "",
+    Remarks: "",
+    DepreciationPeriodType: "month",
+    DepreciationPeriodValue: "",
+    DepreciationRate: "",
   });
 
-  const [updatedItem, setUpdatedItem] = useState({
-    itemName: "",
-    quantity: "",
-    description: "",
-  });
-
-  const [addQuantity, setAddQuantity] = useState(0); // New state for additional quantity
-
-  // Toggle modals
   const toggleModal = (type) => {
     setModals((prev) => ({ ...prev, [type]: !prev[type] }));
   };
 
-  const fetchItems = async () => {
+  useEffect(() => {
+    if (categoryId) {
+      fetchItems(categoryId);
+    } else {
+      alert("No category selected, redirecting to categories page.");
+      navigate("/categories");
+    }
+  }, [categoryId, navigate]);
+
+  const fetchItems = async (categoryId) => {
     try {
-      if (selectedCategory && selectedCategory.id) {
-        const result = await fetchData(
-          `${API_URL}GetAssetsByCategory?categoryID=${selectedCategory.id}`,
-          "GET"
-        );
-        setItems(result);
-        setFilteredItems(result);
-        setLoading(false);
-        console.log(result);
-      } else {
-        console.error("No selectedCategory or ID provided");
-        setLoading(false);
-      }
+      const result = await fetchData(
+        `${API_URL}GetAssetsByCategory?categoryID=${categoryId}`,
+        "GET"
+      );
+      setItems(result);
+      setFilteredItems(result);
+      console.log(result);
+      setLoading(false);
     } catch (error) {
       console.error("Failed to fetch items", error);
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (selectedCategory) {
-      fetchItems();
-    }
-  }, [selectedCategory]);
+  const handleAddAssetItem = async (e) => {
+    e.preventDefault();
 
-  useEffect(() => {
-    if (selectedCategory && items.length > 0) {
-      const filtered = items.filter(
-        (item) => item.categoryID === selectedCategory.id
-      );
-      setFilteredItems(filtered);
+    try {
+      await fetchData(`${API_URL}InsertAssetItem`, "POST", {
+        AssetName: addItem.AssetName,
+        DatePurchased: addItem.DatePurchased,
+        DateIssued: addItem.DateIssued,
+        IssuedTo: addItem.IssuedTo,
+        CheckedBy: addItem.CheckedBy,
+        Cost: parseFloat(addItem.Cost),
+        Location: addItem.Location,
+        AssetCode: addItem.AssetCode,
+        Remarks: addItem.Remarks,
+        DepreciationPeriodType: addItem.DepreciationPeriodType,
+        DepreciationPeriodValue: parseInt(addItem.DepreciationPeriodValue),
+        DepreciationRate: parseFloat(addItem.DepreciationRate),
+      });
+
+      toggleModal("add");
+      fetchItems(categoryId); // Refresh the list of items using the correct categoryId
+    } catch (error) {
+      console.error("Failed to add asset item", error);
     }
-  }, [items, selectedCategory]);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setAddCategoryItem((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleUpdateInputChange = (e) => {
-    const { name, value } = e.target;
-    setUpdatedItem((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleAddCategoryItem = async (e) => {
-    e.preventDefault();
-    try {
-      await fetchData(`${API_URL}InsertItem`, "POST", {
-        itemID: 0,
-        categoryID: selectedCategory.id,
-        itemName: addItem.ItemName,
-        quantity: addItem.Quantity,
-        description: addItem.Description,
-        dateAdded: new Date().toISOString(),
-      });
-      toggleModal("add");
-      fetchItems();
-    } catch (error) {
-      console.error("Failed to add item", error);
-    }
-  };
-
-  const handleUpdateItem = async () => {
-    try {
-      await fetchData(
-        `${API_URL}UpdateItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`,
-        "PUT",
-        {
-          itemID: selectedItem.itemID,
-          categoryID: selectedCategory.id,
-          itemName: updatedItem.itemName,
-          quantity: updatedItem.quantity,
-          description: updatedItem.description,
-          dateAdded: selectedItem.dateAdded,
-        }
-      );
-      toggleModal("update");
-      fetchItems();
-    } catch (error) {
-      console.error("Failed to update item", error);
-    }
-  };
-
-  const handleDeleteItem = async () => {
-    try {
-      await fetchData(
-        `${API_URL}DeleteItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`,
-        "DELETE"
-      );
-      toggleModal("delete");
-      fetchItems();
-    } catch (error) {
-      console.error("Failed to delete item", error);
-    }
-  };
-
-  const handleAddQuantity = async () => {
-    try {
-      const newQuantity = selectedItem.quantity + addQuantity;
-      await fetchData(
-        `${API_URL}UpdateItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`,
-        "PUT",
-        {
-          itemID: selectedItem.itemID,
-          categoryID: selectedCategory.id,
-          itemName: selectedItem.itemName,
-          quantity: newQuantity,
-          description: selectedItem.description,
-          dateAdded: selectedItem.dateAdded,
-        }
-      );
-      toggleModal("addQuantity");
-      fetchItems();
-    } catch (error) {
-      console.error("Failed to add quantity", error);
-    }
+    setAddItem((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -180,7 +119,7 @@ export default function Inventory_table() {
         <div className="container-table100">
           <div className="wrap-table100">
             <div className="table100">
-              <div className="flex space justify-between mb-4">
+              <div className="flex justify-between mb-4">
                 <h2 className="text-2xl mb-4">
                   Items in {selectedCategory?.categoryName || "All Categories"}
                 </h2>
@@ -195,42 +134,44 @@ export default function Inventory_table() {
               {loading ? (
                 <p>Loading...</p>
               ) : (
-                <table>
-                  <thead>
-                    <tr className="table100-head">
-                      <th className="column1">Item ID</th>
-                      <th className="column2">Item Name</th>
-                      <th className="column3">Issued To</th>
-                      <th className="column4">Checked By</th>
-                      <th className="column5">Cost</th>
-                      <th className="column6">Location</th>
-                      <th className="column6">Asset Code</th>
-                      <th className="column6">Remarks</th>
+                <table className="min-w-full table-auto bg-white shadow-md rounded-lg overflow-hidden">
+                  <thead className="table100-head">
+                    <tr className="">
+                      <th className="py-3 px-6 text-left">Item ID</th>
+                      <th className="py-3 px-6 text-left">Item Name</th>
+                      <th className="py-3 px-6 text-left">Issued To</th>
+                      <th className="py-3 px-6 text-left">Checked By</th>
+                      <th className="py-3 px-6 text-left">Cost</th>
+                      <th className="py-3 px-6 text-left">Location</th>
+                      <th className="py-3 px-6 text-left">Asset Code</th>
+                      <th className="py-3 px-6 text-left">Remarks</th>
+                      <th className="py-3 px-6 text-left">DatePurchase</th>
+                      <th className="py-3 px-6 text-left">Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="text-gray-600 text-sm">
                     {filteredItems.length > 0 ? (
                       filteredItems.map((item) => (
-                        <tr key={item.itemID}>
-                          <td className="column1">{item.itemID}</td>
-                          <td className="column2">{item.itemName}</td>
-                          <td className="column3">{item.quantity}</td>
-                          <td className="column4">{item.unitPrice}</td>
-                          <td className="column5">
-                            {new Date(item.dateAdded).toLocaleDateString()}
-                          </td>
-                          <td className="column6">
+                        <tr
+                          key={item.itemID}
+                          className="border-b border-gray-200 hover:bg-gray-100"
+                        >
+                          <td className="py-3 px-6">{item.assetId}</td>
+                          <td className="py-3 px-6">{item.assetName}</td>
+                          <td className="py-3 px-6">{item.issuedTo}</td>
+                          <td className="py-3 px-6">{item.checkedBy}</td>
+                          <td className="py-3 px-6">{item.cost}</td>
+                          <td className="py-3 px-6">{item.location}</td>
+                          <td className="py-3 px-6">{item.assetCode}</td>
+                          <td className="py-3 px-6">{item.remarks}</td>
+                          <td className="py-3 px-6">{item.datePurchased}</td>
+                          <td className="py-3 px-6 flex items-center space-x-2">
                             <button
                               onClick={() => {
                                 setSelectedItem(item);
-                                setUpdatedItem({
-                                  itemName: item.itemName,
-                                  quantity: item.quantity,
-                                  description: item.description,
-                                });
                                 toggleModal("update");
                               }}
-                              className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                              className="text-white bg-green-600 hover:bg-green-700 rounded-lg text-sm px-4 py-1"
                             >
                               <i className="fa-solid fa-pen"></i>
                             </button>
@@ -239,34 +180,25 @@ export default function Inventory_table() {
                                 setSelectedItem(item);
                                 toggleModal("delete");
                               }}
-                              className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                              className="text-white bg-red-600 hover:bg-red-700 rounded-lg text-sm px-4 py-1"
                             >
                               <i className="fa-solid fa-trash"></i>
                             </button>
                             <button
                               onClick={() => {
                                 setSelectedItem(item);
-                                toggleModal("addQuantity"); // Open the add quantity modal
+                                toggleModal("addQuantity");
                               }}
-                              className="text-white bg-orange-500 hover:bg-orange-600 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                              className="text-white bg-yellow-500 hover:bg-yellow-600 rounded-lg text-sm px-4 py-1"
                             >
                               <i className="fa-solid fa-plus"></i>
-                            </button>
-                            <button
-                              onClick={() => {
-                                setSelectedItem(item);
-                                toggleModal("view");
-                              }}
-                              className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
-                            >
-                              <i className="fa-solid fa-eye"></i>
                             </button>
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="6" className="text-center">
+                        <td colSpan="9" className="text-center py-4">
                           No items in this category.
                         </td>
                       </tr>
@@ -274,375 +206,113 @@ export default function Inventory_table() {
                   </tbody>
                 </table>
               )}
+
+              {/* Add Item Modal */}
+              {modals.add && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                  <div className="bg-white rounded-lg w-11/12 md:w-1/2 p-6 relative">
+                    <span
+                      className="absolute top-2 right-2 text-gray-600 cursor-pointer text-2xl font-bold"
+                      onClick={() => toggleModal("add")}
+                    >
+                      &times;
+                    </span>
+                    <h2 className="text-2xl mb-4 font-semibold text-center">
+                      Add New Asset
+                    </h2>
+                    <form onSubmit={handleAddAssetItem} className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium">
+                          Asset Name
+                        </label>
+                        <input
+                          type="text"
+                          name="AssetName"
+                          value={addItem.AssetName}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          required
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium">
+                            Date Purchased
+                          </label>
+                          <input
+                            type="date"
+                            name="DatePurchased"
+                            value={addItem.DatePurchased}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium">
+                            Date Issued
+                          </label>
+                          <input
+                            type="date"
+                            name="DateIssued"
+                            value={addItem.DateIssued}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium">
+                          Issued To
+                        </label>
+                        <input
+                          type="text"
+                          name="IssuedTo"
+                          value={addItem.IssuedTo}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium">
+                            Cost
+                          </label>
+                          <input
+                            type="number"
+                            name="Cost"
+                            value={addItem.Cost}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium">
+                            Location
+                          </label>
+                          <input
+                            type="text"
+                            name="Location"
+                            value={addItem.Location}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md"
+                      >
+                        Add Asset
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
-
-      {modals.addQuantity && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
-            <h2 className="text-xl font-semibold mb-4">
-              Add Quantity to {selectedItem?.itemName}
-            </h2>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Quantity</label>
-              <input
-                type="number"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                value={addQuantity}
-                onChange={(e) => setAddQuantity(parseInt(e.target.value))}
-              />
-            </div>
-            <div className="flex justify-end">
-              <button
-                onClick={() => toggleModal("addQuantity")}
-                className="text-gray-700 bg-gray-200 hover:bg-gray-300 font-medium rounded-lg text-sm px-4 py-2 me-2"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddQuantity}
-                className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
-              >
-                Add Quantity
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Item Modal */}
-      {modals.add && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-            <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">Add Asset</h5>
-              <button
-                type="button"
-                onClick={() => toggleModal("add")}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-            <form onSubmit={handleAddCategoryItem}>
-              <div className="mt-4">
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
-                  {/* AssetName */}
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="AssetName"
-                      value={addItem.AssetName}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Asset Name"
-                      required
-                    />
-                  </div>
-
-                  {/* DatePurchased */}
-                  <div className="relative">
-                    <input
-                      type="date"
-                      name="DatePurchased"
-                      value={addItem.DatePurchased}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      required
-                    />
-                  </div>
-
-                  {/* DateIssued */}
-                  <div className="relative">
-                    <input
-                      type="date"
-                      name="DateIssued"
-                      value={addItem.DateIssued}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                    />
-                  </div>
-
-                  {/* IssuedTo */}
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="IssuedTo"
-                      value={addItem.IssuedTo}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Issued To"
-                    />
-                  </div>
-
-                  {/* CheckedBy */}
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="CheckedBy"
-                      value={addItem.CheckedBy}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Checked By"
-                    />
-                  </div>
-
-                  {/* Cost */}
-                  <div className="relative">
-                    <input
-                      type="number"
-                      name="Cost"
-                      value={addItem.Cost}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Cost"
-                      required
-                    />
-                  </div>
-
-                  {/* Location */}
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="Location"
-                      value={addItem.Location}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Location"
-                    />
-                  </div>
-
-                  {/* AssetCode */}
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="AssetCode"
-                      value={addItem.AssetCode}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Asset Code"
-                      required
-                    />
-                  </div>
-
-                  {/* Remarks */}
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="Remarks"
-                      value={addItem.Remarks}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Remarks"
-                    />
-                  </div>
-
-                  {/* DepreciationRate */}
-
-                  {/* Depreciation Period */}
-                  <div className="relative">
-                    <div className="flex space-x-2">
-                      {/* Select between months or years */}
-                      <select
-                        name="DepreciationPeriodType"
-                        value={addItem.DepreciationPeriodType} // A new state for tracking period type (month/year)
-                        onChange={handleInputChange}
-                        className="p-2 border rounded border-black w-full"
-                        required
-                      >
-                        <option value="month">Month(s)</option>
-                        <option value="year">Year(s)</option>
-                      </select>
-
-                      {/* Input for number of months/years */}
-                      <input
-                        type="number"
-                        name="DepreciationPeriodValue"
-                        value={addItem.DepreciationPeriodValue} // The value (e.g., 3 months, 2 years)
-                        onChange={handleInputChange}
-                        className="p-2 border rounded border-black w-full"
-                        placeholder={
-                          addItem.DepreciationPeriodType === "month"
-                            ? "Enter months"
-                            : "Enter years"
-                        } // Placeholder changes dynamically
-                        required
-                        min="1"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="relative">
-                    <input
-                      type="number"
-                      name="DepreciationRate"
-                      value={addItem.DepreciationValue}
-                      onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Depreciation Rate"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 flex justify-end space-x-2">
-                <button
-                  type="button"
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
-                  onClick={() => toggleModal("add")}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className=" bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded"
-                >
-                  Add Asset
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Update Item Modal */}
-      {modals.update && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-            <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">Update Item</h5>
-              <button
-                type="button"
-                onClick={() => toggleModal("update")}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-            <div className="mt-4">
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="itemName"
-                    value={updatedItem.itemName}
-                    onChange={handleUpdateInputChange}
-                    className="p-2 border rounded border-black w-full"
-                    placeholder="Item Name"
-                    required
-                  />
-                </div>
-                <div className="relative">
-                  <input
-                    type="number"
-                    name="quantity"
-                    value={updatedItem.quantity}
-                    onChange={handleUpdateInputChange}
-                    className="p-2 border rounded border-black w-full"
-                    placeholder="Quantity"
-                    required
-                  />
-                </div>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="description"
-                    value={updatedItem.description}
-                    onChange={handleUpdateInputChange}
-                    className="p-2 border rounded border-black w-full"
-                    placeholder="Description"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end space-x-2">
-              <button
-                type="button"
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
-                onClick={() => toggleModal("update")}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                onClick={handleUpdateItem}
-              >
-                Update Item
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {modals.delete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-            <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">Delete Item</h5>
-              <button
-                type="button"
-                onClick={() => toggleModal("delete")}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-            <div className="mt-4">
-              <p>Are you sure you want to delete this item?</p>
-              <div className="mt-6 flex justify-end space-x-2">
-                <button
-                  type="button"
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
-                  onClick={() => toggleModal("delete")}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                  onClick={handleDeleteItem}
-                >
-                  Delete Item
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* View Item Modal */}
-      {modals.view && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-            <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">View Item</h5>
-              <button
-                type="button"
-                onClick={() => toggleModal("view")}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-            <div className="mt-4">
-              <p>Item ID: {selectedItem?.itemID}</p>
-              <p>Item Name: {selectedItem?.itemName}</p>
-              <p>Quantity: {selectedItem?.quantity}</p>
-              <p>Description: {selectedItem?.description}</p>
-              <p>
-                Date Added:{" "}
-                {new Date(selectedItem?.dateAdded).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

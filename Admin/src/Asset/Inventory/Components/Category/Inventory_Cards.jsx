@@ -1,5 +1,4 @@
 import React from "react";
-import { FaEdit, FaTrash } from "react-icons/fa";
 
 const InventoryCards = ({
   categories,
@@ -15,7 +14,7 @@ const InventoryCards = ({
     >
       {categories.map((category) => (
         <div
-          key={category.id}
+          key={category.categoryId}
           className="relative bg-BlackNgadiliBlack text-white rounded-3xl shadow-md hover:bg-gray-800 transition duration-300 p-4 flex flex-col justify-center items-center"
           style={{ width: "300px", height: "100px" }}
           onClick={() => onCategoryClick(category)} // Add the onClick event here
@@ -29,7 +28,7 @@ const InventoryCards = ({
                 <i className="fa-solid fa-pen"></i>
               </button>
               <button
-                onClick={() => handleDeleteCategory(category.id)}
+                onClick={() => handleDeleteCategory(category.categoryId)}
                 className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
               >
                 <i className="fa-solid fa-trash"></i>

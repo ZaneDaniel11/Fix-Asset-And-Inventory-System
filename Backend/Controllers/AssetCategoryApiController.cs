@@ -25,21 +25,23 @@ namespace Backend.Controllers
             }
         }
 
-        [HttpPost("InsertAssetCategory")]
-        public async Task<IActionResult> InsertAsssetCategoryAsync(AssetCategory cat)
-        {
-            const string query = @"
-                INSERT INTO asset_category_tb (CategoryName) 
-                VALUES (@CategoryName);
-                SELECT * FROM asset_category_tb ORDER BY CategoryId DESC LIMIT 1;";
+      [HttpPost("InsertAssetCategory")]
+    public async Task<IActionResult> InsertAsssetCategoryAsync(AssetCategory cat)
+    {
+        const string query = @"
+            INSERT INTO asset_category_tb (CategoryName) 
+            VALUES (@CategoryName);
+            SELECT last_insert_rowid() AS CategoryId;";  // Fetch the last inserted ID
 
-            using (var connection = new SqliteConnection(_connectionString))
-            {
-                connection.Open();
-                var result = await connection.QuerySingleOrDefaultAsync<AssetCategory>(query, new { CategoryName = cat.CategoryName });
-                return Ok(result);
-            }
+        using (var connection = new SqliteConnection(_connectionString))
+        {
+            connection.Open();
+            var newCategoryId = await connection.ExecuteScalarAsync<int>(query, new { CategoryName = cat.CategoryName });
+            cat.CategoryId = newCategoryId;  // Assign the new CategoryId back to the category object
+            return Ok(cat);  // Return the full category object, including its new CategoryId
         }
+    }
+
 
         [HttpDelete("DeleteAssetCategory")]
         public async Task<IActionResult> DeleteAsssetCategoryAsync(int CategoryId)

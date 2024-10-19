@@ -27,21 +27,23 @@ namespace Backend.Controllers
             }
         }
 
-        // POST: api/AssetApi/InsertAsset
+        // POST: api/AssetApi/InsertAsset// POST: api/AssetApi/InsertAsset
         [HttpPost("InsertAsset")]
         public async Task<IActionResult> InsertAssetAsync(AssetItem newAsset)
         {
-            const string query = @"
-    INSERT INTO asset_item_tb 
-    (CategoryID, AssetName, DatePurchased, DateIssued, IssuedTo, CheckedBy, Cost, Location, AssetCode, Remarks, DepreciationRate, DepreciationValue, DepreciationPeriodType, DepreciationPeriodValue) 
-    VALUES 
-    (@CategoryID, @AssetName, @DatePurchased, @DateIssued, @IssuedTo, @CheckedBy, @Cost, @Location, @AssetCode, @Remarks, @DepreciationRate, @DepreciationValue, @DepreciationPeriodType, @DepreciationPeriodValue);
-    SELECT * FROM asset_item_tb ORDER BY AssetId DESC LIMIT 1;";
+            const string insertQuery = @"
+        INSERT INTO asset_item_tb 
+        (CategoryID, AssetName, DatePurchased, DateIssued, IssuedTo, CheckedBy, Cost, Location, AssetCode, Remarks, DepreciationRate, DepreciationValue, DepreciationPeriodType, DepreciationPeriodValue) 
+        VALUES 
+        (@CategoryID, @AssetName, @DatePurchased, @DateIssued, @IssuedTo, @CheckedBy, @Cost, @Location, @AssetCode, @Remarks, @DepreciationRate, @DepreciationValue, @DepreciationPeriodType, @DepreciationPeriodValue);
+        SELECT * FROM asset_item_tb ORDER BY AssetId DESC LIMIT 1;";
 
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-                var result = await connection.QuerySingleOrDefaultAsync<AssetItem>(query, new
+
+                // Insert asset and retrieve the newly created asset
+                var result = await connection.QuerySingleOrDefaultAsync<AssetItem>(insertQuery, new
                 {
                     newAsset.CategoryID,
                     newAsset.AssetName,
@@ -59,7 +61,59 @@ namespace Backend.Controllers
                     newAsset.DepreciationPeriodValue  // number of months or years
                 });
 
+                // Calculate depreciation schedule for the inserted asset
+                await CalculateDepreciationScheduleAsync(result, connection);
+
                 return Ok(result); // Return the newly inserted asset
+            }
+        }
+
+        // Method to calculate and store depreciation schedule
+        private async Task CalculateDepreciationScheduleAsync(AssetItem asset, SqliteConnection connection)
+        {
+            decimal currentValue = asset.Cost;
+            int periodCount = asset.DepreciationPeriodType == "year" ? asset.DepreciationPeriodValue : asset.DepreciationPeriodValue * 12;
+            decimal depreciationAmountPerPeriod = (asset.DepreciationRate ?? 0) / 100 * asset.Cost;
+
+            for (int i = 1; i <= periodCount && currentValue > 1; i++)
+            {
+                currentValue -= depreciationAmountPerPeriod;
+
+                // Ensure the asset value does not drop below 1
+                if (currentValue < 1)
+                {
+                    currentValue = 1;
+                }
+
+                // Insert depreciation record for this period
+                const string insertDepreciationQuery = @"
+            INSERT INTO depreciation_tb (AssetId, DepreciationDate, DepreciationValue) 
+            VALUES (@AssetId, @DepreciationDate, @DepreciationValue);";
+
+                await connection.ExecuteAsync(insertDepreciationQuery, new
+                {
+                    AssetId = asset.AssetId,
+                    DepreciationDate = asset.DepreciationPeriodType == "year" ? asset.DatePurchased.AddYears(i) : asset.DatePurchased.AddMonths(i),
+                    DepreciationValue = currentValue
+                });
+            }
+        }
+
+        // GET: api/AssetApi/ViewDepreciationSchedule?AssetId=1
+        [HttpGet("ViewDepreciationSchedule")]
+        public async Task<IActionResult> ViewDepreciationScheduleAsync(int assetId)
+        {
+            const string query = @"
+        SELECT DepreciationDate, DepreciationValue 
+        FROM depreciation_tb 
+        WHERE AssetId = @AssetId
+        ORDER BY DepreciationDate ASC";
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var depreciationSchedule = await connection.QueryAsync(query, new { AssetId = assetId });
+                return Ok(depreciationSchedule); // Return all depreciation records for this asset
             }
         }
 
@@ -165,7 +219,7 @@ namespace Backend.Controllers
         private decimal CalculateDepreciation(AssetItem asset)
         {
             decimal depreciationValue = 0;
-            decimal rate = asset.DepreciationRate / 100;
+            decimal rate = (asset.DepreciationRate ?? 0) / 100;
 
             if (asset.DepreciationPeriodType == "year")
             {

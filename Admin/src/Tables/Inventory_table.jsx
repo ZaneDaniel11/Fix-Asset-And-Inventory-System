@@ -32,6 +32,13 @@ export default function Inventory_table() {
     description: "",
   });
 
+  useEffect(() => {
+    console.log("Selected Category:", selectedCategory);
+    if (selectedCategory) {
+      fetchItems();
+    }
+  }, [selectedCategory]);
+
   const [addQuantity, setAddQuantity] = useState(0); // New state for additional quantity
 
   // Toggle modals
@@ -41,7 +48,7 @@ export default function Inventory_table() {
 
   const fetchItems = async () => {
     try {
-      if (selectedCategory && selectedCategory.id) {
+      if (selectedCategory?.id) {
         const result = await fetchData(
           `${API_URL}GetItemsByCategory?categoryID=${selectedCategory.id}`,
           "GET"
@@ -51,7 +58,7 @@ export default function Inventory_table() {
         setLoading(false);
         console.log(result);
       } else {
-        console.error("No selectedCategory or ID provided");
+        console.error("No valid category ID provided.");
         setLoading(false);
       }
     } catch (error) {
