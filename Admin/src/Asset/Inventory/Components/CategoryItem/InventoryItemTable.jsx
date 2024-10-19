@@ -115,6 +115,24 @@ export default function Inventory_table() {
     setAddItem((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleDeleteAssetItem = async () => {
+    try {
+      await fetchData(
+        `${API_URL}DeleteAsset?CategoryID=${categoryId}&AssetCode=${selectedItem.assetCode}`, // Assuming selectedItem.assetCode is correct
+        "DELETE"
+      );
+      toggleModal("delete");
+
+      // Close the delete modal
+      fetchItems(categoryId); // Refresh the items list after deletion
+    } catch (error) {
+      console.error("Failed to delete asset item", error);
+    }
+    console.log(
+      `${API_URL}DeleteAsset?CategoryID=${categoryId}&AssetCode=${selectedItem.assetCode}`
+    );
+  };
+
   return (
     <div>
       <div className="limiter">
@@ -155,7 +173,7 @@ export default function Inventory_table() {
                     {filteredItems.length > 0 ? (
                       filteredItems.map((item) => (
                         <tr
-                          key={item.itemID}
+                          key={item.assetId}
                           className="border-b border-gray-200 hover:bg-gray-100"
                         >
                           <td className="py-3 px-6">{item.assetId}</td>
@@ -403,6 +421,40 @@ export default function Inventory_table() {
                         Add Asset
                       </button>
                     </form>
+                  </div>
+                </div>
+              )}
+
+              {modals.delete && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                  <div className="bg-white rounded-lg w-11/12 md:w-1/3 p-6 relative">
+                    <span
+                      className="absolute top-2 right-2 text-gray-600 cursor-pointer text-2xl font-bold"
+                      onClick={() => toggleModal("delete")}
+                    >
+                      &times;
+                    </span>
+                    <h2 className="text-2xl mb-4 font-semibold text-center">
+                      Delete Item
+                    </h2>
+                    <p className="text-center">
+                      Are you sure you want to delete{" "}
+                      <strong>{selectedItem?.assetName}</strong>?
+                    </p>
+                    <div className="flex justify-center space-x-4 mt-6">
+                      <button
+                        onClick={handleDeleteAssetItem}
+                        className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md"
+                      >
+                        Yes, Delete
+                      </button>
+                      <button
+                        onClick={() => toggleModal("delete")}
+                        className="bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded-md"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
