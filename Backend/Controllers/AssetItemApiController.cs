@@ -27,7 +27,7 @@ namespace Backend.Controllers
             }
         }
 
-        // POST: api/AssetApi/InsertAsset// POST: api/AssetApi/InsertAsset
+        // POST: api/AssetApi/InsertAsset
         [HttpPost("InsertAsset")]
         public async Task<IActionResult> InsertAssetAsync(AssetItem newAsset)
         {
@@ -58,7 +58,7 @@ namespace Backend.Controllers
                     newAsset.DepreciationRate,
                     newAsset.DepreciationValue,
                     newAsset.DepreciationPeriodType, // "month" or "year"
-                    newAsset.DepreciationPeriodValue  // number of months or years
+                    newAsset.DepreciationPeriodValue  // Interval in months or years
                 });
 
                 // Calculate depreciation schedule for the inserted asset
@@ -72,34 +72,63 @@ namespace Backend.Controllers
         private async Task CalculateDepreciationScheduleAsync(AssetItem asset, SqliteConnection connection)
         {
             decimal currentValue = asset.Cost;
-            int periodCount = asset.DepreciationPeriodType == "year" ? asset.DepreciationPeriodValue : asset.DepreciationPeriodValue * 12;
             decimal depreciationAmountPerPeriod = (asset.DepreciationRate ?? 0) / 100 * asset.Cost;
 
-            for (int i = 1; i <= periodCount && currentValue > 1; i++)
+            // Determine the number of periods based on DepreciationPeriodType (year or month)
+            if (asset.DepreciationPeriodType == "year")
             {
-                currentValue -= depreciationAmountPerPeriod;
-
-                // Ensure the asset value does not drop below 1
-                if (currentValue < 1)
+                // Depreciate every N years
+                for (int i = 1; currentValue > 1; i += asset.DepreciationPeriodValue)
                 {
-                    currentValue = 1;
+                    currentValue -= depreciationAmountPerPeriod;
+
+                    // Ensure the asset value does not drop below 1
+                    if (currentValue < 1)
+                    {
+                        currentValue = 1;
+                    }
+
+                    // Insert depreciation record for this period
+                    const string insertDepreciationQuery = @"
+                INSERT INTO depreciation_tb (AssetId, DepreciationDate, DepreciationValue) 
+                VALUES (@AssetId, @DepreciationDate, @DepreciationValue);";
+
+                    await connection.ExecuteAsync(insertDepreciationQuery, new
+                    {
+                        AssetId = asset.AssetId,
+                        DepreciationDate = asset.DatePurchased.AddYears(i), // Every N years
+                        DepreciationValue = currentValue
+                    });
                 }
-
-                // Insert depreciation record for this period
-                const string insertDepreciationQuery = @"
-            INSERT INTO depreciation_tb (AssetId, DepreciationDate, DepreciationValue) 
-            VALUES (@AssetId, @DepreciationDate, @DepreciationValue);";
-
-                await connection.ExecuteAsync(insertDepreciationQuery, new
+            }
+            else if (asset.DepreciationPeriodType == "month")
+            {
+                // Depreciate every N months
+                for (int i = 1; currentValue > 1; i += asset.DepreciationPeriodValue)
                 {
-                    AssetId = asset.AssetId,
-                    DepreciationDate = asset.DepreciationPeriodType == "year" ? asset.DatePurchased.AddYears(i) : asset.DatePurchased.AddMonths(i),
-                    DepreciationValue = currentValue
-                });
+                    currentValue -= depreciationAmountPerPeriod;
+
+                    // Ensure the asset value does not drop below 1
+                    if (currentValue < 1)
+                    {
+                        currentValue = 1;
+                    }
+
+                    // Insert depreciation record for this period
+                    const string insertDepreciationQuery = @"
+                INSERT INTO depreciation_tb (AssetId, DepreciationDate, DepreciationValue) 
+                VALUES (@AssetId, @DepreciationDate, @DepreciationValue);";
+
+                    await connection.ExecuteAsync(insertDepreciationQuery, new
+                    {
+                        AssetId = asset.AssetId,
+                        DepreciationDate = asset.DatePurchased.AddMonths(i), // Every N months
+                        DepreciationValue = currentValue
+                    });
+                }
             }
         }
 
-        // GET: api/AssetApi/ViewDepreciationSchedule?AssetId=1
         [HttpGet("ViewDepreciationSchedule")]
         public async Task<IActionResult> ViewDepreciationScheduleAsync(int assetId)
         {
@@ -175,62 +204,43 @@ namespace Backend.Controllers
         }
 
         // Scheduled task to calculate depreciation
+
+
+        // PUT: api/AssetApi/UpdateDepreciationValues
         [HttpPut("UpdateDepreciationValues")]
         public async Task<IActionResult> UpdateDepreciationValuesAsync()
         {
             const string query = @"
-                SELECT * FROM asset_item_tb 
-                WHERE 
-                (DepreciationPeriodType = 'year' AND DatePurchased <= @TargetDateForYears)
-                OR 
-                (DepreciationPeriodType = 'month' AND DatePurchased <= @TargetDateForMonths);";
+        SELECT d.AssetId, d.DepreciationDate, d.DepreciationValue
+        FROM depreciation_tb d
+        JOIN asset_item_tb a ON d.AssetId = a.AssetId
+        WHERE d.DepreciationDate <= @CurrentDate
+        AND a.DepreciationValue > 1;";  // Select assets where the depreciation date has arrived
 
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
-                var assets = await connection.QueryAsync<AssetItem>(query, new
-                {
-                    TargetDateForYears = DateTime.Now.AddYears(-1),
-                    TargetDateForMonths = DateTime.Now.AddMonths(-1)
-                });
+                var assetsToUpdate = await connection.QueryAsync(query, new { CurrentDate = DateTime.Now });
 
-                foreach (var asset in assets)
+                foreach (var asset in assetsToUpdate)
                 {
-                    // Calculate depreciation
-                    decimal depreciationValue = CalculateDepreciation(asset);
-
-                    // Update the asset's depreciation value in the database
+                    // Update the asset's depreciation value in the asset_item_tb table
                     const string updateQuery = @"
-                        UPDATE asset_item_tb 
-                        SET DepreciationValue = @DepreciationValue 
-                        WHERE AssetId = @AssetId";
+                UPDATE asset_item_tb 
+                SET DepreciationValue = @DepreciationValue 
+                WHERE AssetId = @AssetId";
 
                     await connection.ExecuteAsync(updateQuery, new
                     {
-                        DepreciationValue = depreciationValue,
+                        DepreciationValue = asset.DepreciationValue,
                         AssetId = asset.AssetId
                     });
                 }
-                return Ok("Depreciation values updated.");
+
+                return Ok("Depreciation values updated for assets where the depreciation date has passed.");
             }
         }
 
-        private decimal CalculateDepreciation(AssetItem asset)
-        {
-            decimal depreciationValue = 0;
-            decimal rate = (asset.DepreciationRate ?? 0) / 100;
-
-            if (asset.DepreciationPeriodType == "year")
-            {
-                depreciationValue = asset.Cost * rate * asset.DepreciationPeriodValue;
-            }
-            else if (asset.DepreciationPeriodType == "month")
-            {
-                depreciationValue = asset.Cost * rate * (asset.DepreciationPeriodValue / 12);
-            }
-
-            return depreciationValue;
-        }
     }
 }
