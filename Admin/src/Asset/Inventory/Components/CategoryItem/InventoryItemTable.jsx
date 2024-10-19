@@ -86,19 +86,21 @@ export default function Inventory_table() {
     e.preventDefault();
 
     try {
-      await fetchData(`${API_URL}InsertAssetItem`, "POST", {
-        AssetName: addItem.AssetName,
-        DatePurchased: addItem.DatePurchased,
-        DateIssued: addItem.DateIssued,
-        IssuedTo: addItem.IssuedTo,
-        CheckedBy: addItem.CheckedBy,
-        Cost: parseFloat(addItem.Cost),
-        Location: addItem.Location,
-        AssetCode: addItem.AssetCode,
-        Remarks: addItem.Remarks,
-        DepreciationPeriodType: addItem.DepreciationPeriodType,
-        DepreciationPeriodValue: parseInt(addItem.DepreciationPeriodValue),
-        DepreciationRate: parseFloat(addItem.DepreciationRate),
+      await fetchData(`${API_URL}InsertAsset`, "POST", {
+        categoryID: categoryId,
+        assetName: addItem.AssetName,
+        datePurchased: addItem.DatePurchased,
+        dateIssued: addItem.DateIssued,
+        issuedTo: addItem.IssuedTo,
+        checkedBy: addItem.CheckedBy,
+        cost: parseFloat(addItem.Cost),
+        location: addItem.Location,
+        assetCode: addItem.AssetCode,
+        remarks: addItem.Remarks,
+        depreciationRate: parseFloat(addItem.DepreciationRate),
+        depreciationValue: parseFloat(addItem.Cost),
+        depreciationPeriodType: addItem.DepreciationPeriodType,
+        depreciationPeriodValue: parseInt(addItem.DepreciationPeriodValue),
       });
 
       toggleModal("add");
@@ -207,7 +209,6 @@ export default function Inventory_table() {
                 </table>
               )}
 
-              {/* Add Item Modal */}
               {modals.add && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                   <div className="bg-white rounded-lg w-11/12 md:w-1/2 p-6 relative">
@@ -221,19 +222,24 @@ export default function Inventory_table() {
                       Add New Asset
                     </h2>
                     <form onSubmit={handleAddAssetItem} className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium">
-                          Asset Name
-                        </label>
-                        <input
-                          type="text"
-                          name="AssetName"
-                          value={addItem.AssetName}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                          required
-                        />
+                      {/* Asset Name and Category ID */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium">
+                            Asset Name
+                          </label>
+                          <input
+                            type="text"
+                            name="AssetName"
+                            value={addItem.AssetName}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                            required
+                          />
+                        </div>
                       </div>
+
+                      {/* Date Purchased and Date Issued */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium">
@@ -260,18 +266,36 @@ export default function Inventory_table() {
                           />
                         </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium">
-                          Issued To
-                        </label>
-                        <input
-                          type="text"
-                          name="IssuedTo"
-                          value={addItem.IssuedTo}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                        />
+
+                      {/* Issued To and Checked By */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium">
+                            Issued To
+                          </label>
+                          <input
+                            type="text"
+                            name="IssuedTo"
+                            value={addItem.IssuedTo}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium">
+                            Checked By
+                          </label>
+                          <input
+                            type="text"
+                            name="CheckedBy"
+                            value={addItem.CheckedBy}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
                       </div>
+
+                      {/* Cost and Location */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium">
@@ -299,6 +323,79 @@ export default function Inventory_table() {
                         </div>
                       </div>
 
+                      {/* Asset Code and Remarks */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium">
+                            Asset Code
+                          </label>
+                          <input
+                            type="text"
+                            name="AssetCode"
+                            value={addItem.AssetCode}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium">
+                            Remarks
+                          </label>
+                          <input
+                            type="text"
+                            name="Remarks"
+                            value={addItem.Remarks}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Depreciation Rate and Depreciation Period */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium">
+                            Depreciation Rate (%)
+                          </label>
+                          <input
+                            type="number"
+                            name="DepreciationRate"
+                            value={addItem.DepreciationRate}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium">
+                            Depreciation Period Type
+                          </label>
+                          <select
+                            name="DepreciationPeriodType"
+                            value={addItem.DepreciationPeriodType}
+                            onChange={handleInputChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="month">Month</option>
+                            <option value="year">Year</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Depreciation Period Value */}
+                      <div>
+                        <label className="block text-sm font-medium">
+                          Depreciation Period Value
+                        </label>
+                        <input
+                          type="number"
+                          name="DepreciationPeriodValue"
+                          value={addItem.DepreciationPeriodValue}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+
+                      {/* Submit Button */}
                       <button
                         type="submit"
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md"
