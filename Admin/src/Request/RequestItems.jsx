@@ -49,10 +49,14 @@ export default function RequestItems() {
   };
   const closeViewModal = () => setViewModalOpen(false);
 
+  // const filteredItems = items.filter(
+  //   (item) =>
+  //     item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+  //     (statusQuery === "" || item.status === statusQuery)
+  // );
+
   const filteredItems = items.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (statusQuery === "" || item.status === statusQuery)
+    (item) => item.Admin1 === "Pending" // Only show pending Admin1 approval
   );
 
   const getStatusInfo = (status) => {
