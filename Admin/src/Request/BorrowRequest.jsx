@@ -122,8 +122,6 @@ export default function BorrowedItems() {
     }
   };
 
-  // Filter items based on search and status query
-  // Filter items based on search and status query, and only show "Pending" Admin1Approval
   const filteredItems = items.filter(
     (item) =>
       item.RequestedBy.toLowerCase().includes(searchQuery.toLowerCase()) &&

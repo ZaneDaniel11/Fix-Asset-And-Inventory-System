@@ -150,6 +150,20 @@ const Sidebar = () => {
             </li>
           </ul>
         </li>
+
+        <li>
+          <a href="Logs">
+            <i className="fa-regular fa-user"></i>
+            <span className="link_name">Logs</span>
+          </a>
+          <ul className="sub-menu blank">
+            <li>
+              <a className="link_name" href="#">
+                Logs
+              </a>
+            </li>
+          </ul>
+        </li>
         <li>
           <div className="profile-details">
             <div className="profile-content"></div>
