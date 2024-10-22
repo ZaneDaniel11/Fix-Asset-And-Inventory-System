@@ -184,6 +184,9 @@ export default function BorrowedItems() {
                       <td className="column4">{item.Purpose}</td>
                       <td className="column5">{item.Status}</td>
                       <td className="column6">{item.Admin1Approval}</td>
+                      <td className="column6">{item.Admin2Approval}</td>
+                      <td className="column6">{item.Admin3Approval}</td>
+                      <td className="column6">{item.ReturnStatus}</td>
                       <td className="flex items-center justify-center mt-2 space-x-2">
                         <button
                           type="button"
