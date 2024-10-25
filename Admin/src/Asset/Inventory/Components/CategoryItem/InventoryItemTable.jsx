@@ -35,7 +35,10 @@ export default function Inventory_table() {
     delete: false,
     view: false,
     addQuantity: false,
+    viewDepreciation: false,
   });
+  const [depreciationData, setDepreciationData] = useState(null);
+
   const [selectedItem, setSelectedItem] = useState(null);
 
   const [addItem, setAddItem] = useState({
@@ -56,6 +59,22 @@ export default function Inventory_table() {
   const toggleModal = (type) => {
     setModals((prev) => ({ ...prev, [type]: !prev[type] }));
   };
+  async function fetchDepreciationSchedule(assetId) {
+    try {
+      const response = await fetch(
+        `${API_URL}ViewDepreciationSchedule?assetId=${assetId}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(data);
+      setDepreciationData(data); // Use state to store fetched depreciation data
+    } catch (error) {
+      console.error("Failed to fetch depreciation schedule:", error);
+    }
+  }
 
   useEffect(() => {
     if (categoryId) {
@@ -207,11 +226,12 @@ export default function Inventory_table() {
                             <button
                               onClick={() => {
                                 setSelectedItem(item);
-                                toggleModal("addQuantity");
+                                fetchDepreciationSchedule(item.assetId); // Fetch depreciation data for selected item
+                                toggleModal("viewDepreciation");
                               }}
-                              className="text-white bg-yellow-500 hover:bg-yellow-600 rounded-lg text-sm px-4 py-1"
+                              className="text-white bg-blue-500 hover:bg-blue-600 rounded-lg text-sm px-4 py-1"
                             >
-                              <i className="fa-solid fa-plus"></i>
+                              <i className="fa-solid fa-calendar"></i>
                             </button>
                           </td>
                         </tr>
@@ -455,6 +475,65 @@ export default function Inventory_table() {
                         Cancel
                       </button>
                     </div>
+                  </div>
+                </div>
+              )}
+              {modals.viewDepreciation && (
+                <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
+                  <div className="bg-white rounded-xl shadow-lg w-10/12 md:w-2/3 lg:w-1/3 max-h-[90vh] overflow-y-auto p-8 relative">
+                    <button
+                      className="absolute top-4 right-4 text-gray-700 text-2xl font-bold hover:text-red-500 transition"
+                      onClick={() => toggleModal("viewDepreciation")}
+                    >
+                      &times;
+                    </button>
+                    <h2 className="text-3xl font-semibold text-center mb-6 text-gray-800">
+                      Depreciation Schedule
+                    </h2>
+                    {depreciationData ? (
+                      <div className="space-y-6">
+                        {depreciationData.map((entry, index) => {
+                          const date = new Date(entry.DepreciationDate);
+                          const formattedDate = date.toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            }
+                          );
+                          return (
+                            <div
+                              key={index}
+                              className="p-4 rounded-lg border border-gray-200 shadow-sm"
+                            >
+                              <p className="text-lg">
+                                <span className="font-semibold text-gray-600">
+                                  Date:
+                                </span>{" "}
+                                {formattedDate}
+                              </p>
+                              <p className="text-lg">
+                                <span className="font-semibold text-gray-600">
+                                  Depreciation Amount:
+                                </span>{" "}
+                                {entry.depreciationAmount}
+                              </p>
+                              <p className="text-lg">
+                                <span className="font-semibold text-gray-600">
+                                  Remaining Value:
+                                </span>{" "}
+                                {entry.DepreciationValue}
+                              </p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-center text-gray-500">
+                        Loading depreciation data...
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
