@@ -424,12 +424,85 @@ public async Task<IActionResult> UpdateApprovalAdmin3(int borrowId, [FromBody] U
             }
         }
     }
+
+    
+}
+
+        
+      [HttpPut("UpdateReturnStatus/{borrowId}")]
+public async Task<IActionResult> UpdateReturnStatus(int borrowId, [FromBody] UpdateReturnStatusRequest request)
+{
+    if (request == null || string.IsNullOrEmpty(request.ReturnStatus))
+        return BadRequest("Invalid request. ReturnStatus must be provided.");
+
+    using (var connection = new SqliteConnection(_connectionString))
+    {
+        await connection.OpenAsync();
+
+        using (var transaction = connection.BeginTransaction())
+        {
+            try
+            {
+                // Update only the ReturnStatus field
+                string updateReturnStatusQuery = @"
+                    UPDATE Borrowreq_tb 
+                    SET ReturnStatus = @ReturnStatus
+                    WHERE BorrowId = @BorrowId";
+
+                await connection.ExecuteAsync(updateReturnStatusQuery, new
+                {
+                    ReturnStatus = request.ReturnStatus,
+                    BorrowId = borrowId
+                }, transaction);
+
+                // If the ReturnStatus is "Returned", update the quantity in items_db
+                if (request.ReturnStatus == "Returned")
+                {
+                    // Query to get borrowed items with their quantities
+                    string selectBorrowedItemsQuery = @"
+                        SELECT ItemID, Quantity 
+                        FROM BorrowItems_tb 
+                        WHERE BorrowId = @BorrowId";
+
+                    var borrowedItems = await connection.QueryAsync(selectBorrowedItemsQuery, new
+                    {
+                        BorrowId = borrowId
+                    }, transaction);
+
+                    // Update each item's quantity in items_db
+                    foreach (var item in borrowedItems)
+                    {
+                        string updateItemQuantityQuery = @"
+                            UPDATE items_db 
+                            SET Quantity = Quantity + @Quantity
+                            WHERE ItemID = @ItemID";
+
+                        await connection.ExecuteAsync(updateItemQuantityQuery, new
+                        {
+                            Quantity = item.Quantity,
+                            ItemID = item.ItemID
+                        }, transaction);
+                    }
+                }
+
+                transaction.Commit();
+                return Ok("Return status and item quantities updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+    }
 }
 
 
+    }
 
-
-
+ public class UpdateReturnStatusRequest
+    {
+        public string ReturnStatus { get; set; }
     }
 
     // Model for Borrow Request

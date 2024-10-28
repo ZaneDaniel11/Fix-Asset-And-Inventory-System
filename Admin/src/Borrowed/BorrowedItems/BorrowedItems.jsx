@@ -9,12 +9,15 @@ export default function BorrowedItems() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [borrowedItems, setBorrowedItems] = useState([]);
-  const [borrowLoading, setBorrowLoading] = useState(false);
-  const [adminApproval, setAdminApproval] = useState("");
-  const [isUpdating, setIsUpdating] = useState(false); // Track update state
 
-  // Fetch all borrow requests on component load
+  const [adminApproval, setAdminApproval] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [returnStatus, setReturnStatus] = useState(""); // New state for return status
+  const [status, setStatus] = useState(""); // New state for main status
+
+  const [borrowedItems, setBorrowedItems] = useState([]); // State to hold borrowed items
+  const [borrowLoading, setBorrowLoading] = useState(false); // State for loading borrowed items
+
   useEffect(() => {
     const fetchBorrowRequests = async () => {
       try {
@@ -32,11 +35,9 @@ export default function BorrowedItems() {
         setLoading(false);
       }
     };
-
     fetchBorrowRequests();
   }, []);
 
-  // Fetch the details of borrowed items for a specific borrow request
   const fetchBorrowItems = async (borrowId) => {
     setBorrowLoading(true);
     try {
@@ -55,77 +56,66 @@ export default function BorrowedItems() {
     }
   };
 
-  // Open the modal to view borrowed items
   const openViewModal = (item) => {
     setCurrentItem(item);
     setViewModalOpen(true);
     fetchBorrowItems(item.BorrowId);
   };
 
-  // Open the modal to update admin approval
   const openUpdateModal = (item) => {
     setCurrentItem(item);
-    setAdminApproval(item.Admin1Approval); // Pre-fill admin approval
+    setAdminApproval(item.Admin1Approval);
+    setStatus(item.Status); // Set initial status
+    setReturnStatus(item.ReturnStatus); // Set initial return status
     setUpdateModalOpen(true);
   };
 
-  // Close the view modal
   const closeViewModal = () => {
     setViewModalOpen(false);
     setCurrentItem(null);
     setBorrowedItems([]);
   };
 
-  // Close the update modal
   const closeUpdateModal = () => {
     setUpdateModalOpen(false);
     setCurrentItem(null);
   };
 
-  // Handle admin approval update
   const handleUpdate = async () => {
-    setIsUpdating(true); // Set updating state to true
+    setIsUpdating(true);
     try {
+      const updatedItem = {
+        returnStatus: returnStatus, // Only include `returnStatus` field
+      };
+
       const response = await fetch(
-        `http://localhost:5075/api/BorrowRequestApi/UpdateApproval/${currentItem.BorrowId}`,
+        `http://localhost:5075/api/BorrowRequestApi/UpdateReturnStatus/${currentItem.BorrowId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ Admin1Approval: adminApproval }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedItem),
         }
       );
-      if (!response.ok) {
-        throw new Error("Failed to update approval status");
-      }
 
-      // Optionally refresh the items or display success notification
-      const updatedItems = items.map((item) =>
-        item.BorrowId === currentItem.BorrowId
-          ? {
-              ...item,
-              Admin1Approval: adminApproval,
-              Status:
-                adminApproval === "Approved" ? "In Progress" : item.Status,
-            }
-          : item
-      );
-      setItems(updatedItems);
+      if (!response.ok) {
+        console.log("Response status:", response.status);
+        console.log("Response text:", await response.text());
+        throw new Error("Failed to update borrow request");
+      }
 
       closeUpdateModal();
     } catch (error) {
       setError(error.message);
     } finally {
-      setIsUpdating(false); // Reset updating state
+      setIsUpdating(false);
     }
   };
 
-  // Filter items based on search and status query
   const filteredItems = items.filter(
     (item) =>
       item.RequestedBy.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (statusQuery === "" || item.Status === statusQuery)
+      (statusQuery === "" || item.Status === statusQuery) &&
+      item.Admin3Approval === "Approved"
   );
 
   if (loading) {
@@ -170,9 +160,10 @@ export default function BorrowedItems() {
                     <th className="column4">Purpose</th>
                     <th className="column5">Status</th>
                     <th className="column6">Approval</th>
-                    <th className="column7" style={{ paddingRight: 20 }}>
-                      Actions
-                    </th>
+                    <th className="column6">Approval2</th>
+                    <th className="column6">Approval3</th>
+                    <th className="column6">ReturnStatus</th>
+                    <th className="column7">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -215,7 +206,7 @@ export default function BorrowedItems() {
       {/* View Modal */}
       {viewModalOpen && currentItem && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
             <button
               onClick={closeViewModal}
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
@@ -236,35 +227,21 @@ export default function BorrowedItems() {
               </svg>
             </button>
             <h2 className="text-2xl font-semibold mb-4">
-              Borrowed Items for Borrow ID: {currentItem.BorrowId}
+              Borrowed Items for Request: {currentItem.BorrowId}
             </h2>
             {borrowLoading ? (
-              <div>Loading borrowed items...</div>
-            ) : borrowedItems.length > 0 ? (
-              <ul className="space-y-2">
-                {borrowedItems.map((item) => (
-                  <li
-                    key={item.ItemId}
-                    className="border-b pb-2 border-gray-200"
-                  >
-                    <span className="font-medium">{item.ItemName}</span> -{" "}
-                    Quantity: {item.Quantity}
+              <div>Loading items...</div>
+            ) : (
+              <ul>
+                {borrowedItems.map((item, index) => (
+                  <li key={index}>
+                    <strong>Item Name:</strong> {item.ItemName}
+                    <br />
+                    <strong>Quantity:</strong> {item.Quantity}
                   </li>
                 ))}
               </ul>
-            ) : (
-              <div className="text-gray-500">
-                No items found for this borrow request.
-              </div>
             )}
-            <div className="flex justify-end mt-4">
-              <button
-                onClick={closeViewModal}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-              >
-                Close
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -293,33 +270,33 @@ export default function BorrowedItems() {
               </svg>
             </button>
             <h2 className="text-2xl font-semibold mb-4">
-              Update Borrow Request: {currentItem.BorrowId}
+              Update Borrow Request
             </h2>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">
-                Admin 1 Approval
+            <form onSubmit={(e) => e.preventDefault()}>
+              {/* Select for Return Status */}
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Return Status
               </label>
               <select
-                value={adminApproval}
-                onChange={(e) => setAdminApproval(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
+                value={returnStatus}
+                onChange={(e) => setReturnStatus(e.target.value)}
+                className="w-full p-2 mb-4 border rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
               >
+                <option value="">Select Status</option>
                 <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
+                <option value="Returned">Returned</option>
+                <option value="Not Returned">Not Returned</option>
               </select>
-            </div>
-            <div className="flex justify-end">
+
+              {/* Update Button */}
               <button
+                type="button"
                 onClick={handleUpdate}
-                disabled={isUpdating}
-                className={`bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 ${
-                  isUpdating ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5"
               >
-                {isUpdating ? "Updating..." : "Save Changes"}
+                {isUpdating ? "Updating..." : "Update"}
               </button>
-            </div>
+            </form>
           </div>
         </div>
       )}
