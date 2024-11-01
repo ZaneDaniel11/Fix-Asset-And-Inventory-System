@@ -1,5 +1,5 @@
-// Inventory Admin
-import { Route, Routes, useLocation } from "react-router-dom";
+import React from "react";
+import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import Login from "./Login.jsx";
 import Maintenance from "./Tables/Maintenance.jsx";
 import Users from "./Tables/User.jsx";
@@ -17,31 +17,69 @@ import AssetInvenTable from "./Asset/Inventory/Components/CategoryItem/Inventory
 
 function App() {
   const location = useLocation();
+  const isAuthenticated = !!localStorage.getItem("token"); // Check if token is present
+  const showSidebar = isAuthenticated && location.pathname !== "/";
 
-  // Check if the current path is "/Login"
-  const showSidebar = location.pathname !== "/Login";
+  // Route guard for protected routes
+  const ProtectedRoute = ({ element }) => {
+    return isAuthenticated ? element : <Navigate to="/" replace />;
+  };
 
   return (
     <div>
-      {showSidebar && <Sidebar />}{" "}
-      {/* Show Sidebar on all routes except /Login */}
+      {showSidebar && <Sidebar />} {/* Show Sidebar only when authenticated */}
       <div className={showSidebar ? "home-section" : ""}>
-        {" "}
-        {/* Adjust layout when Sidebar is present */}
         <Routes>
-          <Route exact path="/" element={<Dashboard />} />
-          <Route exact path="/Login" element={<Login />} />
-          <Route exact path="/Request" element={<RequestItems />} />
-          <Route exact path="/Inventory" element={<Inventory />} />
-          <Route exact path="/Maintenance" element={<Maintenance />} />
-          <Route exact path="/Users" element={<Users />} />
-          <Route exact path="/InventoryTable" element={<Inventory_table />} />
-          <Route exact path="/BorrowedRequest" element={<BorrowedRequest />} />
-          <Route exact path="/RequestItem" element={<RequestItems />} />
-          <Route exact path="/BorrowedTable" element={<BorrowedItems />} />
+          {/* Public route */}
+          <Route path="/" element={<Login />} />
+
+          {/* Protected routes */}
+          <Route
+            path="/Dashboard"
+            element={<ProtectedRoute element={<Dashboard />} />}
+          />
+          <Route
+            path="/Request"
+            element={<ProtectedRoute element={<RequestItems />} />}
+          />
+          <Route
+            path="/Inventory"
+            element={<ProtectedRoute element={<Inventory />} />}
+          />
+          <Route
+            path="/Maintenance"
+            element={<ProtectedRoute element={<Maintenance />} />}
+          />
+          <Route
+            path="/Users"
+            element={<ProtectedRoute element={<Users />} />}
+          />
+          <Route
+            path="/InventoryTable"
+            element={<ProtectedRoute element={<Inventory_table />} />}
+          />
+          <Route
+            path="/BorrowedRequest"
+            element={<ProtectedRoute element={<BorrowedRequest />} />}
+          />
+          <Route
+            path="/RequestItem"
+            element={<ProtectedRoute element={<RequestItems />} />}
+          />
+          <Route
+            path="/BorrowedTable"
+            element={<ProtectedRoute element={<BorrowedItems />} />}
+          />
+
           {/* Asset Section */}
-          <Route exact path="/AssetInventory" element={<AssetInventory />} />
-          <Route exact path="/AssetItemTable" element={<AssetInvenTable />} />
+          <Route
+            path="/AssetInventory"
+            element={<ProtectedRoute element={<AssetInventory />} />}
+          />
+          <Route
+            path="/AssetItemTable"
+            element={<ProtectedRoute element={<AssetInvenTable />} />}
+          />
         </Routes>
       </div>
     </div>
