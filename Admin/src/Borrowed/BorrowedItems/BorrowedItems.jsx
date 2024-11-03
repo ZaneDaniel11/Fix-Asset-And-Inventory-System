@@ -5,7 +5,7 @@ export default function BorrowedItems() {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusQuery, setStatusQuery] = useState("");
+  const [returnStatusQuery, setReturnStatusQuery] = useState(""); // New state for return status filter
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,8 +15,8 @@ export default function BorrowedItems() {
   const [returnStatus, setReturnStatus] = useState(""); // New state for return status
   const [status, setStatus] = useState(""); // New state for main status
 
-  const [borrowedItems, setBorrowedItems] = useState([]); // State to hold borrowed items
-  const [borrowLoading, setBorrowLoading] = useState(false); // State for loading borrowed items
+  const [borrowedItems, setBorrowedItems] = useState([]);
+  const [borrowLoading, setBorrowLoading] = useState(false);
 
   useEffect(() => {
     const fetchBorrowRequests = async () => {
@@ -65,8 +65,8 @@ export default function BorrowedItems() {
   const openUpdateModal = (item) => {
     setCurrentItem(item);
     setAdminApproval(item.Admin1Approval);
-    setStatus(item.Status); // Set initial status
-    setReturnStatus(item.ReturnStatus); // Set initial return status
+    setStatus(item.Status);
+    setReturnStatus(item.ReturnStatus);
     setUpdateModalOpen(true);
   };
 
@@ -85,7 +85,7 @@ export default function BorrowedItems() {
     setIsUpdating(true);
     try {
       const updatedItem = {
-        returnStatus: returnStatus, // Only include `returnStatus` field
+        returnStatus: returnStatus,
       };
 
       const response = await fetch(
@@ -111,10 +111,11 @@ export default function BorrowedItems() {
     }
   };
 
+  // Filter items based on search query, status, and return status
   const filteredItems = items.filter(
     (item) =>
       item.RequestedBy.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (statusQuery === "" || item.Status === statusQuery) &&
+      (returnStatusQuery === "" || item.ReturnStatus === returnStatusQuery) &&
       item.Admin3Approval === "Approved"
   );
 
@@ -140,15 +141,15 @@ export default function BorrowedItems() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="p-2 border rounded border-black"
                 />
+
                 <select
-                  value={statusQuery}
-                  onChange={(e) => setStatusQuery(e.target.value)}
+                  value={returnStatusQuery}
+                  onChange={(e) => setReturnStatusQuery(e.target.value)}
                   className="p-2 border rounded border-black"
                 >
-                  <option value="">All Statuses</option>
-                  <option value="Complete">Complete</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Pending">Pending</option>
+                  <option value="">All Return Statuses</option>
+                  <option value="Returned">Returned</option>
+                  <option value="Not Returned">Not Returned</option>
                 </select>
               </div>
               <table>

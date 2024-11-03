@@ -15,7 +15,7 @@ const Sidebar = () => {
     const storedUsername = localStorage.getItem("username");
     if (storedUsername) setUsername(storedUsername);
   }, []);
-  
+
   // ... rest of the code remains the same
 
   const handleLogout = () => {
@@ -54,7 +54,7 @@ const Sidebar = () => {
           </a>
         </li>
         <li>
-          <a href="/">
+          <a href="/Dashboard">
             <i className="bx bx-grid-alt"></i>
             <span className="link_name">Dashboard</span>
           </a>

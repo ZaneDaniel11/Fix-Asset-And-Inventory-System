@@ -14,6 +14,7 @@ import BorrowedItems from "./Borrowed/BorrowedItems/BorrowedItems.jsx";
 // Asset Admin
 import AssetInventory from "./Asset/Inventory/AInventory.jsx";
 import AssetInvenTable from "./Asset/Inventory/Components/CategoryItem/InventoryItemTable.jsx";
+import Logs from "./Logs/Log.jsx";
 
 function App() {
   const location = useLocation();
@@ -80,6 +81,7 @@ function App() {
             path="/AssetItemTable"
             element={<ProtectedRoute element={<AssetInvenTable />} />}
           />
+          <Route path="/Logs" element={<ProtectedRoute element={<Logs />} />} />
         </Routes>
       </div>
     </div>
