@@ -1,61 +1,64 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "boxicons/css/boxicons.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "../Css/Sidebar.css";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+
   useEffect(() => {
-    const arrow = document.querySelectorAll(".arrow");
+    // Retrieve the username from localStorage (assuming it's stored under "username")
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+
+    const arrowElements = document.querySelectorAll(".arrow");
     const sidebar = document.querySelector(".sidebar");
     const sidebarBtn = document.querySelector(".bx-menu");
 
-    // Add event listeners to arrow elements if they exist
-    if (arrow.length > 0) {
-      for (let i = 0; i < arrow.length; i++) {
-        arrow[i].addEventListener("click", (e) => {
-          let arrowParent = e.target.parentElement.parentElement; // select the main parent of arrow
-          arrowParent.classList.toggle("showMenu");
-        });
-      }
-    }
+    arrowElements.forEach((arrow) => {
+      arrow.addEventListener("click", (e) => {
+        let arrowParent = e.target.closest(".iocn-link"); // select the main parent of arrow
+        arrowParent.classList.toggle("showMenu");
+      });
+    });
 
-    // Add event listener to the sidebar button if it exists
     if (sidebarBtn) {
       sidebarBtn.addEventListener("click", () => {
-        if (sidebar) {
-          sidebar.classList.toggle("close");
-        }
+        sidebar.classList.toggle("close");
       });
     }
+
     const handleLogout = () => {
       localStorage.removeItem("token"); // Remove the token from local storage
+      localStorage.removeItem("username"); // Remove the username from local storage
       navigate("/"); // Redirect to the login page
     };
 
     // Clean up event listeners on component unmount
     return () => {
-      for (let i = 0; i < arrow.length; i++) {
-        arrow[i].removeEventListener("click", (e) => {
-          let arrowParent = e.target.parentElement.parentElement; // select the main parent of arrow
+      arrowElements.forEach((arrow) => {
+        arrow.removeEventListener("click", (e) => {
+          let arrowParent = e.target.closest(".iocn-link");
           arrowParent.classList.toggle("showMenu");
         });
-      }
+      });
       if (sidebarBtn) {
         sidebarBtn.removeEventListener("click", () => {
-          if (sidebar) {
-            sidebar.classList.toggle("close");
-          }
+          sidebar.classList.toggle("close");
         });
       }
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="sidebar close">
       <div className="logo-details">
         <i className="bx bxl-c-plus-plus bx-menu" id="sidebar-toggle"></i>
         <span className="logo_name">Fix Asset</span>
-        {/* <i className="bx bx-menu"></i> Sidebar toggle button */}
       </div>
       <ul className="nav-links">
         <li>
@@ -123,7 +126,7 @@ const Sidebar = () => {
           </ul>
         </li>
         <li>
-          <a href="Users">
+          <a href="/Users">
             <i className="fa-regular fa-user"></i>
             <span className="link_name">User</span>
           </a>
@@ -154,9 +157,8 @@ const Sidebar = () => {
             </li>
           </ul>
         </li>
-
         <li>
-          <a href="Logs">
+          <a href="/Logs">
             <i className="fa-regular fa-user"></i>
             <span className="link_name">Logs</span>
           </a>
@@ -173,11 +175,10 @@ const Sidebar = () => {
           <div className="profile-details">
             <div className="profile-content"></div>
             <div className="name-job">
-              <div className="profile_name">Zane Daniel</div>
+              <div className="profile_name">{username || "Zane Daniel"}</div>
               <div className="job">Admin</div>
             </div>
-            <i className="bx bx-log-out" onClick={handleLogout}></i>{" "}
-            {/* Logout icon */}
+            <i className="bx bx-log-out" onClick={() => handleLogout()}></i>
           </div>
         </li>
       </ul>

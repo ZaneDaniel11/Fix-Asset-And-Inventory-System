@@ -2,117 +2,98 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous error messages
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/LoginApi/Authenticate",
+        "http://localhost:5075/api/LoginApi/Authenticate",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ UserName: email, Password: password }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ UserName: username, Password: password }),
         }
       );
 
       if (!response.ok) {
-        const data = await response.json();
-        setError(data.message || "Invalid login credentials");
+        const errorText = await response.text();
+        alert(errorText || "Login failed");
         return;
       }
 
       const data = await response.json();
-      localStorage.setItem("token", data.token); // Store JWT token in localStorage
-      navigate("/"); // Redirect to dashboard after successful login
-    } catch (err) {
-      console.error("Login failed:", err);
-      setError("Something went wrong. Please try again.");
+      console.log(`"Hey":${data}`);
+
+      // Store the token, username, and userId in local storage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", username);
+      localStorage.setItem("userId", data.userId); // Store the userId
+      localStorage.setItem("userType", data.userType);
+
+      navigate("/Dashboard");
+    } catch (error) {
+      console.error("There was an error making the request", error);
+      alert("An unexpected error occurred. Please try again later.");
     }
   };
 
   return (
-    <div>
-      <div className="min-h-screen flex items-center justify-center w-full dark:bg-gray-950">
-        <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg px-8 py-6 max-w-md">
-          <h1 className="text-2xl font-bold text-center mb-4 dark:text-gray-200">
-            Welcome Back!
-          </h1>
-          <form onSubmit={handleLogin}>
-            <div className="mb-4">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                className="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                className="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <a
-                href="#"
-                className="text-xs text-gray-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Forgot Password?
-              </a>
-            </div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="relative mx-auto w-96 max-w-md bg-white px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:rounded-xl sm:px-10">
+        <div className="w-full">
+          <div className="text-center">
+            <h1 className="text-3xl font-semibold text-gray-900">Sign in</h1>
+          </div>
+          <div className="mt-5">
+            <form onSubmit={handleLogin}>
+              <div className="relative mt-6">
                 <input
-                  type="checkbox"
-                  id="remember"
-                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 focus:outline-none"
+                  type="text"
+                  name="username"
+                  id="username"
+                  placeholder="Username"
+                  className="peer mt-1 w-full border-b-2 border-gray-300 px-0 py-1 placeholder:text-transparent focus:border-gray-500 focus:outline-none"
+                  autoComplete="NA"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
                 <label
-                  htmlFor="remember"
-                  className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                  htmlFor="username"
+                  className="pointer-events-none absolute top-0 left-0 origin-left -translate-y-1/2 transform text-sm text-gray-800 opacity-75 transition-all duration-100 ease-in-out peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-0 peer-focus:pl-0 peer-focus:text-sm peer-focus:text-gray-800"
                 >
-                  Remember me
+                  Username
                 </label>
               </div>
-              <a
-                href="#"
-                className="text-xs text-indigo-500 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Create Account
-              </a>
-            </div>
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            <button
-              type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Login
-            </button>
-          </form>
+              <div className="relative mt-6">
+                <input
+                  type="password"
+                  name="password"
+                  id="password"
+                  placeholder="Password"
+                  className="peer mt-1 w-full border-b-2 border-gray-300 px-0 py-1 placeholder:text-transparent focus:border-gray-500 focus:outline-none"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <label
+                  htmlFor="password"
+                  className="pointer-events-none absolute top-0 left-0 origin-left -translate-y-1/2 transform text-sm text-gray-800 opacity-75 transition-all duration-100 ease-in-out peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-0 peer-focus:pl-0 peer-focus:text-sm peer-focus:text-gray-800"
+                >
+                  Password
+                </label>
+              </div>
+              <div className="my-6">
+                <button className="w-full rounded-md bg-MainColor px-3 py-4 text-white focus:bg-gray-600 focus:outline-none">
+                  Sign in
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
