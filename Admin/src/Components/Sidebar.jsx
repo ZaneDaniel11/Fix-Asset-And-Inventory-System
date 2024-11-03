@@ -7,57 +7,43 @@ import "../Css/Sidebar.css";
 const Sidebar = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
+  const [isSidebarClosed, setIsSidebarClosed] = useState(false); // Set to false for open by default
+  const [isRequestMenuOpen, setIsRequestMenuOpen] = useState(false);
+  const [isBorrowedMenuOpen, setIsBorrowedMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Retrieve the username from localStorage (assuming it's stored under "username")
     const storedUsername = localStorage.getItem("username");
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
+    if (storedUsername) setUsername(storedUsername);
+  }, []);
+  
+  // ... rest of the code remains the same
 
-    const arrowElements = document.querySelectorAll(".arrow");
-    const sidebar = document.querySelector(".sidebar");
-    const sidebarBtn = document.querySelector(".bx-menu");
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    navigate("/");
+  };
 
-    arrowElements.forEach((arrow) => {
-      arrow.addEventListener("click", (e) => {
-        let arrowParent = e.target.closest(".iocn-link"); // select the main parent of arrow
-        arrowParent.classList.toggle("showMenu");
-      });
-    });
+  const toggleSidebar = () => setIsSidebarClosed(!isSidebarClosed);
 
-    if (sidebarBtn) {
-      sidebarBtn.addEventListener("click", () => {
-        sidebar.classList.toggle("close");
-      });
-    }
+  const toggleRequestMenu = () => {
+    setIsRequestMenuOpen(!isRequestMenuOpen);
+    if (!isRequestMenuOpen) setIsBorrowedMenuOpen(false); // Close borrowed menu if open
+  };
 
-    const handleLogout = () => {
-      localStorage.removeItem("token"); // Remove the token from local storage
-      localStorage.removeItem("username"); // Remove the username from local storage
-      navigate("/"); // Redirect to the login page
-    };
-
-    // Clean up event listeners on component unmount
-    return () => {
-      arrowElements.forEach((arrow) => {
-        arrow.removeEventListener("click", (e) => {
-          let arrowParent = e.target.closest(".iocn-link");
-          arrowParent.classList.toggle("showMenu");
-        });
-      });
-      if (sidebarBtn) {
-        sidebarBtn.removeEventListener("click", () => {
-          sidebar.classList.toggle("close");
-        });
-      }
-    };
-  }, [navigate]);
+  const toggleBorrowedMenu = () => {
+    setIsBorrowedMenuOpen(!isBorrowedMenuOpen);
+    if (!isBorrowedMenuOpen) setIsRequestMenuOpen(false); // Close request menu if open
+  };
 
   return (
-    <div className="sidebar close">
+    <div className={`sidebar ${isSidebarClosed ? "close" : ""}`}>
       <div className="logo-details">
-        <i className="bx bxl-c-plus-plus bx-menu" id="sidebar-toggle"></i>
+        <i
+          className="bx bxl-c-plus-plus bx-menu"
+          id="sidebar-toggle"
+          onClick={toggleSidebar}
+        ></i>
         <span className="logo_name">Fix Asset</span>
       </div>
       <ul className="nav-links">
@@ -66,53 +52,36 @@ const Sidebar = () => {
             <i className="fa-solid fa-boxes-stacked"></i>
             <span className="link_name">Asset Inventory</span>
           </a>
-          <ul className="sub-menu blank">
-            <li>
-              <a className="link_name" href="#">
-                Asset Inventory
-              </a>
-            </li>
-          </ul>
         </li>
         <li>
           <a href="/">
             <i className="bx bx-grid-alt"></i>
             <span className="link_name">Dashboard</span>
           </a>
-          <ul className="sub-menu blank">
-            <li>
-              <a className="link_name" href="#">
-                Dashboard
-              </a>
-            </li>
-          </ul>
         </li>
         <li>
           <a href="/inventory">
             <i className="fa-solid fa-boxes-stacked"></i>
             <span className="link_name">Inventory</span>
           </a>
-          <ul className="sub-menu blank">
-            <li>
-              <a className="link_name" href="#">
-                Inventory
-              </a>
-            </li>
-          </ul>
         </li>
+
+        {/* Request Menu */}
         <li>
-          <div className="iocn-link">
-            <a href="/Request">
+          <div className="iocn-link" onClick={toggleRequestMenu}>
+            <a href="#" className="menu-item">
               <i className="bx bx-collection"></i>
               <span className="link_name">Request</span>
             </a>
-            <i className="bx bxs-chevron-down arrow"></i>
+            <i
+              className={`bx bxs-chevron-down arrow ${
+                isRequestMenuOpen ? "rotate" : ""
+              }`}
+            ></i>
           </div>
-          <ul className="sub-menu">
+          <ul className={`sub-menu ${isRequestMenuOpen ? "show" : ""}`}>
             <li>
-              <a className="link_name" href="#">
-                Request
-              </a>
+              <a href="#">Request</a>
             </li>
             <li>
               <a href="/BorrowedRequest">Borrow Request</a>
@@ -125,60 +94,50 @@ const Sidebar = () => {
             </li>
           </ul>
         </li>
+
         <li>
           <a href="/Users">
             <i className="fa-regular fa-user"></i>
             <span className="link_name">User</span>
           </a>
-          <ul className="sub-menu blank">
-            <li>
-              <a className="link_name" href="#">
-                User
-              </a>
-            </li>
-          </ul>
         </li>
+
+        {/* Borrowed Menu */}
         <li>
-          <div className="iocn-link">
-            <a href="/BorrowedTable">
+          <div className="iocn-link" onClick={toggleBorrowedMenu}>
+            <a href="#" className="menu-item">
               <i className="fa-solid fa-box-archive"></i>
               <span className="link_name">Borrowed</span>
             </a>
-            <i className="bx bxs-chevron-down arrow"></i>
+            <i
+              className={`bx bxs-chevron-down arrow ${
+                isBorrowedMenuOpen ? "rotate" : ""
+              }`}
+            ></i>
           </div>
-          <ul className="sub-menu">
+          <ul className={`sub-menu ${isBorrowedMenuOpen ? "show" : ""}`}>
             <li>
-              <a className="link_name" href="#">
-                Borrowed
-              </a>
+              <a href="#">Borrowed</a>
             </li>
             <li>
               <a href="/BorrowedTable">Borrowed Items</a>
             </li>
           </ul>
         </li>
+
         <li>
           <a href="/Logs">
             <i className="fa-regular fa-user"></i>
             <span className="link_name">Logs</span>
           </a>
-          <ul className="sub-menu blank">
-            <li>
-              <a className="link_name" href="#">
-                Logs
-              </a>
-            </li>
-          </ul>
         </li>
-
         <li>
           <div className="profile-details">
-            <div className="profile-content"></div>
             <div className="name-job">
               <div className="profile_name">{username || "Zane Daniel"}</div>
               <div className="job">Admin</div>
             </div>
-            <i className="bx bx-log-out" onClick={() => handleLogout()}></i>
+            <i className="bx bx-log-out" onClick={handleLogout}></i>
           </div>
         </li>
       </ul>
