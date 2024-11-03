@@ -27,6 +27,10 @@ const Sidebar = () => {
         }
       });
     }
+    const handleLogout = () => {
+      localStorage.removeItem("token"); // Remove the token from local storage
+      navigate("/"); // Redirect to the login page
+    };
 
     // Clean up event listeners on component unmount
     return () => {
@@ -164,6 +168,7 @@ const Sidebar = () => {
             </li>
           </ul>
         </li>
+
         <li>
           <div className="profile-details">
             <div className="profile-content"></div>
@@ -171,7 +176,8 @@ const Sidebar = () => {
               <div className="profile_name">Zane Daniel</div>
               <div className="job">Admin</div>
             </div>
-            <i className="bx bx-log-out"></i>
+            <i className="bx bx-log-out" onClick={handleLogout}></i>{" "}
+            {/* Logout icon */}
           </div>
         </li>
       </ul>

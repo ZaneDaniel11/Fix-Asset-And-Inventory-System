@@ -5,7 +5,7 @@ import Maintenance from "./Tables/Maintenance.jsx";
 import Users from "./Tables/User.jsx";
 import Inventory from "./Inventory.jsx";
 import Dashboard from "./Dashboard.jsx";
-import Inventory_table from "./Tables/Inventory_table.jsx";
+import InventoryTable from "./Tables/Inventory_table.jsx";
 import BorrowedRequest from "./Request/BorrowRequest.jsx";
 import RequestItems from "./Request/RequestItems.jsx";
 import Sidebar from "./Components/Sidebar.jsx";
@@ -56,7 +56,7 @@ function App() {
           />
           <Route
             path="/InventoryTable"
-            element={<ProtectedRoute element={<Inventory_table />} />}
+            element={<ProtectedRoute element={<InventoryTable />} />}
           />
           <Route
             path="/BorrowedRequest"
