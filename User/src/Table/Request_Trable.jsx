@@ -92,7 +92,7 @@ export default function Request_History() {
     setBorrowLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:5075/api/BorrowItemsApi/${borrowId}`
+        `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${borrowId}`
       );
       if (!response.ok) throw new Error("Failed to fetch borrowed items");
 
@@ -308,13 +308,10 @@ export default function Request_History() {
               {borrowedItems.map((item, index) => (
                 <li key={index}>
                   <p>
-                    <strong>Item Name:</strong> {item.name}
+                    <strong>Item Name:</strong> {item.ItemName}
                   </p>
                   <p>
-                    <strong>Quantity:</strong> {item.quantity}
-                  </p>
-                  <p>
-                    <strong>Description:</strong> {item.description}
+                    <strong>Quantity:</strong> {item.Quantity}
                   </p>
                 </li>
               ))}
