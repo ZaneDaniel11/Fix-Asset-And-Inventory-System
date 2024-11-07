@@ -7,7 +7,7 @@ import "../Css/Sidebar.css";
 const Sidebar = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
-  const [isSidebarClosed, setIsSidebarClosed] = useState(false); // Set to false for open by default
+  const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const [isRequestMenuOpen, setIsRequestMenuOpen] = useState(false);
   const [isBorrowedMenuOpen, setIsBorrowedMenuOpen] = useState(false);
 
@@ -15,8 +15,6 @@ const Sidebar = () => {
     const storedUsername = localStorage.getItem("username");
     if (storedUsername) setUsername(storedUsername);
   }, []);
-
-  // ... rest of the code remains the same
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -54,6 +52,12 @@ const Sidebar = () => {
           </a>
         </li>
         <li>
+          <a href="/Schedule">
+            <i className="fa-solid fa-boxes-stacked"></i>
+            <span className="link_name">Schedule</span>
+          </a>
+        </li>
+        <li>
           <a href="/Dashboard">
             <i className="bx bx-grid-alt"></i>
             <span className="link_name">Dashboard</span>
@@ -80,9 +84,6 @@ const Sidebar = () => {
             ></i>
           </div>
           <ul className={`sub-menu ${isRequestMenuOpen ? "show" : ""}`}>
-            <li>
-              <a href="#">Request</a>
-            </li>
             <li>
               <a href="/BorrowedRequest">Borrow Request</a>
             </li>
@@ -116,9 +117,6 @@ const Sidebar = () => {
             ></i>
           </div>
           <ul className={`sub-menu ${isBorrowedMenuOpen ? "show" : ""}`}>
-            <li>
-              <a href="#">Borrowed</a>
-            </li>
             <li>
               <a href="/BorrowedTable">Borrowed Items</a>
             </li>
