@@ -14,10 +14,11 @@ import {
 const events = [
   {
     Id: 1,
-    Subject: "Team Meeting",
+    Subject: "Schedule Maintenace",
     StartTime: new Date(2024, 10, 8, 10, 0),
     EndTime: new Date(2024, 10, 8, 11, 0),
-    Location: "Conference Room 1",
+    Location: "Lab1",
+    Asset: "Shesh1",
   },
   {
     Id: 2,
@@ -25,6 +26,7 @@ const events = [
     StartTime: new Date(2024, 10, 9, 14, 0),
     EndTime: new Date(2024, 10, 9, 15, 30),
     Location: "Online",
+    Asset: "Shesh1",
   },
 ];
 
