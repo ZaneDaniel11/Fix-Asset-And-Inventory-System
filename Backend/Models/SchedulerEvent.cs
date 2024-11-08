@@ -1,4 +1,4 @@
-namespace Backend.Models
+namespace ScheduleEvents.Models
 {
     public class SchedulerEvent
     {

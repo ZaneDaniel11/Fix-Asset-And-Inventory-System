@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Dapper;
-using System.Data;
+using Microsoft.Data.Sqlite;
+using ScheduleEvents.Models;
 using System.Threading.Tasks;
-using Backend.Models;
-using System.Collections.Generic;
 
 namespace Backend.Controllers
 {
@@ -11,7 +10,7 @@ namespace Backend.Controllers
     [ApiController]
     public class SchedulerEventsController : ControllerBase
     {
-         private readonly string _dbConnection = "Data Source=capstone.db";
+        private readonly string _dbConnectionString = "Data Source=capstone.db";
      
         // Create Event
         [HttpPost]
@@ -23,8 +22,11 @@ namespace Backend.Controllers
             newEvent.CreatedDate = DateTime.Now;
             newEvent.LastModified = DateTime.Now;
 
-            var eventId = await _dbConnection.ExecuteScalarAsync<int>(sql, newEvent);
-            return Ok(new { EventID = eventId });
+            using (var connection = new SqliteConnection(_dbConnectionString))
+            {
+                var eventId = await connection.ExecuteScalarAsync<int>(sql, newEvent);
+                return Ok(new { EventID = eventId });
+            }
         }
 
         // Read All Events
@@ -32,8 +34,12 @@ namespace Backend.Controllers
         public async Task<IActionResult> GetAllEvents()
         {
             var sql = "SELECT * FROM SchedulerEvents";
-            var events = await _dbConnection.QueryAsync<SchedulerEvent>(sql);
-            return Ok(events);
+
+            using (var connection = new SqliteConnection(_dbConnectionString))
+            {
+                var events = await connection.QueryAsync<SchedulerEvent>(sql);
+                return Ok(events);
+            }
         }
 
         // Read Event by ID
@@ -41,12 +47,16 @@ namespace Backend.Controllers
         public async Task<IActionResult> GetEventById(int id)
         {
             var sql = "SELECT * FROM SchedulerEvents WHERE EventID = @id";
-            var eventItem = await _dbConnection.QueryFirstOrDefaultAsync<SchedulerEvent>(sql, new { id });
 
-            if (eventItem == null)
-                return NotFound("Event not found");
+            using (var connection = new SqliteConnection(_dbConnectionString))
+            {
+                var eventItem = await connection.QueryFirstOrDefaultAsync<SchedulerEvent>(sql, new { id });
 
-            return Ok(eventItem);
+                if (eventItem == null)
+                    return NotFound("Event not found");
+
+                return Ok(eventItem);
+            }
         }
 
         // Update Event
@@ -61,11 +71,14 @@ namespace Backend.Controllers
             updatedEvent.EventID = id;
             updatedEvent.LastModified = DateTime.Now;
 
-            var rowsAffected = await _dbConnection.ExecuteAsync(sql, updatedEvent);
-            if (rowsAffected == 0)
-                return NotFound("Event not found");
+            using (var connection = new SqliteConnection(_dbConnectionString))
+            {
+                var rowsAffected = await connection.ExecuteAsync(sql, updatedEvent);
+                if (rowsAffected == 0)
+                    return NotFound("Event not found");
 
-            return NoContent();
+                return NoContent();
+            }
         }
 
         // Delete Event
@@ -73,12 +86,16 @@ namespace Backend.Controllers
         public async Task<IActionResult> DeleteEvent(int id)
         {
             var sql = "DELETE FROM SchedulerEvents WHERE EventID = @id";
-            var rowsAffected = await _dbConnection.ExecuteAsync(sql, new { id });
 
-            if (rowsAffected == 0)
-                return NotFound("Event not found");
+            using (var connection = new SqliteConnection(_dbConnectionString))
+            {
+                var rowsAffected = await connection.ExecuteAsync(sql, new { id });
 
-            return NoContent();
+                if (rowsAffected == 0)
+                    return NotFound("Event not found");
+
+                return NoContent();
+            }
         }
     }
 }
