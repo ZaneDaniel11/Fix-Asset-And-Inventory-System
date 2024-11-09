@@ -262,7 +262,7 @@ public async Task<IActionResult> UpdateApproval(int borrowId, [FromBody] UpdateA
                 {
                     string updateRejectionQuery = @"
                     UPDATE Borrowreq_tb 
-                    SET Status = 'Rejected', 
+                    SET Status = 'Declined', 
                         RejectReason = @RejectReason, 
                         RejectBy = @RejectBy
                     WHERE BorrowId = @BorrowId";
@@ -289,66 +289,81 @@ public async Task<IActionResult> UpdateApproval(int borrowId, [FromBody] UpdateA
     }
 }
 
-        [HttpPut("UpdateApprovalAdmin2/{borrowId}")]
-        public async Task<IActionResult> UpdateApprovalAdmin2(int borrowId, [FromBody] UpdateApprovalRequestAdmin2 request)
+ [HttpPut("UpdateApprovalAdmin2/{borrowId}")]
+public async Task<IActionResult> UpdateApprovalAdmin2(int borrowId, [FromBody] UpdateApprovalRequestAdmin2 request)
+{
+    if (request == null || string.IsNullOrEmpty(request.Admin2Approval))
+        return BadRequest("Invalid request. Admin2Approval must be provided.");
+
+    if (request.Admin2Approval == "Rejected" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
+        return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
+
+    using (var connection = new SqliteConnection(_connectionString))
+    {
+        await connection.OpenAsync();
+
+        using (var transaction = connection.BeginTransaction())
         {
-            if (request == null || string.IsNullOrEmpty(request.Admin2Approval))
-                return BadRequest("Invalid request. Admin2Approval must be provided.");
-
-            using (var connection = new SqliteConnection(_connectionString))
+            try
             {
-                await connection.OpenAsync();
+                // Check if BorrowId exists
+                string checkExistQuery = "SELECT COUNT(1) FROM Borrowreq_tb WHERE BorrowId = @BorrowId";
+                var exists = await connection.ExecuteScalarAsync<bool>(checkExistQuery, new { BorrowId = borrowId });
 
-                using (var transaction = connection.BeginTransaction())
-                {
-                    try
-                    {
-                        // Update Admin2Approval
-                        string updateApprovalQuery = @"
+                if (!exists)
+                    return NotFound($"Borrow request with ID {borrowId} not found.");
+
+                // Update Admin2Approval
+                string updateApprovalQuery = @"
                 UPDATE Borrowreq_tb 
                 SET Admin2Approval = @Admin2Approval
                 WHERE BorrowId = @BorrowId";
 
-                        await connection.ExecuteAsync(updateApprovalQuery, new
-                        {
-                            Admin2Approval = request.Admin2Approval,
-                            BorrowId = borrowId
-                        }, transaction);
+                await connection.ExecuteAsync(updateApprovalQuery, new
+                {
+                    Admin2Approval = request.Admin2Approval,
+                    BorrowId = borrowId
+                }, transaction);
 
-                        // Handle status update based on Admin2Approval
-                        string updateStatusQuery = string.Empty;
-
-                        if (request.Admin2Approval == "Rejected")
-                        {
-                            updateStatusQuery = @"
-                    UPDATE Borrowreq_tb 
-                    SET Status = 'Rejected'
-                    WHERE BorrowId = @BorrowId";
-                        }
-                        else if (request.Admin2Approval == "Approved")
-                        {
-                            updateStatusQuery = @"
+                // If Admin2Approval is "Approved", update Status to "In Progress"
+                if (request.Admin2Approval == "Approved")
+                {
+                    string updateStatusQuery = @"
                     UPDATE Borrowreq_tb 
                     SET Status = 'In Progress'
                     WHERE BorrowId = @BorrowId";
-                        }
 
-                        if (!string.IsNullOrEmpty(updateStatusQuery))
-                        {
-                            await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
-                        }
-
-                        transaction.Commit();
-                        return Ok("Approval and status updated successfully.");
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        return StatusCode(500, $"Internal server error: {ex.Message}");
-                    }
+                    await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
                 }
+                // If Admin2Approval is "Rejected", update Status, RejectReason, and RejectBy
+                else if (request.Admin2Approval == "Declined")
+                {
+                    string updateRejectionQuery = @"
+                    UPDATE Borrowreq_tb 
+                    SET Status = 'Rejected', 
+                        RejectReason = @RejectReason, 
+                        RejectBy = @RejectBy
+                    WHERE BorrowId = @BorrowId";
+
+                    await connection.ExecuteAsync(updateRejectionQuery, new
+                    {
+                        BorrowId = borrowId,
+                        RejectReason = request.RejectReason,
+                        RejectBy = request.RejectBy
+                    }, transaction);
+                }
+
+                transaction.Commit();
+                return Ok("Approval and status updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+    }
+}
 
         [HttpGet("ApprovedByAdmin1")]
         public async Task<IActionResult> GetApprovedByAdmin1Requests()
@@ -562,10 +577,14 @@ public async Task<IActionResult> UpdateReturnStatus(int borrowId, [FromBody] Upd
     }
 
 
-    public class UpdateApprovalRequestAdmin2
-    {
-        public string Admin2Approval { get; set; }
-    }
+public class UpdateApprovalRequestAdmin2
+{
+    public string Admin2Approval { get; set; }
+    public string RejectReason { get; set; }
+    public string RejectBy { get; set; }
+}
+
+
     public class UpdateApprovalRequestAdmin3
     {
         public string Admin3Approval { get; set; }
