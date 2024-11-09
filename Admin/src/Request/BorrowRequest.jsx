@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 export default function BorrowedItems() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [declineModalOpen, setDeclineModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusQuery, setStatusQuery] = useState("");
@@ -12,9 +13,11 @@ export default function BorrowedItems() {
   const [borrowedItems, setBorrowedItems] = useState([]);
   const [borrowLoading, setBorrowLoading] = useState(false);
   const [adminApproval, setAdminApproval] = useState("");
-  const [isUpdating, setIsUpdating] = useState(false); // Track update state
+  const [declineReason, setDeclineReason] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  // Fetch all borrow requests on component load
+  const storedUsername = localStorage.getItem("username");
+
   useEffect(() => {
     const fetchBorrowRequests = async () => {
       try {
@@ -36,7 +39,6 @@ export default function BorrowedItems() {
     fetchBorrowRequests();
   }, []);
 
-  // Fetch the details of borrowed items for a specific borrow request
   const fetchBorrowItems = async (borrowId) => {
     setBorrowLoading(true);
     try {
@@ -55,36 +57,41 @@ export default function BorrowedItems() {
     }
   };
 
-  // Open the modal to view borrowed items
   const openViewModal = (item) => {
     setCurrentItem(item);
     setViewModalOpen(true);
     fetchBorrowItems(item.BorrowId);
   };
 
-  // Open the modal to update admin approval
   const openUpdateModal = (item) => {
     setCurrentItem(item);
-    setAdminApproval(item.Admin1Approval); // Pre-fill admin approval
+    setAdminApproval(item.Admin1Approval);
     setUpdateModalOpen(true);
   };
 
-  // Close the view modal
   const closeViewModal = () => {
     setViewModalOpen(false);
     setCurrentItem(null);
     setBorrowedItems([]);
   };
 
-  // Close the update modal
   const closeUpdateModal = () => {
     setUpdateModalOpen(false);
     setCurrentItem(null);
   };
 
-  // Handle admin approval update
+  const closeDeclineModal = () => {
+    setDeclineModalOpen(false);
+    setDeclineReason("");
+  };
+
   const handleUpdate = async () => {
-    setIsUpdating(true); // Set updating state to true
+    if (adminApproval === "Declined" && !declineReason) {
+      setDeclineModalOpen(true);
+      return;
+    }
+
+    setIsUpdating(true);
     try {
       const response = await fetch(
         `http://localhost:5075/api/BorrowRequestApi/UpdateApproval/${currentItem.BorrowId}`,
@@ -93,14 +100,17 @@ export default function BorrowedItems() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ Admin1Approval: adminApproval }),
+          body: JSON.stringify({
+            admin1Approval: adminApproval,
+            rejectReason: adminApproval === "Declined" ? declineReason : null,
+            rejectBy: adminApproval === "Declined" ? storedUsername : null,
+          }),
         }
       );
       if (!response.ok) {
         throw new Error("Failed to update approval status");
       }
 
-      // Optionally refresh the items or display success notification
       const updatedItems = items.map((item) =>
         item.BorrowId === currentItem.BorrowId
           ? {
@@ -108,24 +118,28 @@ export default function BorrowedItems() {
               Admin1Approval: adminApproval,
               Status:
                 adminApproval === "Approved" ? "In Progress" : item.Status,
+              DeclineReason:
+                adminApproval === "Declined" ? declineReason : null,
+              RejectBy: adminApproval === "Declined" ? storedUsername : null,
             }
           : item
       );
       setItems(updatedItems);
 
       closeUpdateModal();
+      closeDeclineModal();
     } catch (error) {
-      console.error("Error updating approval:", error.message); // Log error for debugging
+      console.error("Error updating approval:", error.message);
       setError(error.message);
     } finally {
-      setIsUpdating(false); // Reset updating state
+      setIsUpdating(false);
     }
   };
 
   const filteredItems = items.filter(
     (item) =>
       item.RequestedBy.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      item.Admin1Approval === "Pending" // Only show pending Admin1 approval
+      item.Admin1Approval === "Pending"
   );
 
   if (loading) {
@@ -250,7 +264,6 @@ export default function BorrowedItems() {
         </div>
       )}
 
-      {/* Update Modal */}
       {updateModalOpen && currentItem && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
@@ -293,6 +306,46 @@ export default function BorrowedItems() {
               disabled={isUpdating}
             >
               {isUpdating ? "Updating..." : "Update Approval"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Decline Reason Modal */}
+      {declineModalOpen && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            <button
+              onClick={closeDeclineModal}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <h2 className="text-2xl font-semibold mb-4">Decline Reason</h2>
+            <textarea
+              value={declineReason}
+              onChange={(e) => setDeclineReason(e.target.value)}
+              className="p-2 border rounded border-black w-full mb-4"
+              placeholder="Enter reason for decline"
+            />
+            <button
+              onClick={handleUpdate}
+              className="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-4 py-2"
+            >
+              Submit Decline Reason
             </button>
           </div>
         </div>
