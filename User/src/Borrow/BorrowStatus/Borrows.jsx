@@ -4,7 +4,7 @@ import Sidebar from "../../components/Sidebar";
 export default function BorrowStatus() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
+
   const [statusQuery, setStatusQuery] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -84,11 +84,7 @@ export default function BorrowStatus() {
   };
 
   const filteredItems = Array.isArray(items)
-    ? items.filter(
-        (item) =>
-          item.RequestedBy.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          (statusQuery === "" || item.Status === statusQuery)
-      )
+    ? items.filter((item) => statusQuery === "" || item.Status === statusQuery)
     : [];
 
   if (loading) {
@@ -109,13 +105,6 @@ export default function BorrowStatus() {
         {/* Search Bar with Shadow */}
         <div className="p-4 mb-4 bg-white shadow-md rounded-md">
           <div className="flex justify-between">
-            <input
-              type="text"
-              placeholder="Search by Requester Name"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="p-2 border rounded border-gray-400 w-1/2"
-            />
             <select
               value={statusQuery}
               onChange={(e) => setStatusQuery(e.target.value)}
