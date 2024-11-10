@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 export default function Borrow() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [declineReasonModalOpen, setDeclineReasonModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [items, setItems] = useState([]);
@@ -12,9 +13,10 @@ export default function Borrow() {
   const [borrowedItems, setBorrowedItems] = useState([]);
   const [borrowLoading, setBorrowLoading] = useState(false);
   const [adminApproval, setAdminApproval] = useState("");
+  const [declineReason, setDeclineReason] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Fetch approved borrow requests
+  const storedUsername = localStorage.getItem("username");
   useEffect(() => {
     const fetchApprovedBorrowRequests = async () => {
       try {
@@ -34,7 +36,11 @@ export default function Borrow() {
   }, []);
 
   const handleUpdateApproval = async () => {
-    if (!adminApproval) return;
+    if (adminApproval === "Declined" && !declineReason) {
+      // Show the decline reason modal if Declined is selected but no reason is provided
+      setDeclineReasonModalOpen(true);
+      return;
+    }
 
     try {
       setIsUpdating(true);
@@ -42,10 +48,12 @@ export default function Borrow() {
         `http://localhost:5075/api/BorrowRequestApi/UpdateApprovalAdmin2/${currentItem.BorrowId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ Admin2Approval: adminApproval }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            admin2Approval: adminApproval,
+            rejectReason: adminApproval === "Declined" ? declineReason : null,
+            rejectBy: adminApproval === "Declined" ? storedUsername : null,
+          }),
         }
       );
 
@@ -74,9 +82,7 @@ export default function Borrow() {
       const response = await fetch(
         `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${borrowId}`
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch borrowed items");
-      }
+      if (!response.ok) throw new Error("Failed to fetch borrowed items");
       const data = await response.json();
       setBorrowedItems(data);
     } catch (error) {
@@ -107,6 +113,17 @@ export default function Borrow() {
     setUpdateModalOpen(false);
     setCurrentItem(null);
     setAdminApproval("");
+    setDeclineReason("");
+    setDeclineReasonModalOpen(false);
+  };
+
+  const handleAdminApprovalChange = (value) => {
+    setAdminApproval(value);
+    if (value === "Declined") {
+      setDeclineReasonModalOpen(true);
+    } else {
+      setDeclineReasonModalOpen(false);
+    }
   };
 
   const filteredItems = items.filter(
@@ -193,12 +210,12 @@ export default function Borrow() {
         </div>
       </div>
 
-      {/* View Modal */}
-      {viewModalOpen && currentItem && (
+      {/* Decline Reason Modal */}
+      {declineReasonModalOpen && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
             <button
-              onClick={closeViewModal}
+              onClick={() => setDeclineReasonModalOpen(false)}
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
             >
               <svg
@@ -217,76 +234,84 @@ export default function Borrow() {
               </svg>
             </button>
             <h2 className="text-2xl font-semibold mb-4">
-              Borrowed Items for Borrow ID: {currentItem.BorrowId}
+              Reason for Declining
             </h2>
-            {borrowLoading ? (
-              <div className="text-center">Loading borrowed items...</div>
-            ) : (
-              <ul className="list-disc pl-5 space-y-2">
-                {borrowedItems.map((item) => (
-                  <li key={item.BorrowId} className="text-gray-700">
-                    {item.ItemName} (Qty: {item.Quantity})
-                  </li>
-                ))}
-              </ul>
-            )}
+            <textarea
+              value={declineReason}
+              onChange={(e) => setDeclineReason(e.target.value)}
+              className="p-2 border border-gray-300 rounded w-full"
+              placeholder="Enter reason for declining"
+            ></textarea>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => handleUpdateApproval()}
+                className="text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md"
+              >
+                Submit Reason & Update
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Update Modal */}
-      {updateModalOpen && currentItem && (
+      {updateModalOpen && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-            <button
-              onClick={closeUpdateModal}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <h2 className="text-2xl font-semibold mb-4">Update Approval</h2>
+            <select
+              value={adminApproval}
+              onChange={(e) => handleAdminApprovalChange(e.target.value)}
+              className="p-2 border border-gray-300 rounded w-full mb-4"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-            <h2 className="text-2xl font-semibold mb-4">
-              Update Approval for Borrow ID: {currentItem.BorrowId}
-            </h2>
-            <div className="mb-4">
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                Admin2 Approval
-              </label>
-              <select
-                value={adminApproval}
-                onChange={(e) => setAdminApproval(e.target.value)}
-                className="p-2 border border-gray-300 rounded w-full"
-              >
-                <option value="">Select Approval Status</option>
-                <option value="Approved">Approved</option>
-                <option value="Declined">Declined</option>
-              </select>
-            </div>
+              <option value="">Select Approval</option>
+              <option value="Approved">Approve</option>
+              <option value="Declined">Declined</option>
+            </select>
+            {adminApproval === "Declined" && (
+              <textarea
+                value={declineReason}
+                onChange={(e) => setDeclineReason(e.target.value)}
+                className="p-2 border border-gray-300 rounded w-full mb-4"
+                placeholder="Enter reason for declining"
+              ></textarea>
+            )}
             <div className="flex justify-end space-x-2">
               <button
                 onClick={closeUpdateModal}
-                className="px-4 py-2 bg-gray-300 rounded-md text-gray-700"
+                className="text-white bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-md"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdateApproval}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md"
-                disabled={isUpdating}
+                className="text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md"
               >
-                {isUpdating ? "Updating..." : "Update"}
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal */}
+      {viewModalOpen && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <h2 className="text-2xl font-semibold mb-4">View Borrowed Items</h2>
+            <ul>
+              {borrowedItems.map((item) => (
+                <li key={item.ItemID} className="mb-2">
+                  {item.ItemName} (Quantity: {item.Quantity})
+                </li>
+              ))}
+            </ul>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={closeViewModal}
+                className="text-white bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-md"
+              >
+                Close
               </button>
             </div>
           </div>
