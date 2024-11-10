@@ -15,6 +15,15 @@ const API_URL = "http://localhost:5075/api/SchedulerEvents";
 export default function Schedule() {
   const [events, setEvents] = useState([]);
 
+  const data = [
+    {
+      Id: 1,
+      Subject: "Meeting - 1",
+      StartTime: new Date(2018, 1, 15, 10, 0),
+      EndTime: new Date(2018, 1, 16, 12, 30),
+      IsAllDay: false,
+    },
+  ];
   // Load events from the backend API
   const loadEvents = async () => {
     try {
@@ -60,7 +69,7 @@ export default function Schedule() {
         <p>Loading events...</p> // Show a loading message while events are being fetched
       ) : (
         <ScheduleComponent
-          eventSettings={{ dataSource: events }} // Use the formatted events from the API
+          eventSettings={{ dataSource: data }} // Use the formatted events from the API
           actionBegin={(args) => {
             if (args.requestType === "eventCreate") {
               onEventAdd(args);

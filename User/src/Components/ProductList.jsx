@@ -21,9 +21,8 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
         count: category.itemCount,
       }));
 
-      // Add "All" category at the beginning
       setCategories([
-        { id: 0, name: "All", icon: "📦", count: 0 }, // 'All' category
+        { id: 0, name: "All", icon: "📦", count: 0 },
         ...mappedCategories,
       ]);
     } catch (error) {
@@ -36,21 +35,18 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
     try {
       let response;
       if (categoryId === 0) {
-        // Fetch all items if "All" is selected
         response = await fetch(`${API_URL}GetAllItems`);
       } else {
-        // Fetch items by category
         response = await fetch(
           `http://localhost:5075/api/ItemApi/GetItemsByCategory?categoryID=${categoryId}`
         );
       }
 
       const result = await response.json();
-
-      // Save both the initial quantity and available quantity for later manipulation
       const processedProducts = result.map((product) => ({
         ...product,
-        initialQuantity: product.quantity, // This saves the initial stock for reference
+        initialQuantity: product.quantity,
+        requestedQuantity: 0, // Add this field to track the quantity in the summary
       }));
 
       setProducts(processedProducts);
@@ -68,13 +64,29 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
     FetchProductsByCategory(selectedCategoryId);
   }, [selectedCategoryId]);
 
+  // Handle adding products and enforce quantity limit
+  const handleAddProduct = (product) => {
+    if (product.requestedQuantity < product.initialQuantity) {
+      onAddProduct({
+        ...product,
+        requestedQuantity: product.requestedQuantity + 1,
+      });
+      setProducts(
+        products.map((p) =>
+          p.itemID === product.itemID
+            ? { ...p, requestedQuantity: product.requestedQuantity + 1 }
+            : p
+        )
+      );
+    } else {
+      alert("Maximum quantity reached for this item.");
+    }
+  };
+
   return (
     <div className="w-full">
       <div className="overflow-x-auto mb-6">
-        <div
-          className="flex gap-4 w-full"
-          style={{ maxWidth: "100%", overflowX: "auto" }}
-        >
+        <div className="flex gap-4 w-full max-w-full overflow-x-auto">
           {categories.map((category) => (
             <button
               key={category.id}
@@ -83,7 +95,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
                   ? "bg-green-100 border-green-400"
                   : "bg-white border-gray-200"
               } hover:bg-green-50`}
-              onClick={() => setSelectedCategoryId(category.id)} // When "All" is clicked, fetch all items
+              onClick={() => setSelectedCategoryId(category.id)}
             >
               <div className="text-3xl mb-2">{category.icon}</div>
               <div className="font-semibold">{category.name}</div>
@@ -95,7 +107,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((product) => (
           <div key={product.itemID} className="border p-4 rounded-lg shadow-lg">
             <img
@@ -104,17 +116,19 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
               className="mb-4"
             />
             <h3 className="text-lg font-bold">{product.itemName}</h3>
-            <p>{`Available Quantity: ${product.quantity}`}</p>
+            <p className="text-sm text-gray-600">{`Available Quantity: ${product.quantity}`}</p>
 
             {product.quantity === 0 ? (
               <p className="text-red-500 font-bold">Out of Stock</p>
             ) : (
               <button
                 className="mt-3 w-full bg-green-700 hover:bg-green-800 text-white py-2 rounded"
-                onClick={() => onAddProduct(product)}
-                disabled={product.quantity <= 0}
+                onClick={() => handleAddProduct(product)}
+                disabled={product.requestedQuantity >= product.initialQuantity}
               >
-                Add Product
+                {product.requestedQuantity >= product.initialQuantity
+                  ? "Max Added"
+                  : "Add Product"}
               </button>
             )}
           </div>

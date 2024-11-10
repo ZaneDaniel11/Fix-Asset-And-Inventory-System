@@ -51,8 +51,8 @@ export default function Borrow() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             admin2Approval: adminApproval,
-            rejectReason: adminApproval === "Declined" ? declineReason : null,
-            rejectBy: adminApproval === "Declined" ? storedUsername : null,
+            rejectReason: adminApproval === "Declined" ? declineReason : "",
+            rejectBy: adminApproval === "Declined" ? storedUsername : "",
           }),
         }
       );
@@ -265,7 +265,7 @@ export default function Borrow() {
               className="p-2 border border-gray-300 rounded w-full mb-4"
             >
               <option value="">Select Approval</option>
-              <option value="Approved">Approve</option>
+              <option value="Approved">Approved</option>
               <option value="Declined">Declined</option>
             </select>
             {adminApproval === "Declined" && (

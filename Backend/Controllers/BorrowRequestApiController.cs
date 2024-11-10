@@ -410,11 +410,14 @@ public async Task<IActionResult> UpdateApprovalAdmin2(int borrowId, [FromBody] U
             }
         }
 
-      [HttpPut("UpdateApprovalAdmin3/{borrowId}")]
+     [HttpPut("UpdateApprovalAdmin3/{borrowId}")]
 public async Task<IActionResult> UpdateApprovalAdmin3(int borrowId, [FromBody] UpdateApprovalRequestAdmin3 request)
 {
     if (request == null || string.IsNullOrEmpty(request.Admin3Approval))
         return BadRequest("Invalid request. Admin3Approval must be provided.");
+
+    if (request.Admin3Approval == "Rejected" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
+        return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
 
     using (var connection = new SqliteConnection(_connectionString))
     {
@@ -436,7 +439,7 @@ public async Task<IActionResult> UpdateApprovalAdmin3(int borrowId, [FromBody] U
                     BorrowId = borrowId
                 }, transaction);
 
-                // Handle status and ReturnStatus update based on Admin3Approval
+                // Handle status, ReturnStatus, RejectReason, and RejectBy based on Admin3Approval
                 if (request.Admin3Approval == "Approved")
                 {
                     string updateStatusQuery = @"
@@ -448,14 +451,21 @@ public async Task<IActionResult> UpdateApprovalAdmin3(int borrowId, [FromBody] U
 
                     await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
                 }
-                else if (request.Admin3Approval == "Rejected")
+                else if (request.Admin3Approval == "Declined")
                 {
-                    string updateStatusQuery = @"
+                    string updateRejectionQuery = @"
                     UPDATE Borrowreq_tb 
-                    SET Status = 'Rejected'
+                    SET Status = 'Rejected', 
+                        RejectReason = @RejectReason, 
+                        RejectBy = @RejectBy
                     WHERE BorrowId = @BorrowId";
 
-                    await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
+                    await connection.ExecuteAsync(updateRejectionQuery, new
+                    {
+                        BorrowId = borrowId,
+                        RejectReason = request.RejectReason,
+                        RejectBy = request.RejectBy
+                    }, transaction);
                 }
 
                 transaction.Commit();
@@ -468,9 +478,8 @@ public async Task<IActionResult> UpdateApprovalAdmin3(int borrowId, [FromBody] U
             }
         }
     }
-
-    
 }
+
 
         
       [HttpPut("UpdateReturnStatus/{borrowId}")]

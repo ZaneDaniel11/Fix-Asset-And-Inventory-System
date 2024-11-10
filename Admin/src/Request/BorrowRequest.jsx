@@ -87,7 +87,7 @@ export default function BorrowedItems() {
 
   const handleUpdate = async () => {
     if (adminApproval === "Declined" && !declineReason) {
-      setDeclineModalOpen(true);
+      setDeclineModalOpen(true); // Open decline reason modal if needed
       return;
     }
 
@@ -97,20 +97,22 @@ export default function BorrowedItems() {
         `http://localhost:5075/api/BorrowRequestApi/UpdateApproval/${currentItem.BorrowId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             admin1Approval: adminApproval,
-            rejectReason: adminApproval === "Declined" ? declineReason : null,
-            rejectBy: adminApproval === "Declined" ? storedUsername : null,
+            rejectReason: adminApproval === "Declined" ? declineReason : "",
+            rejectBy: adminApproval === "Declined" ? storedUsername : "",
           }),
         }
       );
+
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Server response:", errorData); // Log server response for debugging
         throw new Error("Failed to update approval status");
       }
 
+      // Update local items list to reflect the status change
       const updatedItems = items.map((item) =>
         item.BorrowId === currentItem.BorrowId
           ? {
@@ -128,6 +130,7 @@ export default function BorrowedItems() {
 
       closeUpdateModal();
       closeDeclineModal();
+      setDeclineReason(""); // Reset decline reason after submission
     } catch (error) {
       console.error("Error updating approval:", error.message);
       setError(error.message);
@@ -342,7 +345,7 @@ export default function BorrowedItems() {
               placeholder="Enter reason for decline"
             />
             <button
-              onClick={handleUpdate}
+              onClick={handleUpdate} // Updated to call handleUpdate directly
               className="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-4 py-2"
             >
               Submit Decline Reason

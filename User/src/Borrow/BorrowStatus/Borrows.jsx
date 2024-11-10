@@ -122,9 +122,10 @@ export default function BorrowStatus() {
               className="p-2 border rounded border-gray-400"
             >
               <option value="">All Statuses</option>
-              <option value="Complete">Complete</option>
-              <option value="In Progress">In Progress</option>
               <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Declined">Declined</option>
             </select>
           </div>
         </div>

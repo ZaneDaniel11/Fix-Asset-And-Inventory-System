@@ -97,22 +97,24 @@ export default function Request() {
 
         <div className="limiter w-full">
           <div className="container mx-auto p-6">
-            {/* Shadowed div with text */}
-            <div className="bg-gray-200 p-4 shadow-lg rounded-lg mb-6 text-center">
-              <h2 className="text-2xl font-bold">Request Overview</h2>
+            {/* Header Section */}
+            <div className="bg-gray-200 p-6 shadow-lg rounded-lg mb-8 text-center">
+              <h2 className="text-3xl font-bold text-gray-700">
+                Request Overview
+              </h2>
             </div>
 
-            {/* Input fields and buttons with shadow */}
-            <div className="bg-white p-4 shadow-md rounded-lg mb-6 flex justify-between items-center">
+            {/* Action Section */}
+            <div className="bg-white p-6 shadow-md rounded-lg mb-8 flex justify-between items-center">
               <button
                 type="button"
                 onClick={openModal}
-                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
+                className="flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-semibold rounded-lg text-md px-5 py-2 transition duration-150"
               >
-                <i className="fa-solid fa-plus"></i> Add
+                <i className="fa-solid fa-plus mr-2"></i> Add Request
               </button>
               <select
-                className="border rounded-lg px-3 py-2"
+                className="border rounded-lg px-4 py-2 text-gray-600 font-medium focus:ring-2 focus:ring-blue-300 transition duration-150"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
@@ -123,40 +125,48 @@ export default function Request() {
               </select>
             </div>
 
-            <div className="overflow-x-auto shadow-lg rounded-lg">
+            {/* Table Section */}
+            <div className="overflow-x-auto shadow-md rounded-lg">
               <table className="min-w-full text-left table-auto bg-white">
                 <thead>
-                  <tr className="table100-head text-white">
-                    <th className="p-4">Requested by</th>
-                    <th className="p-4">Requested Date</th>
-                    <th className="p-4">Suggested Dealer</th>
-                    <th className="p-4">Purpose</th>
-                    <th className="p-4">Estimated Cost</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4 text-center">Operation</th>
+                  <tr className="text-white font-semibold text-md">
+                    <th className="p-5">Requested By</th>
+                    <th className="p-5">Requested Date</th>
+                    <th className="p-5">Suggested Dealer</th>
+                    <th className="p-5">Purpose</th>
+                    <th className="p-5">Estimated Cost</th>
+                    <th className="p-5">Status</th>
+                    <th className="p-5 text-center">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="text-gray-600 text-md">
                   {filteredRequests.map((request) => (
-                    <tr key={request.id} className="border-t">
-                      <td className="p-4">{request.requestedBy}</td>
-                      <td className="p-4">{request.requestedDate}</td>
-                      <td className="p-4">{request.suggestedDealer}</td>
-                      <td className="p-4">{request.purpose}</td>
-                      <td className="p-4">{request.estimatedCost}</td>
-                      <td className={`p-4 ${statusColors[request.status]}`}>
+                    <tr
+                      key={request.id}
+                      className="border-t hover:bg-gray-100 transition duration-150"
+                    >
+                      <td className="p-5">{request.requestedBy}</td>
+                      <td className="p-5">{request.requestedDate}</td>
+                      <td className="p-5">{request.suggestedDealer}</td>
+                      <td className="p-5">{request.purpose}</td>
+                      <td className="p-5">{request.estimatedCost}</td>
+                      <td
+                        className={`p-5 ${
+                          statusColors[request.status]
+                        } font-medium`}
+                      >
                         <i
                           className={`fa-solid ${
                             statusIcons[request.status]
-                          } me-2`}
+                          } mr-2`}
                         ></i>
                         {request.status}
                       </td>
-                      <td className="p-4 text-center">
+                      <td className="p-5 text-center">
                         <button
                           type="button"
                           onClick={() => openViewModal(request)}
-                          className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                          className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5 transition duration-150"
                         >
                           <i className="fa-regular fa-eye"></i>
                         </button>
@@ -287,46 +297,58 @@ export default function Request() {
 
         {/* View Request Modal */}
         {viewModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-              <div className="flex justify-between items-center">
-                <h5 className="text-lg font-semibold">Request Details</h5>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+            <div className="bg-white p-8 rounded-xl shadow-xl max-w-lg w-full mx-4 md:mx-0 transform transition-all duration-300 ease-in-out">
+              <div className="flex justify-between items-center border-b pb-4 mb-4">
+                <h5 className="text-2xl font-bold text-gray-800">
+                  Request Details
+                </h5>
                 <button
                   type="button"
                   onClick={closeViewModal}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-400 hover:text-gray-600 transition duration-200 ease-in-out focus:outline-none"
                 >
-                  <i className="fa-solid fa-xmark"></i>
+                  <i className="fa-solid fa-xmark text-2xl"></i>
                 </button>
               </div>
-              <div className="mt-4">
-                <p>
-                  <strong>Requested By:</strong> {selectedRequest.requestedBy}
-                </p>
-                <p>
-                  <strong>Requested Date:</strong>{" "}
-                  {selectedRequest.requestedDate}
-                </p>
-                <p>
-                  <strong>Suggested Dealer:</strong>{" "}
-                  {selectedRequest.suggestedDealer}
-                </p>
-                <p>
-                  <strong>Purpose:</strong> {selectedRequest.purpose}
-                </p>
-                <p>
-                  <strong>Estimated Cost:</strong>{" "}
-                  {selectedRequest.estimatedCost}
-                </p>
-                <p>
-                  <strong>Status:</strong> {selectedRequest.status}
-                </p>
-                <p>
-                  <strong>Description:</strong> {selectedRequest.description}
-                </p>
-                <p>
-                  <strong>Priority:</strong> {selectedRequest.priority}
-                </p>
+
+              <div className="space-y-3 text-gray-700">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Requested By:</span>
+                  <span>{selectedRequest.requestedBy}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Requested Date:</span>
+                  <span>{selectedRequest.requestedDate}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Suggested Dealer:</span>
+                  <span>{selectedRequest.suggestedDealer}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Purpose:</span>
+                  <span>{selectedRequest.purpose}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Estimated Cost:</span>
+                  <span>{selectedRequest.estimatedCost}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Status:</span>
+                  <span className="text-blue-600 font-medium">
+                    {selectedRequest.status}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Description:</span>
+                  <span>{selectedRequest.description}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Priority:</span>
+                  <span className="text-red-500 font-medium">
+                    {selectedRequest.priority}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
