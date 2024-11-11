@@ -410,75 +410,75 @@ public async Task<IActionResult> UpdateApprovalAdmin2(int borrowId, [FromBody] U
             }
         }
 
-     [HttpPut("UpdateApprovalAdmin3/{borrowId}")]
-public async Task<IActionResult> UpdateApprovalAdmin3(int borrowId, [FromBody] UpdateApprovalRequestAdmin3 request)
-{
-    if (request == null || string.IsNullOrEmpty(request.Admin3Approval))
-        return BadRequest("Invalid request. Admin3Approval must be provided.");
+//      [HttpPut("UpdateApprovalAdmin3/{borrowId}")]
+// public async Task<IActionResult> UpdateApprovalAdmin3(int borrowId, [FromBody] UpdateApprovalRequestAdmin3 request)
+// {
+//     if (request == null || string.IsNullOrEmpty(request.Admin3Approval))
+//         return BadRequest("Invalid request. Admin3Approval must be provided.");
 
-    if (request.Admin3Approval == "Rejected" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
-        return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
+//     if (request.Admin3Approval == "Rejected" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
+//         return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
 
-    using (var connection = new SqliteConnection(_connectionString))
-    {
-        await connection.OpenAsync();
+//     using (var connection = new SqliteConnection(_connectionString))
+//     {
+//         await connection.OpenAsync();
 
-        using (var transaction = connection.BeginTransaction())
-        {
-            try
-            {
-                // Update Admin3Approval
-                string updateApprovalQuery = @"
-                UPDATE Borrowreq_tb 
-                SET Admin3Approval = @Admin3Approval
-                WHERE BorrowId = @BorrowId";
+//         using (var transaction = connection.BeginTransaction())
+//         {
+//             try
+//             {
+//                 // Update Admin3Approval
+//                 string updateApprovalQuery = @"
+//                 UPDATE Borrowreq_tb 
+//                 SET Admin3Approval = @Admin3Approval
+//                 WHERE BorrowId = @BorrowId";
 
-                await connection.ExecuteAsync(updateApprovalQuery, new
-                {
-                    Admin3Approval = request.Admin3Approval,
-                    BorrowId = borrowId
-                }, transaction);
+//                 await connection.ExecuteAsync(updateApprovalQuery, new
+//                 {
+//                     Admin3Approval = request.Admin3Approval,
+//                     BorrowId = borrowId
+//                 }, transaction);
 
-                // Handle status, ReturnStatus, RejectReason, and RejectBy based on Admin3Approval
-                if (request.Admin3Approval == "Approved")
-                {
-                    string updateStatusQuery = @"
-                    UPDATE Borrowreq_tb 
-                    SET Status = 'Approved', ReturnStatus = 'Not Returned'
-                    WHERE BorrowId = @BorrowId 
-                    AND Admin1Approval = 'Approved' 
-                    AND Admin2Approval = 'Approved'";
+//                 // Handle status, ReturnStatus, RejectReason, and RejectBy based on Admin3Approval
+//                 if (request.Admin3Approval == "Approved")
+//                 {
+//                     string updateStatusQuery = @"
+//                     UPDATE Borrowreq_tb 
+//                     SET Status = 'Approved', ReturnStatus = 'Not Returned'
+//                     WHERE BorrowId = @BorrowId 
+//                     AND Admin1Approval = 'Approved' 
+//                     AND Admin2Approval = 'Approved'";
 
-                    await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
-                }
-                else if (request.Admin3Approval == "Declined")
-                {
-                    string updateRejectionQuery = @"
-                    UPDATE Borrowreq_tb 
-                    SET Status = 'Rejected', 
-                        RejectReason = @RejectReason, 
-                        RejectBy = @RejectBy
-                    WHERE BorrowId = @BorrowId";
+//                     await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
+//                 }
+//                 else if (request.Admin3Approval == "Declined")
+//                 {
+//                     string updateRejectionQuery = @"
+//                     UPDATE Borrowreq_tb 
+//                     SET Status = 'Rejected', 
+//                         RejectReason = @RejectReason, 
+//                         RejectBy = @RejectBy
+//                     WHERE BorrowId = @BorrowId";
 
-                    await connection.ExecuteAsync(updateRejectionQuery, new
-                    {
-                        BorrowId = borrowId,
-                        RejectReason = request.RejectReason,
-                        RejectBy = request.RejectBy
-                    }, transaction);
-                }
+//                     await connection.ExecuteAsync(updateRejectionQuery, new
+//                     {
+//                         BorrowId = borrowId,
+//                         RejectReason = request.RejectReason,
+//                         RejectBy = request.RejectBy
+//                     }, transaction);
+//                 }
 
-                transaction.Commit();
-                return Ok("Admin 3 approval, status, and return status updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-    }
-}
+//                 transaction.Commit();
+//                 return Ok("Admin 3 approval, status, and return status updated successfully.");
+//             }
+//             catch (Exception ex)
+//             {
+//                 transaction.Rollback();
+//                 return StatusCode(500, $"Internal server error: {ex.Message}");
+//             }
+//         }
+//     }
+// }
 
 
         
@@ -597,7 +597,11 @@ public class UpdateApprovalRequestAdmin2
     public class UpdateApprovalRequestAdmin3
     {
         public string Admin3Approval { get; set; }
-    }
-
-
+            public string RejectReason { get; set; }
+    public string RejectBy { get; set; }
 }
+    }
+    
+
+
+

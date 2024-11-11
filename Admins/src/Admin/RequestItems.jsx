@@ -46,7 +46,6 @@ export default function RequestItems() {
   const filteredItems = items.filter(
     (item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (statusQuery === "" || item.status === statusQuery) &&
       item.Admin1 === "Approved" && // Only show items where Admin1 is Approved
       item.Admin2 === "Pending" // Only show items where Admin2 is Pending
   );

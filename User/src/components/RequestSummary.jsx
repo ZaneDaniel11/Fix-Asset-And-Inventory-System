@@ -78,7 +78,7 @@ const RequestSummary = ({
   return (
     <div className="w-full md:w-1/3 bg-white p-4 rounded-lg shadow-lg">
       <h2 className="text-xl font-semibold mb-4 text-gray-700">
-        Request Summary
+        Borrow Summary
       </h2>
       <div className="space-y-3">
         {selectedProducts.map((product) => (

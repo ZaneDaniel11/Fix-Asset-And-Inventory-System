@@ -128,7 +128,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
               >
                 {product.requestedQuantity >= product.initialQuantity
                   ? "Max Added"
-                  : "Add Product"}
+                  : "Request Product"}
               </button>
             )}
           </div>
