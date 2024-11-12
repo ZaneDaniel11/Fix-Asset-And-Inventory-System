@@ -209,7 +209,7 @@ export default function Inventory_table() {
                           <td className="column5">
                             {new Date(item.dateAdded).toLocaleDateString()}
                           </td>
-                          <td className="column6">
+                          <td className="column6  w-32 flex ">
                             <button
                               onClick={() => {
                                 setSelectedItem(item);
