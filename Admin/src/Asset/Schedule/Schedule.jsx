@@ -65,15 +65,34 @@ const addEvent = async (eventData) => {
 // Update an existing event via API
 const updateEvent = async (eventData) => {
   try {
+    console.log("Updating event:", eventData); // Log to verify structure
     const response = await fetch(
-      `${API_BASE_URL}/UpdateEvent/${eventData.Id}`,
+      `${API_BASE_URL}/UpdateEvent/${eventData.id}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(eventData),
+        body: JSON.stringify({
+          eventID: eventData.id, // Adjust to match backend naming
+          subject: eventData.subject,
+          description: eventData.description,
+          startTime: eventData.startTime.toISOString(), // Convert to ISO string
+          endTime: eventData.endTime.toISOString(),
+          isAllDay: eventData.isAllDay,
+          recurrenceRule: eventData.recurrenceRule || "", // Include default if null
+          location: eventData.location,
+          organizer: eventData.organizer,
+          color: eventData.color,
+        }),
       }
     );
-    if (!response.ok) throw new Error("Error updating event");
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Error updating event: ${response.status} - ${errorText}`
+      );
+    }
+    console.log("Event updated successfully");
   } catch (error) {
     console.error("Error updating event:", error);
   }
@@ -82,10 +101,13 @@ const updateEvent = async (eventData) => {
 // Delete an event via API
 const deleteEvent = async (id) => {
   try {
+    console.log("Deleting event with ID:", id);
     const response = await fetch(`${API_BASE_URL}/DeleteEvent/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Error deleting event");
+    if (!response.ok)
+      throw new Error(`Error deleting event: ${response.status}`);
+    console.log("Event deleted successfully");
   } catch (error) {
     console.error("Error deleting event:", error);
   }
@@ -108,35 +130,53 @@ export default function Schedule() {
         startTime: args.data[0].StartTime,
         endTime: args.data[0].EndTime,
         isAllDay: args.data[0].IsAllDay || false,
-        recurrenceRule: args.data[0].RecurrenceRule || "", // Add recurrence rule
+        recurrenceRule: args.data[0].RecurrenceRule || "",
         location: args.data[0].Location || "Unknown",
         organizer: args.data[0].Organizer || "Anonymous",
         color: args.data[0].Color || "#000000",
       };
-      const createdEvent = await addEvent(newEvent); // Add to backend
+      const createdEvent = await addEvent(newEvent);
       if (createdEvent) {
-        setEvents(await fetchEvents()); // Refresh events after adding
+        setEvents(await fetchEvents());
       }
     } else if (args.requestType === "eventChange") {
-      // Update an existing event
+      // Only update fields that were changed
       const updatedEvent = {
         id: args.data.Id,
-        subject: args.data.Subject,
-        description: args.data.Description,
-        startTime: args.data.StartTime,
-        endTime: args.data.EndTime,
-        isAllDay: args.data.IsAllDay,
-        recurrenceRule: args.data.RecurrenceRule, // Handle recurrence rule
-        location: args.data.Location,
-        organizer: args.data.Organizer,
-        color: args.data.Color,
+        subject:
+          args.data.Subject ||
+          events.find((e) => e.Id === args.data.Id).Subject, // Use existing data if unchanged
+        description:
+          args.data.Description ||
+          events.find((e) => e.Id === args.data.Id).Description,
+        startTime: args.data.StartTime
+          ? args.data.StartTime.toISOString()
+          : events.find((e) => e.Id === args.data.Id).StartTime.toISOString(),
+        endTime: args.data.EndTime
+          ? args.data.EndTime.toISOString()
+          : events.find((e) => e.Id === args.data.Id).EndTime.toISOString(),
+        isAllDay:
+          args.data.IsAllDay !== undefined
+            ? args.data.IsAllDay
+            : events.find((e) => e.Id === args.data.Id).IsAllDay,
+        recurrenceRule:
+          args.data.RecurrenceRule ||
+          events.find((e) => e.Id === args.data.Id).RecurrenceRule,
+        location:
+          args.data.Location ||
+          events.find((e) => e.Id === args.data.Id).Location,
+        organizer:
+          args.data.Organizer ||
+          events.find((e) => e.Id === args.data.Id).Organizer,
+        color:
+          args.data.Color || events.find((e) => e.Id === args.data.Id).Color,
       };
+
       await updateEvent(updatedEvent);
-      setEvents(await fetchEvents()); // Refresh events after updating
+      setEvents(await fetchEvents());
     } else if (args.requestType === "eventRemove") {
-      // Delete an event
       await deleteEvent(args.data[0].Id);
-      setEvents(await fetchEvents()); // Refresh events after deleting
+      setEvents(await fetchEvents());
     }
   };
 
