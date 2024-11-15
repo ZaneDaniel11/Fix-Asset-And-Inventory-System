@@ -125,7 +125,7 @@ export default function Users() {
         }
       );
       toggleModal("update");
-      toast.success(`${name}Information Updated Succesfully`);
+      toast.success(`Information Updated Succesfully`);
       fetchUsers(); // Refresh user list after updating
     } catch (error) {
       console.error("Failed to update user:", error);

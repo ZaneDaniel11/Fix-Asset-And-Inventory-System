@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import "../Css/Electronics.css";
-import { fetchData } from "../utilities/ApiUti";
+import "../../Css/Electronics.css";
+import "../../Css/modal.css";
+import { fetchData } from "../../../../utilities/ApiUti";
+import { toast } from "react-toastify";
 
 const API_URL = "http://localhost:5075/api/ItemApi/";
 
@@ -105,6 +107,7 @@ export default function Inventory_table() {
       });
       toggleModal("add");
       fetchItems();
+      toast.success(`Added Item on Category successfully!`);
     } catch (error) {
       console.error("Failed to add item", error);
     }
@@ -126,6 +129,7 @@ export default function Inventory_table() {
       );
       toggleModal("update");
       fetchItems();
+      toast.success(`Item Updated Succesfully`);
     } catch (error) {
       console.error("Failed to update item", error);
     }
@@ -139,6 +143,7 @@ export default function Inventory_table() {
       );
       toggleModal("delete");
       fetchItems();
+      toast.error(`Delete Item on Category Succesfully`);
     } catch (error) {
       console.error("Failed to delete item", error);
     }
@@ -193,9 +198,8 @@ export default function Inventory_table() {
                       <th className="column1">Item ID</th>
                       <th className="column2">Item Name</th>
                       <th className="column3">Quantity</th>
-                      <th className="column4">Unit Price</th>
-                      <th className="column5">Date Added</th>
-                      <th className="column6">Actions</th>
+                      <th className="column3">Date Added</th>
+                      <th className="column3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -205,11 +209,11 @@ export default function Inventory_table() {
                           <td className="column1">{item.itemID}</td>
                           <td className="column2">{item.itemName}</td>
                           <td className="column3">{item.quantity}</td>
-                          <td className="column4">{item.unitPrice}</td>
-                          <td className="column5">
+
+                          <td className="column3">
                             {new Date(item.dateAdded).toLocaleDateString()}
                           </td>
-                          <td className="column6  w-32 flex">
+                          <td className="column3  w-32 flex">
                             <button
                               onClick={() => {
                                 setSelectedItem(item);
@@ -271,30 +275,48 @@ export default function Inventory_table() {
 
       {modals.addQuantity && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
-            <h2 className="text-xl font-semibold mb-4">
-              Add Quantity to {selectedItem?.itemName}
-            </h2>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Quantity</label>
-              <input
-                type="number"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                value={addQuantity}
-                onChange={(e) => setAddQuantity(parseInt(e.target.value))}
-              />
-            </div>
-            <div className="flex justify-end">
+          <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full mx-4 md:mx-0">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-semibold text-gray-800">
+                Add Quantity to {selectedItem?.itemName}
+              </h2>
               <button
                 onClick={() => toggleModal("addQuantity")}
-                className="text-gray-700 bg-gray-200 hover:bg-gray-300 font-medium rounded-lg text-sm px-4 py-2 me-2"
+                className="text-gray-500 hover:text-gray-700"
+                aria-label="Close Modal"
+              >
+                <i className="fa-solid fa-xmark text-lg"></i>
+              </button>
+            </div>
+
+            {/* Input */}
+            <div className="mb-6">
+              <label
+                htmlFor="add-quantity"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Quantity
+              </label>
+              <input
+                type="number"
+                id="add-quantity"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={addQuantity}
+                onChange={(e) => setAddQuantity(parseInt(e.target.value))}
+                placeholder="Enter Quantity"
+              />
+            </div>
+
+            {/* Buttons */}
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => toggleModal("addQuantity")}
+                className="btn-secondary"
               >
                 Cancel
               </button>
-              <button
-                onClick={handleAddQuantity}
-                className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
-              >
+              <button onClick={handleAddQuantity} className="btn-primary">
                 Add Quantity
               </button>
             </div>
@@ -305,67 +327,102 @@ export default function Inventory_table() {
       {/* Add Item Modal */}
       {modals.add && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-            <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">Add Item</h5>
+          <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full mx-4 md:mx-0">
+            {/* Header Section */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-semibold text-gray-800">Add Item</h2>
               <button
-                type="button"
                 onClick={() => toggleModal("add")}
                 className="text-gray-500 hover:text-gray-700"
+                aria-label="Close Modal"
               >
-                <i className="fa-solid fa-xmark"></i>
+                <i className="fa-solid fa-xmark text-lg"></i>
               </button>
             </div>
+
+            {/* Form Section */}
             <form onSubmit={handleAddCategoryItem}>
-              <div className="mt-4">
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
-                  <div className="relative">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {/* Item Name Input */}
+                <div className="flex items-center space-x-2">
+                  <i className="fa-solid fa-box fa-lg text-blue-500"></i>
+                  <div className="flex-1">
+                    <label
+                      htmlFor="item-name"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Item Name
+                    </label>
                     <input
                       type="text"
+                      id="item-name"
                       name="ItemName"
                       value={addItem.ItemName}
                       onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Item Name"
+                      className="input-field border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Enter Item Name"
                       required
                     />
                   </div>
-                  <div className="relative">
+                </div>
+
+                {/* Quantity Input */}
+                <div className="flex items-center space-x-2">
+                  <i className="fa-solid fa-hashtag fa-lg text-green-500"></i>
+                  <div className="flex-1">
+                    <label
+                      htmlFor="quantity"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Quantity
+                    </label>
                     <input
                       type="number"
+                      id="quantity"
                       name="Quantity"
                       value={addItem.Quantity}
                       onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Quantity"
+                      className="input-field border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="Enter Quantity"
                       required
                     />
                   </div>
-                  <div className="relative">
+                </div>
+
+                {/* Description Input */}
+                <div className="flex items-center space-x-2">
+                  <i className="fa-solid fa-align-left fa-lg text-yellow-500"></i>
+                  <div className="flex-1">
+                    <label
+                      htmlFor="description"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Description
+                    </label>
                     <input
                       type="text"
+                      id="description"
                       name="Description"
                       value={addItem.Description}
                       onChange={handleInputChange}
-                      className="p-2 border rounded border-black w-full"
-                      placeholder="Description"
+                      className="input-field border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                      placeholder="Enter Description"
                       required
                     />
                   </div>
                 </div>
               </div>
-              <div className="mt-6 flex justify-end space-x-2">
+
+              {/* Action Buttons */}
+              <div className="mt-6 flex justify-end space-x-4">
                 <button
                   type="button"
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
                   onClick={() => toggleModal("add")}
+                  className="btn-secondary"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className=" bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded"
-                >
+                <button type="submit" className="btn-primary">
                   Add Item
                 </button>
               </div>
@@ -377,70 +434,108 @@ export default function Inventory_table() {
       {/* Update Item Modal */}
       {modals.update && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-            <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">Update Item</h5>
+          <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full mx-4 md:mx-0">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-semibold text-gray-800">
+                Update Item
+              </h2>
               <button
-                type="button"
                 onClick={() => toggleModal("update")}
                 className="text-gray-500 hover:text-gray-700"
+                aria-label="Close Modal"
               >
-                <i className="fa-solid fa-xmark"></i>
+                <i className="fa-solid fa-xmark text-lg"></i>
               </button>
             </div>
-            <div className="mt-4">
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="itemName"
-                    value={updatedItem.itemName}
-                    onChange={handleUpdateInputChange}
-                    className="p-2 border rounded border-black w-full"
-                    placeholder="Item Name"
-                    required
-                  />
+
+            {/* Form */}
+            <form onSubmit={handleUpdateItem}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {/* Item Name */}
+                <div className="flex items-center space-x-2">
+                  <i className="fa-solid fa-box fa-lg text-blue-500"></i>
+                  <div className="flex-1">
+                    <label
+                      htmlFor="update-item-name"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Item Name
+                    </label>
+                    <input
+                      type="text"
+                      id="update-item-name"
+                      name="itemName"
+                      value={updatedItem.itemName}
+                      onChange={handleUpdateInputChange}
+                      className="input-field border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Enter Item Name"
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="relative">
-                  <input
-                    type="number"
-                    name="quantity"
-                    value={updatedItem.quantity}
-                    onChange={handleUpdateInputChange}
-                    className="p-2 border rounded border-black w-full"
-                    placeholder="Quantity"
-                    required
-                  />
+
+                {/* Quantity */}
+                <div className="flex items-center space-x-2">
+                  <i className="fa-solid fa-hashtag fa-lg text-green-500"></i>
+                  <div className="flex-1">
+                    <label
+                      htmlFor="update-quantity"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Quantity
+                    </label>
+                    <input
+                      type="number"
+                      id="update-quantity"
+                      name="quantity"
+                      value={updatedItem.quantity}
+                      onChange={handleUpdateInputChange}
+                      className="input-field border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="Enter Quantity"
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="description"
-                    value={updatedItem.description}
-                    onChange={handleUpdateInputChange}
-                    className="p-2 border rounded border-black w-full"
-                    placeholder="Description"
-                    required
-                  />
+
+                {/* Description */}
+                <div className="flex items-center space-x-2">
+                  <i className="fa-solid fa-align-left fa-lg text-yellow-500"></i>
+                  <div className="flex-1">
+                    <label
+                      htmlFor="update-description"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Description
+                    </label>
+                    <input
+                      type="text"
+                      id="update-description"
+                      name="description"
+                      value={updatedItem.description}
+                      onChange={handleUpdateInputChange}
+                      className="input-field border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                      placeholder="Enter Description"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="mt-6 flex justify-end space-x-2">
-              <button
-                type="button"
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
-                onClick={() => toggleModal("update")}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                onClick={handleUpdateItem}
-              >
-                Update Item
-              </button>
-            </div>
+
+              {/* Buttons */}
+              <div className="mt-6 flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => toggleModal("update")}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  Update Item
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -485,26 +580,52 @@ export default function Inventory_table() {
       {/* View Item Modal */}
       {modals.view && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-            <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">View Item</h5>
+          <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full mx-4 md:mx-0">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-800">View Item</h2>
               <button
-                type="button"
                 onClick={() => toggleModal("view")}
                 className="text-gray-500 hover:text-gray-700"
+                aria-label="Close Modal"
               >
-                <i className="fa-solid fa-xmark"></i>
+                <i className="fa-solid fa-xmark text-lg"></i>
               </button>
             </div>
-            <div className="mt-4">
-              <p>Item ID: {selectedItem?.itemID}</p>
-              <p>Item Name: {selectedItem?.itemName}</p>
-              <p>Quantity: {selectedItem?.quantity}</p>
-              <p>Description: {selectedItem?.description}</p>
-              <p>
-                Date Added:{" "}
-                {new Date(selectedItem?.dateAdded).toLocaleDateString()}
-              </p>
+
+            {/* Content */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <div className="flex items-center space-x-3">
+                <i className="fa-solid fa-id-badge fa-lg text-blue-500"></i>
+                <span className="text-lg font-semibold text-gray-800">
+                  <strong>Item ID:</strong> {selectedItem?.itemID}
+                </span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <i className="fa-solid fa-box fa-lg text-green-500"></i>
+                <span className="text-lg font-semibold text-gray-800">
+                  <strong>Item Name:</strong> {selectedItem?.itemName}
+                </span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <i className="fa-solid fa-hashtag fa-lg text-yellow-500"></i>
+                <span className="text-lg font-semibold text-gray-800">
+                  <strong>Quantity:</strong> {selectedItem?.quantity}
+                </span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <i className="fa-solid fa-align-left fa-lg text-purple-500"></i>
+                <span className="text-lg font-semibold text-gray-800">
+                  <strong>Description:</strong> {selectedItem?.description}
+                </span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <i className="fa-solid fa-calendar-day fa-lg text-red-500"></i>
+                <span className="text-lg font-semibold text-gray-800">
+                  <strong>Date Added:</strong>{" "}
+                  {new Date(selectedItem?.dateAdded).toLocaleDateString()}
+                </span>
+              </div>
             </div>
           </div>
         </div>

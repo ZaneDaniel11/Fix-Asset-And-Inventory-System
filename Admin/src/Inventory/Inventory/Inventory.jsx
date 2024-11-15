@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { fetchData } from "./utilities/ApiUti";
+import { fetchData } from "../../utilities/ApiUti";
 import { FaEdit, FaTrash, FaPlus, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import Inventory_Modal from "./Components/Inventory/Modal/Inventory_Modal";
-import Inventory_Card from "./Components/Inventory/Card/Inventory_Cards";
+import Inventory_Modal from "./Components/Modal/Inventory_Modal";
+import Inventory_Card from "./Components/Card/Inventory_Cards";
 import "./Css/Electronics.css";
+import { toast } from "react-toastify";
 
 const API_URL = "http://localhost:5075/api/CategoryApi/";
 
@@ -37,6 +38,7 @@ export default function Inventory() {
       setModalState({ isVisible: false, isEditMode: false, category: null });
       setNewCategory("");
       FetchCategory();
+      toast.success(`You added Category successfully!`);
     } catch (error) {
       console.error("Failed to add category", error);
     }
@@ -53,8 +55,10 @@ export default function Inventory() {
           categoryName: newCategory,
         }
       );
+
       setModalState({ isVisible: false, isEditMode: false, category: null });
       setNewCategory("");
+      toast.success(`Category Name Updated Succesfully!`);
       FetchCategory();
     } catch (error) {
       console.error("Failed to edit category", error);
@@ -69,6 +73,7 @@ export default function Inventory() {
           "DELETE"
         );
         FetchCategory();
+        toast.error(`Delete Category Succesfully`);
       } catch (error) {
         console.error("Failed to delete category", error);
       }
