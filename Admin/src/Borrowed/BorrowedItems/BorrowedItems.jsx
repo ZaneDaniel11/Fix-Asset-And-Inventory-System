@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function BorrowedItems() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [returnStatusQuery, setReturnStatusQuery] = useState(""); // New state for return status filter
+  const [returnStatusQuery, setReturnStatusQuery] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -103,8 +104,15 @@ export default function BorrowedItems() {
         throw new Error("Failed to update borrow request");
       }
 
+      // Display success notification
+      toast.success(
+        `Borrow request ${currentItem.BorrowId} updated successfully!`
+      );
+
       closeUpdateModal();
     } catch (error) {
+      // Display error notification
+      toast.error(`Error updating borrow request: ${error.message}`);
       setError(error.message);
     } finally {
       setIsUpdating(false);

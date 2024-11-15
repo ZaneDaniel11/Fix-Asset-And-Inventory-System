@@ -16,6 +16,8 @@ import AssetInventory from "./Asset/Inventory/AInventory.jsx";
 import AssetInvenTable from "./Asset/Inventory/Components/CategoryItem/InventoryItemTable.jsx";
 import Logs from "./Logs/Log.jsx";
 import Schedule from "./Asset/Schedule/Schedule.jsx";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const location = useLocation();
@@ -88,6 +90,18 @@ function App() {
           />
           <Route path="/Logs" element={<ProtectedRoute element={<Logs />} />} />
         </Routes>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          style={{ zIndex: 9999 }}
+        />
       </div>
     </div>
   );
