@@ -10,6 +10,8 @@ namespace Backend.Models
         public string? UserType { get; set; }  // Nullable
         public string? Email { get; set; }  // Nullable
         public string? Token { get; set; }  // Nullable
+          public string Name { get; set; }          // New field
+    public string Department { get; set; }  
     }
 
     public class LoginDto

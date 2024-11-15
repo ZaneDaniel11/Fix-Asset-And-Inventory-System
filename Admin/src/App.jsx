@@ -2,7 +2,7 @@ import React from "react";
 import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import Login from "./Login.jsx";
 import Maintenance from "./Tables/Maintenance.jsx";
-import Users from "./Tables/User.jsx";
+import Users from "./Inventory/User/User.jsx";
 import Inventory from "./Inventory.jsx";
 import Dashboard from "./Dashboard.jsx";
 import InventoryTable from "./Tables/Inventory_table.jsx";
