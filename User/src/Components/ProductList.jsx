@@ -109,28 +109,45 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((product) => (
-          <div key={product.itemID} className="border p-4 rounded-lg shadow-lg">
-            <img
-              src="https://via.placeholder.com/100"
-              alt={product.itemName}
-              className="mb-4"
-            />
-            <h3 className="text-lg font-bold">{product.itemName}</h3>
-            <p className="text-sm text-gray-600">{`Available Quantity: ${product.quantity}`}</p>
+          <div
+            key={product.itemID}
+            className="flex items-center border p-4 rounded-lg shadow-lg space-x-4"
+          >
+            {/* Image Section */}
+            <div className="flex-shrink-0">
+              <img
+                src="https://via.placeholder.com/100"
+                alt={product.itemName}
+                className="w-24 h-24 object-cover rounded-lg"
+              />
+            </div>
 
-            {product.quantity === 0 ? (
-              <p className="text-red-500 font-bold">Out of Stock</p>
-            ) : (
-              <button
-                className="mt-3 w-full bg-green-700 hover:bg-green-800 text-white py-2 rounded"
-                onClick={() => handleAddProduct(product)}
-                disabled={product.requestedQuantity >= product.initialQuantity}
-              >
-                {product.requestedQuantity >= product.initialQuantity
-                  ? "Max Added"
-                  : "Request Product"}
-              </button>
-            )}
+            {/* Content Section */}
+            <div className="flex-1">
+              <h3 className="text-2xl font-semibold text-gray-800">
+                {product.itemName}
+              </h3>
+              <p className="text-lg text-gray-600 mb-2">
+                Quantity: {product.quantity}
+              </p>
+
+              {/* Out of Stock or Button */}
+              {product.quantity === 0 ? (
+                <p className="text-red-500 font-bold">Out of Stock</p>
+              ) : (
+                <button
+                  className=" bg-green-700 hover:bg-green-800 text-white py-2 px-4 rounded-lg transition-colors duration-300"
+                  onClick={() => handleAddProduct(product)}
+                  disabled={
+                    product.requestedQuantity >= product.initialQuantity
+                  }
+                >
+                  {product.requestedQuantity >= product.initialQuantity
+                    ? "Max Added"
+                    : "Request"}
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
