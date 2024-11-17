@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import "../../Css/Electronics.css";
 import "../../Css/modal.css";
-import { fetchData } from "../../../../utilities/ApiUti";
+import { fetchData } from "../../../utilities/ApiUti";
 import { toast } from "react-toastify";
 
 const API_URL = "http://localhost:5075/api/ItemApi/";
@@ -113,7 +113,7 @@ export default function Inventory_table() {
     }
   };
 
-  const handleUpdateItem = async () => {
+  const handleUpdateItems = async () => {
     try {
       await fetchData(
         `${API_URL}UpdateItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`,
@@ -164,6 +164,7 @@ export default function Inventory_table() {
           dateAdded: selectedItem.dateAdded,
         }
       );
+      toast.success(`Added Quantity successfully!`);
       toggleModal("addQuantity");
       fetchItems();
     } catch (error) {
@@ -450,7 +451,7 @@ export default function Inventory_table() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleUpdateItem}>
+            <form onSubmit={handleUpdateItems}>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {/* Item Name */}
                 <div className="flex items-center space-x-2">
