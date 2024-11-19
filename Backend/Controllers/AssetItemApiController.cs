@@ -27,6 +27,19 @@ namespace Backend.Controllers
             }
         }
 
+            [HttpGet("GetAllAsset")]
+        public async Task<IActionResult> GetAllAssetsAsync()
+        {
+            const string query = "SELECT * FROM asset_item_tb";
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var assets = await connection.QueryAsync<AssetItem>(query);
+                return Ok(assets); // Return filtered assets based on CategoryID
+            }
+        }
+
         // POST: api/AssetApi/InsertAsset
         [HttpPost("InsertAsset")]
         public async Task<IActionResult> InsertAssetAsync(AssetItem newAsset)

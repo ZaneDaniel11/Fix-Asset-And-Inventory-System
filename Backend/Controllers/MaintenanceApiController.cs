@@ -13,6 +13,19 @@ namespace Backend.Controllers
     public class MaintenanceApiController : ControllerBase
     {
         private readonly string _connectionString = "Data Source=capstone.db";
+
+         [HttpGet("GetAllMaintenanceRequest")]
+        public async Task<IActionResult> GetAllReqMaintenaceAsync()
+        {
+            const string query = "SELECT * FROM maintenance_tb";
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var maintenance = await connection.QueryAsync<Maintenance>(query);
+                return Ok(maintenance); // Return filtered assets based on CategoryID
+            }
+        }
         [HttpPost("InsertMaintenance")]
         public async Task<IActionResult> InsertMaintenanceAsync(Maintenance newMaintenance)
         {
