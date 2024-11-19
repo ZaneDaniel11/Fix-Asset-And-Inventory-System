@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -17,7 +18,10 @@ export default function Login() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ UserName: username, Password: password }),
+          body: JSON.stringify({
+            UserName: username,
+            Password: password,
+          }),
         }
       );
 
@@ -30,11 +34,12 @@ export default function Login() {
       const data = await response.json();
       console.log(`"Hey":${data}`);
 
-      // Store the token, username, and userId in local storage
+      // Store relevant data in local storage
       localStorage.setItem("token", data.token);
       localStorage.setItem("username", username);
       localStorage.setItem("userId", data.userId); // Store the userId
       localStorage.setItem("userType", data.userType);
+      localStorage.setItem("name", data.name); // Store the name
 
       navigate("/Dashboard");
     } catch (error) {

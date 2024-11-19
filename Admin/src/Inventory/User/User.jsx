@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchData } from "../../utilities/ApiUti";
+import { fetchData } from "../utilities/ApiUti";
 import { toast } from "react-toastify";
 import "./CSS/modal.css";
 

@@ -14,7 +14,8 @@ namespace Backend.Controllers
     {
         private readonly string _connectionString = "Data Source=capstone.db";
 
-         [HttpGet("GetAllMaintenanceRequest")]
+
+        [HttpGet("GetAllMaintenanceRequest")]
         public async Task<IActionResult> GetAllReqMaintenaceAsync()
         {
             const string query = "SELECT * FROM maintenance_tb";
@@ -26,6 +27,22 @@ namespace Backend.Controllers
                 return Ok(maintenance); // Return filtered assets based on CategoryID
             }
         }
+
+
+        [HttpGet("GetMaintenanceByRequester/{requesterId}")]
+        public async Task<IActionResult> GetMaintenanceByRequesterAsync(int requesterId)
+        {
+            const string query = "SELECT * FROM maintenance_tb WHERE RequesterID = @RequesterID";
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                var maintenanceRequests = await connection.QueryAsync<Maintenance>(query, new { RequesterID = requesterId });
+                return Ok(maintenanceRequests); // Return maintenance requests for the given RequesterID
+            }
+        }
+
+
         [HttpPost("InsertMaintenance")]
         public async Task<IActionResult> InsertMaintenanceAsync(Maintenance newMaintenance)
         {

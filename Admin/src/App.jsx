@@ -1,24 +1,29 @@
 import React from "react";
 import { Route, Routes, useLocation, Navigate } from "react-router-dom";
+import "react-toastify/dist/ReactToastify.css";
 import Login from "./Login.jsx";
-import Maintenance from "./Tables/Maintenance.jsx";
 import Users from "./Inventory/User/User.jsx";
 import Inventory from "./Inventory/Inventory/Inventory.jsx";
-import Dashboard from "./Dashboard.jsx";
+import Dashboard from "./Inventory/Dashboard/Dashboard.jsx";
 import InventoryTable from "./Inventory/Inventory/Components/Table/Inventory_table.jsx";
-import BorrowedRequest from "./Request/BorrowRequest.jsx";
-import RequestItems from "./Request/RequestItems.jsx";
+import BorrowedRequest from "./Inventory/Request/BorrowRequest.jsx";
+import RequestItems from "./Inventory/Request/RequestItems.jsx";
+import Logs from "./Inventory/Logs/Log.jsx";
 import Sidebar from "./Components/Sidebar.jsx";
-import BorrowedItems from "./Borrowed/BorrowedItems/BorrowedItems.jsx";
+import BorrowedItems from "./Inventory/Borrowed/BorrowedItems.jsx";
 
 // Asset Admin
 import AssetInventory from "./Asset/Inventory/AInventory.jsx";
 import AssetInvenTable from "./Asset/Inventory/Components/CategoryItem/InventoryItemTable.jsx";
-import Logs from "./Logs/Log.jsx";
 import Schedule from "./Asset/Schedule/Schedule.jsx";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
+// User Side
+import UserBorrow from "./User/Borrow/Borrow.jsx";
+import UserBorrowStatus from "./User/BorrowStatus/Borrows.jsx";
+import UserRequestItem from "./User/Request/Request.jsx";
+import UserRequestMaintenance from "./User/Maintenance/Maintenance.jsx";
+import UserRequestLogs from "./User/History/RequestHistory.jsx";
 function App() {
   const location = useLocation();
   const isAuthenticated = !!localStorage.getItem("token"); // Check if token is present
@@ -50,10 +55,7 @@ function App() {
             path="/Inventory"
             element={<ProtectedRoute element={<Inventory />} />}
           />
-          <Route
-            path="/Maintenance"
-            element={<ProtectedRoute element={<Maintenance />} />}
-          />
+
           <Route
             path="/Users"
             element={<ProtectedRoute element={<Users />} />}
@@ -89,6 +91,28 @@ function App() {
             element={<ProtectedRoute element={<Schedule />} />}
           />
           <Route path="/Logs" element={<ProtectedRoute element={<Logs />} />} />
+
+          {/* User Section */}
+          <Route
+            path="/UserBorrow"
+            element={<ProtectedRoute element={<UserBorrow />} />}
+          />
+          <Route
+            path="/UserBorrowStatus"
+            element={<ProtectedRoute element={<UserBorrowStatus />} />}
+          />
+          <Route
+            path="/UserRequest"
+            element={<ProtectedRoute element={<UserRequestItem />} />}
+          />
+          <Route
+            path="/UserRequestMaintenance"
+            element={<ProtectedRoute element={<UserRequestMaintenance />} />}
+          />
+          <Route
+            path="/UserRequestLogs"
+            element={<ProtectedRoute element={<UserRequestLogs />} />}
+          />
         </Routes>
         <ToastContainer
           position="top-right"

@@ -27,16 +27,17 @@ namespace Backend.Controllers
             }
         }
 
-            [HttpGet("GetAllAsset")]
-        public async Task<IActionResult> GetAllAssetsAsync()
+        [HttpGet("GetAllAssetCodes")]
+        public async Task<IActionResult> GetAllAssetCodesAsync()
         {
-            const string query = "SELECT * FROM asset_item_tb";
+            const string query = "SELECT AssetCode FROM asset_item_tb";
 
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-                var assets = await connection.QueryAsync<AssetItem>(query);
-                return Ok(assets); // Return filtered assets based on CategoryID
+                // Query for AssetCode column only
+                var assetCodes = await connection.QueryAsync<string>(query);
+                return Ok(assetCodes); // Return the list of AssetCode values
             }
         }
 
@@ -254,6 +255,26 @@ namespace Backend.Controllers
                 return Ok("Depreciation values updated for assets where the depreciation date has passed.");
             }
         }
+
+        [HttpGet("GetAssetByCode")]
+        public async Task<IActionResult> GetAssetByCodeAsync(string assetCode)
+        {
+            const string query = "SELECT * FROM asset_item_tb WHERE AssetCode = @AssetCode";
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var asset = await connection.QuerySingleOrDefaultAsync<AssetItem>(query, new { AssetCode = assetCode });
+
+                if (asset == null)
+                {
+                    return NotFound(new { message = "Asset not found." });
+                }
+
+                return Ok(asset); // Return the asset that matches the provided AssetCode
+            }
+        }
+
 
     }
 }

@@ -1,45 +1,46 @@
-import React, { useState } from "react";
-import "../Css/Electronics.css";
+import React, { useState, useEffect } from "react";
+import "../CSS/Electronics.css";
 
 export default function RequestItems() {
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editModal, setEditModalOpen] = useState(false);
   const [viewModal, setViewModalOpen] = useState(false);
   const [addModal, setAddModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusQuery, setStatusQuery] = useState("");
-  const [items, setItems] = useState([
-    {
-      id: 2,
-      name: "Item 1",
-      requestedBy: "User 1",
-      requestedDate: "2017-09-26 05:57",
-      status: "Complete",
-      priority: "High",
-    },
-    {
-      id: 3,
-      name: "Item 2",
-      requestedBy: "User 2",
-      requestedDate: "2018-03-15 11:23",
-      status: "In Progress",
-      priority: "Medium",
-    },
-    {
-      id: 4,
-      name: "Item 3",
-      requestedBy: "User 3",
-      requestedDate: "2019-01-10 09:30",
-      status: "Pending",
-      priority: "Low",
-    },
-  ]);
+  const [items, setItems] = useState([]);
+  const [admin1Approvals, setAdmin1Approval] = useState(""); // State for approval selection
+
+  // Fetch API data
+  useEffect(() => {
+    fetch("http://localhost:5075/api/RequestItemsApi/GetAllRequests")
+      .then((response) => response.json())
+      .then((data) => {
+        const mappedItems = data.map((item) => ({
+          id: item.requestID,
+          name: item.requestedItem,
+          requestedBy: item.requestedBy,
+          requestedDate: new Date(item.requestedDate).toLocaleString(),
+          status: item.status,
+          priority: item.priority,
+          Admin1: item.admin1Approval,
+          Cost: item.estimatedCost,
+          dealer: item.suggestedDealer,
+        }));
+        setItems(mappedItems);
+      })
+
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
 
   const openAddModal = () => setAddModalOpen(true);
   const closeAddModal = () => setAddModalOpen(false);
 
-  const openEditModal = () => setEditModalOpen(true);
+  const openEditModal = (item) => {
+    setCurrentItem(item);
+    setAdmin1Approval(item.Admin1);
+    setEditModalOpen(true);
+  };
   const closeEditModal = () => setEditModalOpen(false);
 
   const openViewModal = (item) => {
@@ -48,13 +49,14 @@ export default function RequestItems() {
   };
   const closeViewModal = () => setViewModalOpen(false);
 
-  const openDeleteModal = () => setDeleteModalOpen(true);
-  const closeDeleteModal = () => setDeleteModalOpen(false);
+  // const filteredItems = items.filter(
+  //   (item) =>
+  //     item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+  //     (statusQuery === "" || item.status === statusQuery)
+  // );
 
   const filteredItems = items.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (statusQuery === "" || item.status === statusQuery)
+    (item) => item.Admin1 === "Pending" // Only show pending Admin1 approval
   );
 
   const getStatusInfo = (status) => {
@@ -76,6 +78,43 @@ export default function RequestItems() {
       default:
         return { className: "", icon: null, spin: false };
     }
+  };
+
+  const handleSaveChanges = () => {
+    console.log("Sending update request with data:", admin1Approvals);
+
+    fetch(
+      `http://localhost:5075/api/RequestItemsApi/UpdateAdmin1Approval/${currentItem.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(admin1Approvals), // Pass the string directly as the body
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          console.log("Response status:", response.status);
+          return response.text(); // Log error message if the response isn't OK
+        }
+        return response.text(); // Parse response as a string
+      })
+      .then((message) => {
+        console.log("Request updated:", message); // Log success message
+
+        // Optionally update the UI if necessary
+        const updatedItems = items.map((item) =>
+          item.id === currentItem.id
+            ? { ...item, Admin1: admin1Approvals } // Update the item's Admin1 field
+            : item
+        );
+        setItems(updatedItems);
+        closeEditModal(); // Close the modal after saving
+      })
+      .catch((error) => {
+        console.error("Error updating request:", error);
+      });
   };
 
   return (
@@ -119,6 +158,7 @@ export default function RequestItems() {
                     <th className="column4">Requested Date</th>
                     <th className="column5">Status</th>
                     <th className="column6">Priority</th>
+                    <th className="column6">Admin1</th>
                     <th className="column7" style={{ paddingRight: 20 }}>
                       Operation
                     </th>
@@ -142,7 +182,8 @@ export default function RequestItems() {
                           {item.status}
                         </td>
                         <td className="column6">{item.priority}</td>
-                        <td className="column7 flex items-center justify-center mt-2">
+                        <td className="column7">{item.Admin1}</td>
+                        <td className="column8 flex items-center justify-center mt-2">
                           <button
                             type="button"
                             onClick={() => openViewModal(item)}
@@ -152,17 +193,10 @@ export default function RequestItems() {
                           </button>
                           <button
                             type="button"
-                            onClick={openEditModal}
+                            onClick={() => openEditModal(item)}
                             className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
                           >
                             <i className="fa-solid fa-pen"></i>
-                          </button>
-                          <button
-                            onClick={openDeleteModal}
-                            type="button"
-                            className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
-                          >
-                            <i className="fa-solid fa-trash"></i>
                           </button>
                         </td>
                       </tr>
@@ -174,6 +208,48 @@ export default function RequestItems() {
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {editModal && currentItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
+            <div className="flex justify-between items-center">
+              <h5 className="text-lg font-semibold">Edit Admin1 Approval</h5>
+              <button
+                type="button"
+                onClick={closeEditModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <form>
+              <div className="mt-4">
+                <div className="grid grid-cols-1 gap-5 mt-5">
+                  <select
+                    className="bg-gray-100 text-gray-900 mt-2 p-3 w-full rounded-lg"
+                    value={admin1Approvals}
+                    onChange={(e) => setAdmin1Approval(e.target.value)}
+                  >
+                    <option value="">Select Admin1 Approval</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Declined">Declined</option>
+                  </select>
+                </div>
+              </div>
+            </form>
+            <div className="flex justify-end mt-5">
+              <button
+                type="button"
+                onClick={handleSaveChanges}
+                className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-600"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {addModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -245,66 +321,6 @@ export default function RequestItems() {
         </div>
       )}
 
-      {editModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-            <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">Edit</h5>
-              <button
-                type="button"
-                onClick={closeEditModal}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-            <form action="">
-              <div className="mt-4">
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
-                  <input
-                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
-                    type="text"
-                    placeholder="Item Name"
-                  />
-                  <input
-                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
-                    type="date"
-                    placeholder="Schedule"
-                  />
-                  <select className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black">
-                    <option value="Complete">Complete</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Pending">Pending</option>
-                  </select>
-                </div>
-                <div className="my-4">
-                  <textarea
-                    placeholder="Description"
-                    className="h-32 bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline w-full border border-black"
-                  ></textarea>
-                </div>
-              </div>
-
-              <div className="flex justify-end mt-4">
-                <button
-                  type="button"
-                  onClick={closeEditModal}
-                  className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg mr-2"
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                >
-                  Save changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {viewModal && currentItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
@@ -332,41 +348,20 @@ export default function RequestItems() {
                 <strong>Status:</strong> {currentItem.status}
               </p>
               <p>
-                <strong>Status:</strong> {currentItem.estimatedCost}
-              </p>
-              <p>
                 <strong>Priority:</strong> {currentItem.priority}
+              </p>
+
+              <p>
+                <strong>Suggested Dealer:</strong> {currentItem.dealer}
+              </p>
+
+              <p>
+                <strong>Estimated Cost:</strong> {currentItem.Cost}
               </p>
               <p>
                 <strong>Description:</strong> Lorem ipsum dolor sit amet,
                 consectetur adipiscing elit.
               </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {deleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-            <h5 className="text-lg font-semibold">
-              Are you sure you want to delete?
-            </h5>
-
-            <div className="flex justify-end mt-4">
-              <button
-                type="button"
-                onClick={closeDeleteModal}
-                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg mr-2"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="bg-red-500 text-white px-4 py-2 rounded-lg"
-              >
-                Delete
-              </button>
             </div>
           </div>
         </div>

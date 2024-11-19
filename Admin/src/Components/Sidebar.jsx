@@ -46,6 +46,37 @@ const Sidebar = () => {
       </div>
       <ul className="nav-links">
         <li>
+          <a href="/UserBorrow">
+            <i className="fa-solid fa-boxes-stacked"></i>
+            <span className="link_name">Borrow</span>
+          </a>
+        </li>
+        <li>
+          <a href="/UserBorrowStatus">
+            <i className="fa-solid fa-boxes-stacked"></i>
+            <span className="link_name">BorrowStatus</span>
+          </a>
+        </li>
+        <li>
+          <a href="/UserRequest">
+            <i className="fa-solid fa-boxes-stacked"></i>
+            <span className="link_name">Request Item</span>
+          </a>
+        </li>
+        <li>
+          <a href="/UserRequestMaintenance">
+            <i className="fa-solid fa-boxes-stacked"></i>
+            <span className="link_name">Request Maintenace</span>
+          </a>
+        </li>
+        <li>
+          <a href="/UserRequestLogs">
+            <i className="fa-solid fa-boxes-stacked"></i>
+            <span className="link_name">Logs</span>
+          </a>
+        </li>
+        {/* Asset Menu */}
+        <li>
           <a href="/AssetInventory">
             <i className="fa-solid fa-boxes-stacked"></i>
             <span className="link_name">Asset Inventory</span>
