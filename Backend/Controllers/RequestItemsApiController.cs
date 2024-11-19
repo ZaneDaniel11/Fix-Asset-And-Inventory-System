@@ -244,7 +244,7 @@ public async Task<IActionResult> UpdateAdmin1Approval(int requestId, [FromBody] 
         public async Task<IActionResult> GetRequestsByBorrower(int borrowerId)
         {
             string selectQuery = @"
-        SELECT RequestID, RequestedItem, RequestedBy, SuggestedDealer, Purpose, EstimatedCost, RequestedDate, Status, Priority, Admin1Approval, Admin2Approval, Admin3Approval, BorrowerId
+        SELECT RequestID, RequestedItem, RequestedBy, SuggestedDealer, Purpose, EstimatedCost, RequestedDate, Status, Priority, Admin1Approval, Admin2Approval, Admin3Approval, BorrowerId,Description
         FROM RequestItems_tb
         WHERE BorrowerId = @BorrowerId;
     ";

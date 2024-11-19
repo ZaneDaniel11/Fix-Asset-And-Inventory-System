@@ -1,6 +1,6 @@
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../../components/Sidebar";
 import React, { useState, useEffect } from "react";
-import { fetchData } from "../Utilities/ApiUtilitites";
+import { fetchData } from "../../Utilities/ApiUtilitites";
 
 export default function Request() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -22,6 +22,7 @@ export default function Request() {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
   const openViewModal = (request) => {
+    console.log(request);
     setSelectedRequest(request);
     setViewModalOpen(true);
   };
@@ -47,6 +48,7 @@ export default function Request() {
       "GET"
     );
     setRequests(response);
+    console.log(requests);
   }
 
   useEffect(() => {

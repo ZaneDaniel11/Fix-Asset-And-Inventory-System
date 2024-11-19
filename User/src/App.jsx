@@ -1,12 +1,12 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Login from "./Login";
-import Home from "./Home";
-import RequestHistory from "./RequestHistory";
+import Home from "./User/Borrow/Borrow";
+import RequestHistory from "./User/History/RequestHistory";
 import ProtectedRoute from "./ProtectedRoute";
-import Request from "./Request/Request";
-import BorrowStatus from "./Borrow/BorrowStatus/Borrows";
-import Maintenance from "./Maintenance/Maintenance";
+import Request from "./User/Request/Request";
+import BorrowStatus from "./User/BorrowStatus/Borrows";
+import Maintenance from "./User/Maintenance/Maintenance";
 
 function App() {
   return (

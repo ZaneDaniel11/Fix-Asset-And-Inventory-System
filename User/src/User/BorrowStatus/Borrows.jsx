@@ -161,40 +161,60 @@ export default function BorrowStatus() {
 
         {/* View Modal */}
         {viewModalOpen && currentItem && (
-          <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-8 relative">
+              {/* Close Button */}
               <button
                 onClick={closeViewModal}
-                className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-2xl"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                ✕
               </button>
-              <h2 className="text-2xl font-semibold mb-4">Borrowed Items</h2>
+
+              {/* Modal Title */}
+              <h2 className="text-3xl font-bold text-gray-700 text-center mb-8">
+                Borrowed Items
+              </h2>
+
               {borrowLoading ? (
-                <div>Loading borrowed items...</div>
+                <div className="text-center text-gray-500 text-lg">
+                  Loading borrowed items...
+                </div>
               ) : borrowedItems.length === 0 ? (
-                <div>No borrowed items found</div>
+                <div className="text-center text-gray-500 text-lg">
+                  No borrowed items found
+                </div>
               ) : (
-                <ul>
+                <div className="space-y-6">
                   {borrowedItems.map((borrowItem) => (
-                    <li key={borrowItem.ItemId}>
-                      Item: {borrowItem.ItemName} - Qty: {borrowItem.Quantity}
-                    </li>
+                    <div
+                      key={borrowItem.ItemId}
+                      className="flex items-center border border-gray-200 rounded-lg bg-gray-50 hover:shadow-lg transition-shadow duration-300 p-5"
+                    >
+                      {/* Image Section */}
+                      <div className="flex-shrink-0">
+                        <img
+                          src="https://via.placeholder.com/100"
+                          alt={borrowItem.ItemName}
+                          className="w-24 h-24 object-cover rounded-lg"
+                        />
+                      </div>
+
+                      {/* Content Section */}
+                      <div className="ml-6 flex-1">
+                        <h3 className="text-xl font-semibold text-gray-800">
+                          {borrowItem.ItemName}
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-2">
+                          Quantity:{" "}
+                          <span className="font-medium text-gray-800">
+                            {borrowItem.Quantity}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
             </div>
           </div>
