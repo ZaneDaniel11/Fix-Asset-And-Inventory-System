@@ -24,19 +24,24 @@ import UserBorrowStatus from "./User/BorrowStatus/Borrows.jsx";
 import UserRequestItem from "./User/Request/Request.jsx";
 import UserRequestMaintenance from "./User/Maintenance/Maintenance.jsx";
 import UserRequestLogs from "./User/History/RequestHistory.jsx";
+
 function App() {
   const location = useLocation();
   const isAuthenticated = !!localStorage.getItem("token"); // Check if token is present
+  const usertype = localStorage.getItem("userType"); // Get usertype from localStorage
   const showSidebar = isAuthenticated && location.pathname !== "/";
 
-  // Route guard for protected routes
-  const ProtectedRoute = ({ element }) => {
-    return isAuthenticated ? element : <Navigate to="/" replace />;
+  // Route guard for protected routes based on usertype
+  const ProtectedRoute = ({ element, allowedUsertypes }) => {
+    if (!isAuthenticated) return <Navigate to="/" replace />;
+    if (!allowedUsertypes.includes(usertype))
+      return <Navigate to="/Dashboard" replace />;
+    return element;
   };
 
   return (
     <div>
-      {showSidebar && <Sidebar />} {/* Show Sidebar only when authenticated */}
+      {showSidebar && <Sidebar />}
       <div className={showSidebar ? "home-section" : ""}>
         <Routes>
           {/* Public route */}
@@ -45,73 +50,160 @@ function App() {
           {/* Protected routes */}
           <Route
             path="/Dashboard"
-            element={<ProtectedRoute element={<Dashboard />} />}
+            element={
+              <ProtectedRoute
+                element={<Dashboard />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
           />
           <Route
             path="/Request"
-            element={<ProtectedRoute element={<RequestItems />} />}
+            element={
+              <ProtectedRoute
+                element={<RequestItems />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
           />
           <Route
             path="/Inventory"
-            element={<ProtectedRoute element={<Inventory />} />}
+            element={
+              <ProtectedRoute
+                element={<Inventory />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
           />
-
           <Route
             path="/Users"
-            element={<ProtectedRoute element={<Users />} />}
+            element={
+              <ProtectedRoute
+                element={<Users />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
           />
           <Route
             path="/InventoryTable"
-            element={<ProtectedRoute element={<InventoryTable />} />}
+            element={
+              <ProtectedRoute
+                element={<InventoryTable />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
           />
           <Route
             path="/BorrowedRequest"
-            element={<ProtectedRoute element={<BorrowedRequest />} />}
+            element={
+              <ProtectedRoute
+                element={<BorrowedRequest />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
           />
           <Route
             path="/RequestItem"
-            element={<ProtectedRoute element={<RequestItems />} />}
+            element={
+              <ProtectedRoute
+                element={<RequestItems />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
           />
           <Route
             path="/BorrowedTable"
-            element={<ProtectedRoute element={<BorrowedItems />} />}
+            element={
+              <ProtectedRoute
+                element={<BorrowedItems />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
+          />
+          <Route
+            path="/Logs"
+            element={
+              <ProtectedRoute
+                element={<Logs />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
           />
 
           {/* Asset Section */}
           <Route
             path="/AssetInventory"
-            element={<ProtectedRoute element={<AssetInventory />} />}
+            element={
+              <ProtectedRoute
+                element={<AssetInventory />}
+                allowedUsertypes={["Asset_Admin"]}
+              />
+            }
           />
           <Route
             path="/AssetItemTable"
-            element={<ProtectedRoute element={<AssetInvenTable />} />}
+            element={
+              <ProtectedRoute
+                element={<AssetInvenTable />}
+                allowedUsertypes={["Asset_Admin"]}
+              />
+            }
           />
           <Route
             path="/Schedule"
-            element={<ProtectedRoute element={<Schedule />} />}
+            element={
+              <ProtectedRoute
+                element={<Schedule />}
+                allowedUsertypes={["Asset_Admin"]}
+              />
+            }
           />
-          <Route path="/Logs" element={<ProtectedRoute element={<Logs />} />} />
 
           {/* User Section */}
           <Route
-            path="/UserBorrow"
-            element={<ProtectedRoute element={<UserBorrow />} />}
+            path="/Home"
+            element={
+              <ProtectedRoute
+                element={<UserBorrow />}
+                allowedUsertypes={["Member"]}
+              />
+            }
           />
           <Route
             path="/UserBorrowStatus"
-            element={<ProtectedRoute element={<UserBorrowStatus />} />}
+            element={
+              <ProtectedRoute
+                element={<UserBorrowStatus />}
+                allowedUsertypes={["Member"]}
+              />
+            }
           />
           <Route
             path="/UserRequest"
-            element={<ProtectedRoute element={<UserRequestItem />} />}
+            element={
+              <ProtectedRoute
+                element={<UserRequestItem />}
+                allowedUsertypes={["Member"]}
+              />
+            }
           />
           <Route
             path="/UserRequestMaintenance"
-            element={<ProtectedRoute element={<UserRequestMaintenance />} />}
+            element={
+              <ProtectedRoute
+                element={<UserRequestMaintenance />}
+                allowedUsertypes={["Member"]}
+              />
+            }
           />
           <Route
             path="/UserRequestLogs"
-            element={<ProtectedRoute element={<UserRequestLogs />} />}
+            element={
+              <ProtectedRoute
+                element={<UserRequestLogs />}
+                allowedUsertypes={["Member"]}
+              />
+            }
           />
         </Routes>
         <ToastContainer

@@ -6,19 +6,23 @@ import "../Css/Sidebar.css";
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
+  const [usertype, setUsertype] = useState("");
   const [isRequestMenuOpen, setIsRequestMenuOpen] = useState(false);
   const [isBorrowedMenuOpen, setIsBorrowedMenuOpen] = useState(false);
 
+  const storedName = localStorage.getItem("name");
   useEffect(() => {
-    const storedUsername = localStorage.getItem("username");
-    if (storedUsername) setUsername(storedUsername);
+    const storedUsertype = localStorage.getItem("userType");
+
+    if (storedUsertype) setUsertype(storedUsertype);
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
+    localStorage.removeItem("usertype");
     navigate("/");
   };
 
@@ -45,126 +49,140 @@ const Sidebar = () => {
         <span className="logo_name">Fix Asset</span>
       </div>
       <ul className="nav-links">
-        <li>
-          <a href="/UserBorrow">
-            <i className="fa-solid fa-boxes-stacked"></i>
-            <span className="link_name">Borrow</span>
-          </a>
-        </li>
-        <li>
-          <a href="/UserBorrowStatus">
-            <i className="fa-solid fa-boxes-stacked"></i>
-            <span className="link_name">BorrowStatus</span>
-          </a>
-        </li>
-        <li>
-          <a href="/UserRequest">
-            <i className="fa-solid fa-boxes-stacked"></i>
-            <span className="link_name">Request Item</span>
-          </a>
-        </li>
-        <li>
-          <a href="/UserRequestMaintenance">
-            <i className="fa-solid fa-boxes-stacked"></i>
-            <span className="link_name">Request Maintenace</span>
-          </a>
-        </li>
-        <li>
-          <a href="/UserRequestLogs">
-            <i className="fa-solid fa-boxes-stacked"></i>
-            <span className="link_name">Logs</span>
-          </a>
-        </li>
+        {usertype === "Member" && (
+          <>
+            <li>
+              <a href="/Home">
+                <i className="fa-solid fa-boxes-stacked"></i>
+                <span className="link_name">Borrow</span>
+              </a>
+            </li>
+            <li>
+              <a href="/UserBorrowStatus">
+                <i className="fa-solid fa-boxes-stacked"></i>
+                <span className="link_name">BorrowStatus</span>
+              </a>
+            </li>
+            <li>
+              <a href="/UserRequest">
+                <i className="fa-solid fa-boxes-stacked"></i>
+                <span className="link_name">Request Item</span>
+              </a>
+            </li>
+            <li>
+              <a href="/UserRequestMaintenance">
+                <i className="fa-solid fa-boxes-stacked"></i>
+                <span className="link_name">Request Maintenace</span>
+              </a>
+            </li>
+            <li>
+              <a href="/UserRequestLogs">
+                <i className="fa-solid fa-boxes-stacked"></i>
+                <span className="link_name">Logs</span>
+              </a>
+            </li>
+          </>
+        )}
         {/* Asset Menu */}
-        <li>
-          <a href="/AssetInventory">
-            <i className="fa-solid fa-boxes-stacked"></i>
-            <span className="link_name">Asset Inventory</span>
-          </a>
-        </li>
-        <li>
-          <a href="/Schedule">
-            <i className="fa-solid fa-boxes-stacked"></i>
-            <span className="link_name">Schedule</span>
-          </a>
-        </li>
-        <li>
-          <a href="/Dashboard">
-            <i className="bx bx-grid-alt"></i>
-            <span className="link_name">Dashboard</span>
-          </a>
-        </li>
-        <li>
-          <a href="/inventory">
-            <i className="fa-solid fa-boxes-stacked"></i>
-            <span className="link_name">Inventory</span>
-          </a>
-        </li>
-
-        {/* Request Menu */}
-        <li>
-          <div className="iocn-link" onClick={toggleRequestMenu}>
-            <a href="#" className="menu-item">
-              <i className="bx bx-collection"></i>
-              <span className="link_name">Request</span>
-            </a>
-            <i
-              className={`bx bxs-chevron-down arrow ${
-                isRequestMenuOpen ? "rotate" : ""
-              }`}
-            ></i>
-          </div>
-          <ul className={`sub-menu ${isRequestMenuOpen ? "show" : ""}`}>
+        {usertype === "Asset_Admin" && (
+          <>
             <li>
-              <a href="/BorrowedRequest">Borrow Request</a>
+              <a href="/AssetInventory">
+                <i className="fa-solid fa-boxes-stacked"></i>
+                <span className="link_name">Asset Inventory</span>
+              </a>
             </li>
             <li>
-              <a href="/RequestItem">Request Items</a>
+              <a href="/Schedule">
+                <i className="fa-solid fa-boxes-stacked"></i>
+                <span className="link_name">Schedule</span>
+              </a>
+            </li>
+          </>
+        )}
+        {/* Inventory Admin */}
+
+        {usertype === "Inventory_Admin" && (
+          <>
+            <li>
+              <a href="/Dashboard">
+                <i className="bx bx-grid-alt"></i>
+                <span className="link_name">Dashboard</span>
+              </a>
             </li>
             <li>
-              <a href="/Request">Request Repair</a>
+              <a href="/inventory">
+                <i className="fa-solid fa-boxes-stacked"></i>
+                <span className="link_name">Inventory</span>
+              </a>
             </li>
-          </ul>
-        </li>
 
-        <li>
-          <a href="/Users">
-            <i className="fa-regular fa-user"></i>
-            <span className="link_name">User</span>
-          </a>
-        </li>
-
-        {/* Borrowed Menu */}
-        <li>
-          <div className="iocn-link" onClick={toggleBorrowedMenu}>
-            <a href="#" className="menu-item">
-              <i className="fa-solid fa-box-archive"></i>
-              <span className="link_name">Borrowed</span>
-            </a>
-            <i
-              className={`bx bxs-chevron-down arrow ${
-                isBorrowedMenuOpen ? "rotate" : ""
-              }`}
-            ></i>
-          </div>
-          <ul className={`sub-menu ${isBorrowedMenuOpen ? "show" : ""}`}>
+            {/* Request Menu */}
             <li>
-              <a href="/BorrowedTable">Borrowed Items</a>
+              <div className="iocn-link" onClick={toggleRequestMenu}>
+                <a href="#" className="menu-item">
+                  <i className="bx bx-collection"></i>
+                  <span className="link_name">Request</span>
+                </a>
+                <i
+                  className={`bx bxs-chevron-down arrow ${
+                    isRequestMenuOpen ? "rotate" : ""
+                  }`}
+                ></i>
+              </div>
+              <ul className={`sub-menu ${isRequestMenuOpen ? "show" : ""}`}>
+                <li>
+                  <a href="/BorrowedRequest">Borrow Request</a>
+                </li>
+                <li>
+                  <a href="/RequestItem">Request Items</a>
+                </li>
+                <li>
+                  <a href="/Request">Request Repair</a>
+                </li>
+              </ul>
             </li>
-          </ul>
-        </li>
 
-        <li>
-          <a href="/Logs">
-            <i className="fa-regular fa-user"></i>
-            <span className="link_name">Logs</span>
-          </a>
-        </li>
+            <li>
+              <a href="/Users">
+                <i className="fa-regular fa-user"></i>
+                <span className="link_name">User</span>
+              </a>
+            </li>
+
+            {/* Borrowed Menu */}
+            <li>
+              <div className="iocn-link" onClick={toggleBorrowedMenu}>
+                <a href="#" className="menu-item">
+                  <i className="fa-solid fa-box-archive"></i>
+                  <span className="link_name">Borrowed</span>
+                </a>
+                <i
+                  className={`bx bxs-chevron-down arrow ${
+                    isBorrowedMenuOpen ? "rotate" : ""
+                  }`}
+                ></i>
+              </div>
+              <ul className={`sub-menu ${isBorrowedMenuOpen ? "show" : ""}`}>
+                <li>
+                  <a href="/BorrowedTable">Borrowed Items</a>
+                </li>
+              </ul>
+            </li>
+
+            <li>
+              <a href="/Logs">
+                <i className="fa-regular fa-user"></i>
+                <span className="link_name">Logs</span>
+              </a>
+            </li>
+          </>
+        )}
         <li>
           <div className="profile-details">
             <div className="name-job">
-              <div className="profile_name">{username || "Zane Daniel"}</div>
-              <div className="job">Admin</div>
+              <div className="profile_name">{storedName || "Zane Daniel"}</div>
+              <div className="job">{usertype}</div>
             </div>
             <i className="bx bx-log-out" onClick={handleLogout}></i>
           </div>
