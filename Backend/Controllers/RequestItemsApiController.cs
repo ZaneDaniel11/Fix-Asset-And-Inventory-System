@@ -128,12 +128,12 @@ namespace Backend.Controllers
         }
 
         // API for updating Admin1 approval and setting status based on approval, returning updated request
-       // API for updating Admin1 approval and setting status based on approval, returning updated request
-[HttpPut("UpdateAdmin1Approval/{requestId}")]
-public async Task<IActionResult> UpdateAdmin1Approval(int requestId, [FromBody] string admin1Approval)
-{
-    // Query to update Admin1Approval and Status
-    string updateQuery = @"
+        // API for updating Admin1 approval and setting status based on approval, returning updated request
+        [HttpPut("UpdateAdmin1Approval/{requestId}")]
+        public async Task<IActionResult> UpdateAdmin1Approval(int requestId, [FromBody] string admin1Approval)
+        {
+            // Query to update Admin1Approval and Status
+            string updateQuery = @"
         UPDATE RequestItems_tb 
         SET Admin1Approval = @Admin1Approval, 
             Status = CASE 
@@ -144,35 +144,35 @@ public async Task<IActionResult> UpdateAdmin1Approval(int requestId, [FromBody] 
         WHERE RequestID = @RequestId;
     ";
 
-    // Query to select updated request
-    string selectQuery = @"
+            // Query to select updated request
+            string selectQuery = @"
         SELECT * FROM RequestItems_tb WHERE RequestID = @RequestId;
     ";
 
-    // Using the database connection
-    using (var connection = new SqliteConnection(_connectionString))
-    {
-        connection.Open();
+            // Using the database connection
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
 
-        // Update Admin1Approval and Status
-        await connection.ExecuteAsync(updateQuery, new
-        {
-            Admin1Approval = admin1Approval,
-            RequestId = requestId
-        });
+                // Update Admin1Approval and Status
+                await connection.ExecuteAsync(updateQuery, new
+                {
+                    Admin1Approval = admin1Approval,
+                    RequestId = requestId
+                });
 
-        // Retrieve the updated request
-        var updatedRequest = await connection.QuerySingleOrDefaultAsync<RequestItem>(selectQuery, new { RequestId = requestId });
-        
-        // Return the updated request in the response body
-        if (updatedRequest == null)
-        {
-            return NotFound($"Request with ID {requestId} not found.");
+                // Retrieve the updated request
+                var updatedRequest = await connection.QuerySingleOrDefaultAsync<RequestItem>(selectQuery, new { RequestId = requestId });
+
+                // Return the updated request in the response body
+                if (updatedRequest == null)
+                {
+                    return NotFound($"Request with ID {requestId} not found.");
+                }
+
+                return Ok(updatedRequest);
+            }
         }
-
-        return Ok(updatedRequest);
-    }
-}
 
         // API for updating Admin2 approval and setting status based on approval, returning updated request
         [HttpPut("UpdateAdmin2Approval/{requestId}")]
@@ -246,7 +246,7 @@ public async Task<IActionResult> UpdateAdmin1Approval(int requestId, [FromBody] 
             string selectQuery = @"
         SELECT RequestID, RequestedItem, RequestedBy, SuggestedDealer, Purpose, EstimatedCost, RequestedDate, Status, Priority, Admin1Approval, Admin2Approval, Admin3Approval, BorrowerId,Description
         FROM RequestItems_tb
-        WHERE BorrowerId = @BorrowerId;
+        WHERE BorrowerId = @BorrowerId  ORDER BY RequestID DESC;
     ";
 
             using (var connection = new SqliteConnection(_connectionString))
@@ -256,5 +256,29 @@ public async Task<IActionResult> UpdateAdmin1Approval(int requestId, [FromBody] 
                 return Ok(requestItems);
             }
         }
+
+        [HttpPut("CancelRequest/{requestId}")]
+        public async Task<IActionResult> CancelRequestItem(int requestId)
+        {
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                const string query = @"
+            UPDATE RequestItems_tb
+            SET Status = 'Canceled'
+            WHERE RequestID = @requestId";
+
+                var rowsAffected = await connection.ExecuteAsync(query, new { requestId });
+
+                if (rowsAffected == 0)
+                {
+                    return NotFound($"No request found with RequestID {requestId}.");
+                }
+
+                return Ok($"Request with RequestID {requestId} has been successfully canceled.");
+            }
+        }
+
     }
 }

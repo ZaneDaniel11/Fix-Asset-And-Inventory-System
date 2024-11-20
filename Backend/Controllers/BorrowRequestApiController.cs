@@ -167,24 +167,46 @@ namespace Backend.Controllers
             }
         }
 
-   [HttpGet("RequestById/{borrowerId}")]
-public async Task<IActionResult> GetRequestsByBorrowerId1(int borrowerId)
-{
-    using (var connection = new SqliteConnection(_connectionString))
-    {
-        await connection.OpenAsync();
+        [HttpGet("RequestById/{borrowerId}")]
+        public async Task<IActionResult> GetRequestsByBorrowerId1(int borrowerId)
+        {
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
 
-        const string query = "SELECT * FROM Borrowreq_tb WHERE BorrowerId = @borrowerId";
+                const string query = "SELECT * FROM Borrowreq_tb WHERE BorrowerId = @borrowerId  ORDER BY BorrowId DESC";
 
-        var requests = await connection.QueryAsync(query, new { borrowerId });
+                var requests = await connection.QueryAsync(query, new { borrowerId });
 
-        if (!requests.Any())
-            return NotFound($"No borrow requests found for BorrowerId {borrowerId}.");
+                if (!requests.Any())
+                    return NotFound($"No borrow requests found for BorrowerId {borrowerId}.");
 
-        return Ok(requests);
-    }
-}
+                return Ok(requests);
+            }
+        }
 
+        [HttpPut("UpdateStatus/{borrowId}")]
+        public async Task<IActionResult> UpdateBorrowRequestStatus(int borrowId, [FromBody] string newStatus)
+        {
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                const string query = @"
+            UPDATE Borrowreq_tb 
+            SET Status = @newStatus 
+            WHERE BorrowId = @borrowId";
+
+                var rowsAffected = await connection.ExecuteAsync(query, new { borrowId, newStatus });
+
+                if (rowsAffected == 0)
+                {
+                    return NotFound($"No borrow request found with BorrowId {borrowId}.");
+                }
+
+                return Ok($"Borrow request with BorrowId {borrowId} successfully updated to status '{newStatus}'.");
+            }
+        }
 
 
         // GET: api/Borrow/RequestsByBorrower/{borrowerId}
@@ -211,159 +233,160 @@ public async Task<IActionResult> GetRequestsByBorrowerId1(int borrowerId)
             }
         }
 
-      [HttpPut("UpdateApproval/{borrowId}")]
-public async Task<IActionResult> UpdateApproval(int borrowId, [FromBody] UpdateApprovalRequest request)
-{
-    if (request == null || string.IsNullOrEmpty(request.Admin1Approval))
-        return BadRequest("Invalid request. Admin1Approval must be provided.");
-
-    if (request.Admin1Approval == "Rejected" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
-        return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
-
-    using (var connection = new SqliteConnection(_connectionString))
-    {
-        await connection.OpenAsync();
-
-        using (var transaction = connection.BeginTransaction())
+        [HttpPut("UpdateApproval/{borrowId}")]
+        public async Task<IActionResult> UpdateApproval(int borrowId, [FromBody] UpdateApprovalRequest request)
         {
-            try
+            if (request == null || string.IsNullOrEmpty(request.Admin1Approval))
+                return BadRequest("Invalid request. Admin1Approval must be provided.");
+
+            if (request.Admin1Approval == "Rejected" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
+                return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
+
+            using (var connection = new SqliteConnection(_connectionString))
             {
-                // Check if BorrowId exists
-                string checkExistQuery = "SELECT COUNT(1) FROM Borrowreq_tb WHERE BorrowId = @BorrowId";
-                var exists = await connection.ExecuteScalarAsync<bool>(checkExistQuery, new { BorrowId = borrowId });
+                await connection.OpenAsync();
 
-                if (!exists)
-                    return NotFound($"Borrow request with ID {borrowId} not found.");
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // Check if BorrowId exists
+                        string checkExistQuery = "SELECT COUNT(1) FROM Borrowreq_tb WHERE BorrowId = @BorrowId";
+                        var exists = await connection.ExecuteScalarAsync<bool>(checkExistQuery, new { BorrowId = borrowId });
 
-                // Update Admin1Approval
-                string updateApprovalQuery = @"
+                        if (!exists)
+                            return NotFound($"Borrow request with ID {borrowId} not found.");
+
+                        // Update Admin1Approval
+                        string updateApprovalQuery = @"
                 UPDATE Borrowreq_tb 
                 SET Admin1Approval = @Admin1Approval
                 WHERE BorrowId = @BorrowId";
 
-                await connection.ExecuteAsync(updateApprovalQuery, new
-                {
-                    Admin1Approval = request.Admin1Approval,
-                    BorrowId = borrowId
-                }, transaction);
+                        await connection.ExecuteAsync(updateApprovalQuery, new
+                        {
+                            Admin1Approval = request.Admin1Approval,
+                            BorrowId = borrowId
+                        }, transaction);
 
-                // If Admin1Approval is "Approved", update Status to "In Progress"
-                if (request.Admin1Approval == "Approved")
-                {
-                    string updateStatusQuery = @"
+                        // If Admin1Approval is "Approved", update Status to "In Progress"
+                        if (request.Admin1Approval == "Approved")
+                        {
+                            string updateStatusQuery = @"
                     UPDATE Borrowreq_tb 
                     SET Status = 'In Progress'
                     WHERE BorrowId = @BorrowId";
 
-                    await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
-                }
-                // If Admin1Approval is "Rejected", update Status, RejectReason, and RejectBy
-                else if (request.Admin1Approval == "Declined")
-                {
-                    string updateRejectionQuery = @"
+                            await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
+                        }
+                        // If Admin1Approval is "Rejected", update Status, RejectReason, and RejectBy
+                        else if (request.Admin1Approval == "Declined")
+                        {
+                            string updateRejectionQuery = @"
                     UPDATE Borrowreq_tb 
                     SET Status = 'Declined', 
                         RejectReason = @RejectReason, 
                         RejectBy = @RejectBy
                     WHERE BorrowId = @BorrowId";
 
-                    await connection.ExecuteAsync(updateRejectionQuery, new
-                    {
-                        BorrowId = borrowId,
-                        RejectReason = request.RejectReason,
-                        RejectBy = request.RejectBy
-                    }, transaction);
-                }
+                            await connection.ExecuteAsync(updateRejectionQuery, new
+                            {
+                                BorrowId = borrowId,
+                                RejectReason = request.RejectReason,
+                                RejectBy = request.RejectBy
+                            }, transaction);
+                        }
 
-                transaction.Commit();
-                return Ok("Approval and status updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                // Log the exception if logging is configured
-                // _logger.LogError(ex, "Error updating approval");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                        transaction.Commit();
+                        return Ok("Approval and status updated successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        // Log the exception if logging is configured
+                        // _logger.LogError(ex, "Error updating approval");
+                        return StatusCode(500, $"Internal server error: {ex.Message}");
+                    }
+                }
             }
         }
-    }
-}
 
- [HttpPut("UpdateApprovalAdmin2/{borrowId}")]
-public async Task<IActionResult> UpdateApprovalAdmin2(int borrowId, [FromBody] UpdateApprovalRequestAdmin2 request)
-{
-    if (request == null || string.IsNullOrEmpty(request.Admin2Approval))
-        return BadRequest("Invalid request. Admin2Approval must be provided.");
-
-    if (request.Admin2Approval == "Rejected" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
-        return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
-
-    using (var connection = new SqliteConnection(_connectionString))
-    {
-        await connection.OpenAsync();
-
-        using (var transaction = connection.BeginTransaction())
+        [HttpPut("UpdateApprovalAdmin2/{borrowId}")]
+        public async Task<IActionResult> UpdateApprovalAdmin2(int borrowId, [FromBody] UpdateApprovalRequestAdmin2 request)
         {
-            try
+            if (request == null || string.IsNullOrEmpty(request.Admin2Approval))
+                return BadRequest("Invalid request. Admin2Approval must be provided.");
+
+            if (request.Admin2Approval == "Rejected" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
+                return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
+
+            using (var connection = new SqliteConnection(_connectionString))
             {
-                // Check if BorrowId exists
-                string checkExistQuery = "SELECT COUNT(1) FROM Borrowreq_tb WHERE BorrowId = @BorrowId";
-                var exists = await connection.ExecuteScalarAsync<bool>(checkExistQuery, new { BorrowId = borrowId });
+                await connection.OpenAsync();
 
-                if (!exists)
-                    return NotFound($"Borrow request with ID {borrowId} not found.");
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // Check if BorrowId exists
+                        string checkExistQuery = "SELECT COUNT(1) FROM Borrowreq_tb WHERE BorrowId = @BorrowId";
+                        var exists = await connection.ExecuteScalarAsync<bool>(checkExistQuery, new { BorrowId = borrowId });
 
-                // Update Admin2Approval
-                string updateApprovalQuery = @"
+                        if (!exists)
+                            return NotFound($"Borrow request with ID {borrowId} not found.");
+
+                        // Update Admin2Approval
+                        string updateApprovalQuery = @"
                 UPDATE Borrowreq_tb 
                 SET Admin2Approval = @Admin2Approval
                 WHERE BorrowId = @BorrowId";
 
-                await connection.ExecuteAsync(updateApprovalQuery, new
-                {
-                    Admin2Approval = request.Admin2Approval,
-                    BorrowId = borrowId
-                }, transaction);
+                        await connection.ExecuteAsync(updateApprovalQuery, new
+                        {
+                            Admin2Approval = request.Admin2Approval,
+                            BorrowId = borrowId
+                        }, transaction);
 
-                // If Admin2Approval is "Approved", update Status to "In Progress"
-                if (request.Admin2Approval == "Approved")
-                {
-                    string updateStatusQuery = @"
+                        // If Admin2Approval is "Approved", update Status to "In Progress"
+                        if (request.Admin2Approval == "Approved")
+                        {
+                            string updateStatusQuery = @"
                     UPDATE Borrowreq_tb 
                     SET Status = 'In Progress'
                     WHERE BorrowId = @BorrowId";
 
-                    await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
-                }
-                // If Admin2Approval is "Rejected", update Status, RejectReason, and RejectBy
-                else if (request.Admin2Approval == "Declined")
-                {
-                    string updateRejectionQuery = @"
+                            await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
+                        }
+                        // If Admin2Approval is "Rejected", update Status, RejectReason, and RejectBy
+                        else if (request.Admin2Approval == "Declined")
+                        {
+                            string updateRejectionQuery = @"
                     UPDATE Borrowreq_tb 
                     SET Status = 'Rejected', 
                         RejectReason = @RejectReason, 
                         RejectBy = @RejectBy
                     WHERE BorrowId = @BorrowId";
 
-                    await connection.ExecuteAsync(updateRejectionQuery, new
-                    {
-                        BorrowId = borrowId,
-                        RejectReason = request.RejectReason,
-                        RejectBy = request.RejectBy
-                    }, transaction);
-                }
+                            await connection.ExecuteAsync(updateRejectionQuery, new
+                            {
+                                BorrowId = borrowId,
+                                RejectReason = request.RejectReason,
+                                RejectBy = request.RejectBy
+                            }, transaction);
+                        }
 
-                transaction.Commit();
-                return Ok("Approval and status updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                        transaction.Commit();
+                        return Ok("Approval and status updated successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return StatusCode(500, $"Internal server error: {ex.Message}");
+                    }
+                }
             }
         }
-    }
-}
+
 
         [HttpGet("ApprovedByAdmin1")]
         public async Task<IActionResult> GetApprovedByAdmin1Requests()
@@ -410,150 +433,227 @@ public async Task<IActionResult> UpdateApprovalAdmin2(int borrowId, [FromBody] U
             }
         }
 
-//      [HttpPut("UpdateApprovalAdmin3/{borrowId}")]
-// public async Task<IActionResult> UpdateApprovalAdmin3(int borrowId, [FromBody] UpdateApprovalRequestAdmin3 request)
-// {
-//     if (request == null || string.IsNullOrEmpty(request.Admin3Approval))
-//         return BadRequest("Invalid request. Admin3Approval must be provided.");
+        //      [HttpPut("UpdateApprovalAdmin3/{borrowId}")]
+        // public async Task<IActionResult> UpdateApprovalAdmin3(int borrowId, [FromBody] UpdateApprovalRequestAdmin3 request)
+        // {
+        //     if (request == null || string.IsNullOrEmpty(request.Admin3Approval))
+        //         return BadRequest("Invalid request. Admin3Approval must be provided.");
 
-//     if (request.Admin3Approval == "Rejected" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
-//         return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
+        //     if (request.Admin3Approval == "Rejected" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
+        //         return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
 
-//     using (var connection = new SqliteConnection(_connectionString))
-//     {
-//         await connection.OpenAsync();
+        //     using (var connection = new SqliteConnection(_connectionString))
+        //     {
+        //         await connection.OpenAsync();
 
-//         using (var transaction = connection.BeginTransaction())
-//         {
-//             try
-//             {
-//                 // Update Admin3Approval
-//                 string updateApprovalQuery = @"
-//                 UPDATE Borrowreq_tb 
-//                 SET Admin3Approval = @Admin3Approval
-//                 WHERE BorrowId = @BorrowId";
+        //         using (var transaction = connection.BeginTransaction())
+        //         {
+        //             try
+        //             {
+        //                 // Update Admin3Approval
+        //                 string updateApprovalQuery = @"
+        //                 UPDATE Borrowreq_tb 
+        //                 SET Admin3Approval = @Admin3Approval
+        //                 WHERE BorrowId = @BorrowId";
 
-//                 await connection.ExecuteAsync(updateApprovalQuery, new
-//                 {
-//                     Admin3Approval = request.Admin3Approval,
-//                     BorrowId = borrowId
-//                 }, transaction);
+        //                 await connection.ExecuteAsync(updateApprovalQuery, new
+        //                 {
+        //                     Admin3Approval = request.Admin3Approval,
+        //                     BorrowId = borrowId
+        //                 }, transaction);
 
-//                 // Handle status, ReturnStatus, RejectReason, and RejectBy based on Admin3Approval
-//                 if (request.Admin3Approval == "Approved")
-//                 {
-//                     string updateStatusQuery = @"
-//                     UPDATE Borrowreq_tb 
-//                     SET Status = 'Approved', ReturnStatus = 'Not Returned'
-//                     WHERE BorrowId = @BorrowId 
-//                     AND Admin1Approval = 'Approved' 
-//                     AND Admin2Approval = 'Approved'";
+        //                 // Handle status, ReturnStatus, RejectReason, and RejectBy based on Admin3Approval
+        //                 if (request.Admin3Approval == "Approved")
+        //                 {
+        //                     string updateStatusQuery = @"
+        //                     UPDATE Borrowreq_tb 
+        //                     SET Status = 'Approved', ReturnStatus = 'Not Returned'
+        //                     WHERE BorrowId = @BorrowId 
+        //                     AND Admin1Approval = 'Approved' 
+        //                     AND Admin2Approval = 'Approved'";
 
-//                     await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
-//                 }
-//                 else if (request.Admin3Approval == "Declined")
-//                 {
-//                     string updateRejectionQuery = @"
-//                     UPDATE Borrowreq_tb 
-//                     SET Status = 'Rejected', 
-//                         RejectReason = @RejectReason, 
-//                         RejectBy = @RejectBy
-//                     WHERE BorrowId = @BorrowId";
+        //                     await connection.ExecuteAsync(updateStatusQuery, new { BorrowId = borrowId }, transaction);
+        //                 }
+        //                 else if (request.Admin3Approval == "Declined")
+        //                 {
+        //                     string updateRejectionQuery = @"
+        //                     UPDATE Borrowreq_tb 
+        //                     SET Status = 'Rejected', 
+        //                         RejectReason = @RejectReason, 
+        //                         RejectBy = @RejectBy
+        //                     WHERE BorrowId = @BorrowId";
 
-//                     await connection.ExecuteAsync(updateRejectionQuery, new
-//                     {
-//                         BorrowId = borrowId,
-//                         RejectReason = request.RejectReason,
-//                         RejectBy = request.RejectBy
-//                     }, transaction);
-//                 }
+        //                     await connection.ExecuteAsync(updateRejectionQuery, new
+        //                     {
+        //                         BorrowId = borrowId,
+        //                         RejectReason = request.RejectReason,
+        //                         RejectBy = request.RejectBy
+        //                     }, transaction);
+        //                 }
 
-//                 transaction.Commit();
-//                 return Ok("Admin 3 approval, status, and return status updated successfully.");
-//             }
-//             catch (Exception ex)
-//             {
-//                 transaction.Rollback();
-//                 return StatusCode(500, $"Internal server error: {ex.Message}");
-//             }
-//         }
-//     }
-// }
+        //                 transaction.Commit();
+        //                 return Ok("Admin 3 approval, status, and return status updated successfully.");
+        //             }
+        //             catch (Exception ex)
+        //             {
+        //                 transaction.Rollback();
+        //                 return StatusCode(500, $"Internal server error: {ex.Message}");
+        //             }
+        //         }
+        //     }
+        // }
 
 
-        
-      [HttpPut("UpdateReturnStatus/{borrowId}")]
-public async Task<IActionResult> UpdateReturnStatus(int borrowId, [FromBody] UpdateReturnStatusRequest request)
-{
-    if (request == null || string.IsNullOrEmpty(request.ReturnStatus))
-        return BadRequest("Invalid request. ReturnStatus must be provided.");
 
-    using (var connection = new SqliteConnection(_connectionString))
-    {
-        await connection.OpenAsync();
-
-        using (var transaction = connection.BeginTransaction())
+        [HttpPut("UpdateReturnStatus/{borrowId}")]
+        public async Task<IActionResult> UpdateReturnStatus(int borrowId, [FromBody] UpdateReturnStatusRequest request)
         {
-            try
+            if (request == null || string.IsNullOrEmpty(request.ReturnStatus))
+                return BadRequest("Invalid request. ReturnStatus must be provided.");
+
+            using (var connection = new SqliteConnection(_connectionString))
             {
-                // Update only the ReturnStatus field
-                string updateReturnStatusQuery = @"
+                await connection.OpenAsync();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // Update only the ReturnStatus field
+                        string updateReturnStatusQuery = @"
                     UPDATE Borrowreq_tb 
                     SET ReturnStatus = @ReturnStatus
                     WHERE BorrowId = @BorrowId";
 
-                await connection.ExecuteAsync(updateReturnStatusQuery, new
-                {
-                    ReturnStatus = request.ReturnStatus,
-                    BorrowId = borrowId
-                }, transaction);
+                        await connection.ExecuteAsync(updateReturnStatusQuery, new
+                        {
+                            ReturnStatus = request.ReturnStatus,
+                            BorrowId = borrowId
+                        }, transaction);
 
-                // If the ReturnStatus is "Returned", update the quantity in items_db
-                if (request.ReturnStatus == "Returned")
-                {
-                    // Query to get borrowed items with their quantities
-                    string selectBorrowedItemsQuery = @"
+                        // If the ReturnStatus is "Returned", update the quantity in items_db
+                        if (request.ReturnStatus == "Returned")
+                        {
+                            // Query to get borrowed items with their quantities
+                            string selectBorrowedItemsQuery = @"
                         SELECT ItemID, Quantity 
                         FROM BorrowItems_tb 
                         WHERE BorrowId = @BorrowId";
 
-                    var borrowedItems = await connection.QueryAsync(selectBorrowedItemsQuery, new
-                    {
-                        BorrowId = borrowId
-                    }, transaction);
+                            var borrowedItems = await connection.QueryAsync(selectBorrowedItemsQuery, new
+                            {
+                                BorrowId = borrowId
+                            }, transaction);
 
-                    // Update each item's quantity in items_db
-                    foreach (var item in borrowedItems)
-                    {
-                        string updateItemQuantityQuery = @"
+                            // Update each item's quantity in items_db
+                            foreach (var item in borrowedItems)
+                            {
+                                string updateItemQuantityQuery = @"
                             UPDATE items_db 
                             SET Quantity = Quantity + @Quantity
                             WHERE ItemID = @ItemID";
 
-                        await connection.ExecuteAsync(updateItemQuantityQuery, new
-                        {
-                            Quantity = item.Quantity,
-                            ItemID = item.ItemID
-                        }, transaction);
+                                await connection.ExecuteAsync(updateItemQuantityQuery, new
+                                {
+                                    Quantity = item.Quantity,
+                                    ItemID = item.ItemID
+                                }, transaction);
+                            }
+                        }
+
+                        transaction.Commit();
+                        return Ok("Return status and item quantities updated successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return StatusCode(500, $"Internal server error: {ex.Message}");
                     }
                 }
-
-                transaction.Commit();
-                return Ok("Return status and item quantities updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpPost("CancelRequest")]
+        public async Task<IActionResult> CancelBorrowRequest([FromBody] BorrowRequestDto request)
+        {
+            if (request?.BorrowId <= 0)
+                return BadRequest("Invalid Borrow Request ID.");
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // Check if BorrowId exists
+                        string checkExistQuery = "SELECT COUNT(1) FROM Borrowreq_tb WHERE BorrowId = @BorrowId";
+                        var exists = await connection.ExecuteScalarAsync<bool>(checkExistQuery, new { BorrowId = request.BorrowId });
+
+                        if (!exists)
+                            return NotFound($"Borrow request with ID {request.BorrowId} not found.");
+
+                        // Update item quantities back to inventory
+                        const string updateItemsSql = @"
+                WITH CanceledItems AS (
+                    SELECT bi.ItemID, bi.Quantity AS BorrowedQuantity
+                    FROM BorrowItems_tb bi
+                    JOIN Borrowreq_tb br ON bi.BorrowId = br.BorrowId
+                    WHERE br.Status != 'Canceled' AND br.BorrowId = @BorrowId
+                )
+                UPDATE items_db
+                SET Quantity = Quantity + (
+                    SELECT BorrowedQuantity FROM CanceledItems WHERE CanceledItems.ItemID = items_db.ItemID
+                )
+                WHERE ItemID IN (SELECT ItemID FROM CanceledItems);";
+
+                        await connection.ExecuteAsync(updateItemsSql, new { BorrowId = request.BorrowId }, transaction);
+
+                        // Update BorrowReq_tb status to "Canceled"
+                        const string cancelRequestSql = @"
+                UPDATE Borrowreq_tb
+                SET Status = 'Canceled'
+                WHERE BorrowId = @BorrowId AND Status != 'Canceled';";
+
+                        var rowsAffected = await connection.ExecuteAsync(cancelRequestSql, new { BorrowId = request.BorrowId }, transaction);
+
+                        if (rowsAffected == 0)
+                        {
+                            transaction.Rollback();
+                            return NotFound($"Borrow request with ID {request.BorrowId} not found or already canceled.");
+                        }
+
+                        // Update Admin1Approval to "Canceled"
+                        const string updateApprovalSql = @"
+                UPDATE Borrowreq_tb
+                SET Admin1Approval = 'Canceled'
+                WHERE BorrowId = @BorrowId;";
+
+                        await connection.ExecuteAsync(updateApprovalSql, new { BorrowId = request.BorrowId }, transaction);
+
+                        transaction.Commit();
+
+                        // Return the response with BorrowId
+                        return Ok(new { BorrowId = request.BorrowId });
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return StatusCode(500, $"Internal server error: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+
     }
-}
 
-
-    }
-
- public class UpdateReturnStatusRequest
+    public class UpdateReturnStatusRequest
     {
         public string ReturnStatus { get; set; }
     }
@@ -572,8 +672,8 @@ public async Task<IActionResult> UpdateReturnStatus(int borrowId, [FromBody] Upd
     // Model for Borrowed Items
     public class BorrowItem
     {
-           public int ItemID { get; set; }      // New field for ItemID
-            public int CategoryID { get; set; } 
+        public int ItemID { get; set; }      // New field for ItemID
+        public int CategoryID { get; set; }
         public string ItemName { get; set; }
         public int Quantity { get; set; }
     }
@@ -586,22 +686,33 @@ public async Task<IActionResult> UpdateReturnStatus(int borrowId, [FromBody] Upd
     }
 
 
-public class UpdateApprovalRequestAdmin2
-{
-    public string Admin2Approval { get; set; }
-    public string RejectReason { get; set; }
-    public string RejectBy { get; set; }
-}
+    public class UpdateApprovalRequestAdmin2
+    {
+        public string Admin2Approval { get; set; }
+        public string RejectReason { get; set; }
+        public string RejectBy { get; set; }
+    }
 
 
     public class UpdateApprovalRequestAdmin3
     {
         public string Admin3Approval { get; set; }
-            public string RejectReason { get; set; }
-    public string RejectBy { get; set; }
-}
+        public string RejectReason { get; set; }
+        public string RejectBy { get; set; }
     }
-    
+    // public class BorrowRequestResponse
+    // {
+    //     public int BorrowId { get; set; }
+    // }
+
+    public class BorrowRequestDto
+    {
+        public int BorrowId { get; set; }
+    }
+
+
+}
+
 
 
 

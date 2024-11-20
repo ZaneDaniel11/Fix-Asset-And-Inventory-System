@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../Components/Sidebar";
+import { toast } from "react-toastify";
 
 export default function BorrowStatus() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-
   const [statusQuery, setStatusQuery] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [borrowedItems, setBorrowedItems] = useState([]);
   const [borrowLoading, setBorrowLoading] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [canceling, setCanceling] = useState(false);
 
   useEffect(() => {
     const fetchBorrowRequests = async () => {
@@ -32,17 +34,7 @@ export default function BorrowStatus() {
         }
 
         const data = await response.json();
-        console.log("API Response:", data);
-
-        if (Array.isArray(data)) {
-          setItems(data);
-        } else if (data && typeof data === "object") {
-          setItems([data]);
-        } else {
-          throw new Error(
-            "Unexpected response format, expected an array or object"
-          );
-        }
+        setItems(Array.isArray(data) ? data : [data]);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -83,6 +75,53 @@ export default function BorrowStatus() {
     setBorrowedItems([]);
   };
 
+  const openCancelModal = (item) => {
+    setCurrentItem(item);
+    setCancelModalOpen(true);
+  };
+
+  const closeCancelModal = () => {
+    setCancelModalOpen(false);
+    setCurrentItem(null);
+  };
+
+  const cancelRequest = async () => {
+    if (!currentItem) return;
+
+    setCanceling(true);
+    try {
+      const response = await fetch(
+        "http://localhost:5075/api/BorrowRequestApi/CancelRequest",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ borrowId: currentItem.BorrowId }),
+        }
+      );
+      toast.error("Borrow Canceled");
+      if (!response.ok) {
+        throw new Error("Failed to cancel the request");
+      }
+
+      // Update the UI to reflect the cancellation
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item.BorrowId === currentItem.BorrowId
+            ? { ...item, Status: "Cancelled" }
+            : item
+        )
+      );
+
+      closeCancelModal();
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setCanceling(false);
+    }
+  };
+
   const filteredItems = Array.isArray(items)
     ? items.filter((item) => statusQuery === "" || item.Status === statusQuery)
     : [];
@@ -98,53 +137,102 @@ export default function BorrowStatus() {
 
       {/* Main Content */}
       <div className="flex-grow p-6">
-        <div className="bg-gray-200 p-4 shadow-lg rounded-lg mb-6 text-center">
-          <h2 className="text-2xl font-bold">Borrow Overview</h2>
+        <div className="bg-gray-200 p-6 shadow-lg rounded-lg mb-8 text-center">
+          <h2 className="text-3xl font-bold text-gray-700">Borrow Overview</h2>
         </div>
 
-        {/* Search Bar with Shadow */}
+        {/* Search Bar */}
         <div className="p-4 mb-4 bg-white shadow-md rounded-md">
-          <div className="flex justify-between">
-            <select
-              value={statusQuery}
-              onChange={(e) => setStatusQuery(e.target.value)}
-              className="p-2 border rounded border-gray-400"
-            >
-              <option value="">All Statuses</option>
-              <option value="Pending">Pending</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Rejected">Rejected</option>
-              <option value="Declined">Declined</option>
-            </select>
-          </div>
+          <select
+            value={statusQuery}
+            onChange={(e) => setStatusQuery(e.target.value)}
+            className="p-2 border rounded border-gray-400"
+          >
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Declined">Declined</option>
+          </select>
         </div>
 
         {/* Borrow Request Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead>
-              <tr className="table100-head">
-                <th className="column1">Borrow ID</th>
-                <th className="column2">Requested By</th>
-                <th className="column3">Date</th>
-                <th className="column4">Purpose</th>
-                <th className="column5">Status</th>
-                <th className="column6">Approval</th>
-                <th className="column7" style={{ paddingRight: 20 }}>
+          <table className="min-w-full border-collapse border border-gray-200">
+            <thead className="bg-gray-200">
+              <tr className="text-zinc-50">
+                <th className="border border-gray-300 px-4 py-2 text-left">
+                  Borrow ID
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-left">
+                  Requested By
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-left">
+                  Date
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-left">
+                  Purpose
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-left">
+                  Status
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-left">
+                  Approval
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-center">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody>
-              {filteredItems.map((item) => (
-                <tr key={item.BorrowId}>
-                  <td className="column1">{item.BorrowId}</td>
-                  <td className="column2">{item.RequestedBy}</td>
-                  <td className="column3">{item.ReqBorrowDate}</td>
-                  <td className="column4">{item.Purpose}</td>
-                  <td className="column5">{item.Status}</td>
-                  <td className="column6">{item.Admin1Approval}</td>
-                  <td className="flex items-center justify-center mt-2 space-x-2">
+              {filteredItems.map((item, index) => (
+                <tr
+                  key={item.BorrowId}
+                  className={`${
+                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  } hover:bg-gray-100 transition duration-200`}
+                >
+                  <td className="border border-gray-300 px-4 py-2">
+                    {item.BorrowId}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {item.RequestedBy}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {item.ReqBorrowDate}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {item.Purpose}
+                  </td>
+                  <td
+                    className={`border border-gray-300 px-4 py-2 font-medium ${
+                      item.Status === "Pending"
+                        ? "text-yellow-600"
+                        : item.Status === "Canceled"
+                        ? "text-red-600"
+                        : item.Status === "In Progress"
+                        ? "text-blue-600"
+                        : item.Status === "Rejected"
+                        ? "text-red-600"
+                        : item.Status === "Approved"
+                        ? "text-green-500"
+                        : "text-green-600"
+                    }`}
+                  >
+                    {item.Status}
+                  </td>
+                  <td
+                    className={`border border-gray-300 px-4 py-2 font-medium ${
+                      item.Admin1Approval === "Approved"
+                        ? "text-green-600"
+                        : item.Admin1Approval === "Declined"
+                        ? "text-red-600"
+                        : "text-yellow-600"
+                    }`}
+                  >
+                    {item.Admin1Approval}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-center flex items-center justify-center space-x-2">
                     <button
                       type="button"
                       onClick={() => openViewModal(item)}
@@ -152,6 +240,15 @@ export default function BorrowStatus() {
                     >
                       <i className="fa-solid fa-eye"></i>
                     </button>
+                    {item.Status === "Pending" && (
+                      <button
+                        type="button"
+                        onClick={() => openCancelModal(item)}
+                        className="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-3 py-1.5"
+                      >
+                        <i className="fa-solid fa-ban"></i>
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -159,7 +256,45 @@ export default function BorrowStatus() {
           </table>
         </div>
 
-        {/* View Modal */}
+        {/* Cancel Modal */}
+        {cancelModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white w-full max-w-md mx-auto p-6 rounded-lg shadow-lg relative">
+              <h3 className="text-lg font-bold text-gray-800 text-center mb-4">
+                Confirm Cancellation
+              </h3>
+              <p className="text-sm text-gray-600 text-center mb-6">
+                Are you sure you want to cancel this request? This action cannot
+                be undone.
+              </p>
+
+              <div className="flex justify-between items-center space-x-4">
+                <button
+                  onClick={closeCancelModal}
+                  className="w-full py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg"
+                >
+                  No, Go Back
+                </button>
+                <button
+                  onClick={cancelRequest}
+                  disabled={canceling}
+                  className="w-full py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg"
+                >
+                  {canceling ? "Canceling..." : "Yes, Cancel"}
+                </button>
+              </div>
+
+              {/* Close Icon */}
+              <button
+                onClick={closeCancelModal}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-lg"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
         {viewModalOpen && currentItem && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-8 relative">

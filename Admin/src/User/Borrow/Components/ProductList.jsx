@@ -9,9 +9,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
   // Fetch categories with their item counts from the API
   const FetchCategoryWithCounts = async () => {
     try {
-      const response = await fetch(`${API_URL}GetItemCountsByCategory`, {
-        method: "GET",
-      });
+      const response = await fetch(`${API_URL}GetItemCountsByCategory`);
       const result = await response.json();
 
       const mappedCategories = result.map((category) => ({
@@ -38,7 +36,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
         response = await fetch(`${API_URL}GetAllItems`);
       } else {
         response = await fetch(
-          `http://localhost:5075/api/ItemApi/GetItemsByCategory?categoryID=${categoryId}`
+          `${API_URL}GetItemsByCategory?categoryID=${categoryId}`
         );
       }
 
@@ -46,7 +44,8 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
       const processedProducts = result.map((product) => ({
         ...product,
         initialQuantity: product.quantity,
-        requestedQuantity: 0, // Add this field to track the quantity in the summary
+        requestedQuantity: 0,
+        isRequested: false, // Track if the item is requested
       }));
 
       setProducts(processedProducts);
@@ -66,25 +65,44 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
 
   // Handle adding products and enforce quantity limit
   const handleAddProduct = (product) => {
-    if (product.requestedQuantity < product.initialQuantity) {
+    if (!product.isRequested && product.quantity > 0) {
       onAddProduct({
         ...product,
-        requestedQuantity: product.requestedQuantity + 1,
+        requestedQuantity: 1,
       });
       setProducts(
         products.map((p) =>
           p.itemID === product.itemID
-            ? { ...p, requestedQuantity: product.requestedQuantity + 1 }
+            ? {
+                ...p,
+                quantity: p.quantity - 1,
+                isRequested: true,
+                requestedQuantity: 1,
+              }
             : p
         )
       );
-    } else {
-      alert("Maximum quantity reached for this item.");
     }
   };
 
+  const handleRemoveRequest = (productId) => {
+    setProducts(
+      products.map((p) =>
+        p.itemID === productId
+          ? {
+              ...p,
+              isRequested: false,
+              quantity: p.initialQuantity,
+              requestedQuantity: 0,
+            }
+          : p
+      )
+    );
+  };
+
   return (
-    <div className="w-full">
+    <div className="w-full ml-4">
+      {/* Categories Section */}
       <div className="overflow-x-auto mb-6">
         <div className="flex gap-4 w-full max-w-full overflow-x-auto">
           {categories.map((category) => (
@@ -94,7 +112,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
                 selectedCategoryId === category.id
                   ? "bg-green-100 border-green-400"
                   : "bg-white border-gray-200"
-              } hover:bg-green-50`}
+              } hover:bg-green-50 transition-all duration-300`}
               onClick={() => setSelectedCategoryId(category.id)}
             >
               <div className="text-3xl mb-2">{category.icon}</div>
@@ -107,6 +125,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
         </div>
       </div>
 
+      {/* Products Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((product) => (
           <div
@@ -134,17 +153,19 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
               {/* Out of Stock or Button */}
               {product.quantity === 0 ? (
                 <p className="text-red-500 font-bold">Out of Stock</p>
+              ) : product.isRequested ? (
+                <button
+                  className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded-lg transition duration-300"
+                  onClick={() => handleRemoveRequest(product.itemID)}
+                >
+                  Requested
+                </button>
               ) : (
                 <button
-                  className=" bg-green-700 hover:bg-green-800 text-white py-2 px-4 rounded-lg transition-colors duration-300"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-300"
                   onClick={() => handleAddProduct(product)}
-                  disabled={
-                    product.requestedQuantity >= product.initialQuantity
-                  }
                 >
-                  {product.requestedQuantity >= product.initialQuantity
-                    ? "Max Added"
-                    : "Request"}
+                  Request
                 </button>
               )}
             </div>

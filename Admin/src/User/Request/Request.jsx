@@ -1,9 +1,9 @@
 import Sidebar from "../../Components/Sidebar";
 import React, { useState, useEffect } from "react";
 import { fetchData } from "../utilities/ApiUti";
+import { toast } from "react-toastify";
 
 export default function Request() {
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [addModalOpen, setIsModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -27,19 +27,6 @@ export default function Request() {
     setViewModalOpen(true);
   };
   const closeViewModal = () => setViewModalOpen(false);
-  const closeDeleteModal = () => setDeleteModalOpen(false);
-
-  const statusColors = {
-    Pending: " text-orange-400",
-    Approved: " text-green-700",
-    Rejected: " text-red-700",
-  };
-
-  const statusIcons = {
-    Pending: "fa-hourglass-start",
-    Approved: "fa-check-circle",
-    Rejected: "fa-times-circle",
-  };
 
   async function fetchRequests() {
     const loggedInUserId = localStorage.getItem("userId");
@@ -54,6 +41,26 @@ export default function Request() {
   useEffect(() => {
     fetchRequests();
   }, []);
+
+  // Function to cancel a request
+  async function handleCancelRequest(requestId) {
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this request?"
+    );
+    if (!confirmed) return;
+
+    try {
+      await fetchData(
+        `http://localhost:5075/api/RequestItemsApi/CancelRequest/${requestId}`,
+        "POST"
+      );
+      alert("Request canceled successfully.");
+      fetchRequests(); // Refresh the list of requests
+    } catch (error) {
+      console.error("Error canceling request:", error);
+      alert("Failed to cancel the request. Please try again.");
+    }
+  }
 
   // Add request handling
   async function handleAddRequest(e) {
@@ -84,6 +91,7 @@ export default function Request() {
 
     closeModal();
     fetchRequests();
+    toast.success("You submitted Your Request successfully!");
   }
 
   // Filter requests by status
@@ -129,49 +137,96 @@ export default function Request() {
 
             {/* Table Section */}
             <div className="overflow-x-auto shadow-md rounded-lg">
-              <table className="min-w-full text-left table-auto bg-white">
-                <thead>
-                  <tr className="text-white font-semibold text-md">
-                    <th className="p-5">Requested By</th>
-                    <th className="p-5">Requested Date</th>
-                    <th className="p-5">Suggested Dealer</th>
-                    <th className="p-5">Purpose</th>
-                    <th className="p-5">Estimated Cost</th>
-                    <th className="p-5">Status</th>
-                    <th className="p-5 text-center">Actions</th>
+              <table className="min-w-full border-collapse border border-gray-200 bg-white">
+                <thead className="bg-gray-200">
+                  <tr className="font-semibold text-md text-zinc-50">
+                    <th className="border border-gray-300 px-5 py-3">
+                      Item Name
+                    </th>
+                    <th className="border border-gray-300 px-5 py-3">
+                      Requested By
+                    </th>
+
+                    <th className="border border-gray-300 px-5 py-3">
+                      Requested Date
+                    </th>
+                    <th className="border border-gray-300 px-5 py-3">
+                      Suggested Dealer
+                    </th>
+                    <th className="border border-gray-300 px-5 py-3">
+                      Purpose
+                    </th>
+                    <th className="border border-gray-300 px-5 py-3">
+                      Estimated Cost
+                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Status</th>
+                    <th className="border border-gray-300 px-5 py-3 text-center">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="text-gray-600 text-md">
-                  {filteredRequests.map((request) => (
+                <tbody>
+                  {filteredRequests.map((request, index) => (
                     <tr
                       key={request.id}
-                      className="border-t hover:bg-gray-100 transition duration-150"
+                      className={`${
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                      } hover:bg-gray-100 transition duration-200`}
                     >
-                      <td className="p-5">{request.requestedBy}</td>
-                      <td className="p-5">{request.requestedDate}</td>
-                      <td className="p-5">{request.suggestedDealer}</td>
-                      <td className="p-5">{request.purpose}</td>
-                      <td className="p-5">{request.estimatedCost}</td>
+                      <td className="border border-gray-300 px-5 py-3">
+                        {request.requestedItem}
+                      </td>
+                      <td className="border border-gray-300 px-5 py-3">
+                        {request.requestedBy}
+                      </td>
+                      <td className="border border-gray-300 px-5 py-3">
+                        {request.requestedDate}
+                      </td>
+                      <td className="border border-gray-300 px-5 py-3">
+                        {request.suggestedDealer}
+                      </td>
+                      <td className="border border-gray-300 px-5 py-3">
+                        {request.purpose}
+                      </td>
+                      <td className="border border-gray-300 px-5 py-3">
+                        {request.estimatedCost}
+                      </td>
                       <td
-                        className={`p-5 ${
-                          statusColors[request.status]
-                        } font-medium`}
+                        className={`border border-gray-300 px-4 py-2 font-medium ${
+                          request.status === "Pending"
+                            ? "text-yellow-600"
+                            : item.Status === "Canceled"
+                            ? "text-red-600"
+                            : item.Status === "In Progress"
+                            ? "text-blue-600"
+                            : item.Status === "Rejected"
+                            ? "text-red-600"
+                            : item.Status === "Approved"
+                            ? "text-green-500"
+                            : "text-green-600"
+                        }`}
                       >
-                        <i
-                          className={`fa-solid ${
-                            statusIcons[request.status]
-                          } mr-2`}
-                        ></i>
                         {request.status}
                       </td>
-                      <td className="p-5 text-center">
-                        <button
-                          type="button"
-                          onClick={() => openViewModal(request)}
-                          className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5 transition duration-150"
-                        >
-                          <i className="fa-regular fa-eye"></i>
-                        </button>
+                      <td className="border border-gray-300 px-5 py-3 text-center">
+                        <div className="flex  items-center gap-4">
+                          <button
+                            type="button"
+                            onClick={() => openViewModal(request)}
+                            className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5 transition duration-150"
+                          >
+                            <i className="fa-regular fa-eye"></i>
+                          </button>
+                          {request.status === "Pending" && (
+                            <button
+                              type="button"
+                              onClick={() => handleCancelRequest(request.id)}
+                              className="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-3 py-1.5 transition duration-150"
+                            >
+                              <i className="fa-solid fa-ban"></i>
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -315,6 +370,10 @@ export default function Request() {
               </div>
 
               <div className="space-y-3 text-gray-700">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Item Name:</span>
+                  <span>{selectedRequest.requestedItem}</span>
+                </div>
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Requested By:</span>
                   <span>{selectedRequest.requestedBy}</span>
