@@ -50,18 +50,34 @@ export default function Request() {
     if (!confirmed) return;
 
     try {
-      await fetchData(
+      // Using native fetch directly
+      const response = await fetch(
         `http://localhost:5075/api/RequestItemsApi/CancelRequest/${requestId}`,
-        "POST"
+        {
+          method: "PUT", // Adjust the method to match your API's requirements
+          headers: {
+            "Content-Type": "application/json", // Ensure the header is correct
+          },
+        }
       );
-      alert("Request canceled successfully.");
-      fetchRequests(); // Refresh the list of requests
+
+      const result = await response.json(); // Parse JSON response
+
+      if (response.ok && result.success) {
+        // Assuming your API responds with { success: true }
+        toast.success("Request canceled successfully.");
+        fetchRequests(); // Refresh the list of requests
+      } else {
+        // Handle API errors
+        toast.error(
+          result.message || `${requestId}Failed to cancel the request.`
+        );
+      }
     } catch (error) {
       console.error("Error canceling request:", error);
-      alert("Failed to cancel the request. Please try again.");
+      toast.error("Failed to cancel the request. Please try again.");
     }
   }
-
   // Add request handling
   async function handleAddRequest(e) {
     e.preventDefault();
@@ -168,7 +184,7 @@ export default function Request() {
                 <tbody>
                   {filteredRequests.map((request, index) => (
                     <tr
-                      key={request.id}
+                      key={request.requestID}
                       className={`${
                         index % 2 === 0 ? "bg-white" : "bg-gray-50"
                       } hover:bg-gray-100 transition duration-200`}
@@ -195,13 +211,13 @@ export default function Request() {
                         className={`border border-gray-300 px-4 py-2 font-medium ${
                           request.status === "Pending"
                             ? "text-yellow-600"
-                            : item.Status === "Canceled"
+                            : request.status === "Canceled"
                             ? "text-red-600"
-                            : item.Status === "In Progress"
+                            : request.status === "In Progress"
                             ? "text-blue-600"
-                            : item.Status === "Rejected"
+                            : request.status === "Rejected"
                             ? "text-red-600"
-                            : item.Status === "Approved"
+                            : request.status === "Approved"
                             ? "text-green-500"
                             : "text-green-600"
                         }`}
@@ -220,7 +236,9 @@ export default function Request() {
                           {request.status === "Pending" && (
                             <button
                               type="button"
-                              onClick={() => handleCancelRequest(request.id)}
+                              onClick={() =>
+                                handleCancelRequest(request.requestID)
+                              }
                               className="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-3 py-1.5 transition duration-150"
                             >
                               <i className="fa-solid fa-ban"></i>

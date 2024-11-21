@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "../../components/Sidebar";
+import Sidebar from "../../Components/Sidebar";
 
 export default function MaintenanceRequests() {
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -17,6 +17,7 @@ export default function MaintenanceRequests() {
     setSelectedRequest(request);
     setViewModalOpen(true);
   };
+
   const closeViewModal = () => setViewModalOpen(false);
 
   const [requestMaintenance, setRequestMaintenance] = useState({
@@ -171,78 +172,123 @@ export default function MaintenanceRequests() {
   return (
     <div className="flex">
       <Sidebar />
-      <div className="limiter">
-        <div className="container-table100">
-          <div className="wrap-table100">
-            <div className="table100">
-              <div className="flex justify-between mb-4">
-                <button
-                  type="button"
-                  onClick={openAddModal}
-                  className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5"
-                >
-                  <i className="fa-solid fa-plus"></i> Add Maintenance Request
-                </button>
-                <select
-                  className="border rounded-lg px-3 py-2"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="All">All</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Rejected">Rejected</option>
-                </select>
-              </div>
-              <table>
-                <thead>
-                  <tr className="table100-head">
-                    <th className="column1">Request ID</th>
-                    <th className="column2">Asset Name</th>
-                    <th className="column3">Request Date</th>
-                    <th className="column4">Location</th>
-                    <th className="column5">Issue</th>
-                    <th className="column6">Status</th>
-                    <th className="column7 text-white">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredRequests.map((request) => (
-                    <tr key={request.maintenanceID}>
-                      <td className="column1">{request.maintenanceID}</td>
-                      <td className="column2">{request.assetName}</td>
-                      <td className="column3">
-                        {new Date(request.requestDate).toLocaleDateString()}
-                      </td>
-                      <td className="column4">{request.location}</td>
-                      <td className="column5">{request.issue}</td>
-                      <td className="column6 ">{request.maintenanceStatus}</td>
-                      <td className="flex items-center justify-center mt-2">
+      <div className="limiter w-full">
+        <div className="container mx-auto p-6">
+          {/* Header Section */}
+          <div className="bg-gray-200 p-6 shadow-lg rounded-lg mb-8 text-center">
+            <h2 className="text-3xl font-bold text-gray-700">
+              Maintenance Requests
+            </h2>
+          </div>
+
+          {/* Action Section */}
+          <div className="bg-white p-6 shadow-md rounded-lg mb-8 flex justify-between items-center">
+            <button
+              type="button"
+              onClick={openAddModal}
+              className="flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-semibold rounded-lg text-md px-5 py-2 transition duration-150"
+            >
+              <i className="fa-solid fa-plus mr-2"></i> Add Maintenance Request
+            </button>
+            {/* <select
+              className="border rounded-lg px-4 py-2 text-gray-600 font-medium focus:ring-2 focus:ring-blue-300 transition duration-150"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="All">All</option>
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="Rejected">Rejected</option>
+            </select> */}
+          </div>
+
+          {/* Table Section */}
+          <div className="overflow-x-auto shadow-md rounded-lg">
+            <table className="min-w-full border-collapse border border-gray-200 bg-white">
+              <thead className="bg-gray-200">
+                <tr className="font-semibold text-md text-zinc-50">
+                  <th className="border border-gray-300 px-5 py-3">
+                    Request ID
+                  </th>
+                  <th className="border border-gray-300 px-5 py-3">
+                    Asset Name
+                  </th>
+                  <th className="border border-gray-300 px-5 py-3">
+                    Request Date
+                  </th>
+                  <th className="border border-gray-300 px-5 py-3">Location</th>
+                  <th className="border border-gray-300 px-5 py-3">Issue</th>
+                  <th className="border border-gray-300 px-5 py-3">Status</th>
+                  <th className="border border-gray-300 px-5 py-3 text-center">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRequests.map((request, index) => (
+                  <tr
+                    key={request.maintenanceID}
+                    className={`${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } hover:bg-gray-100 transition duration-200`}
+                  >
+                    <td className="border border-gray-300 px-5 py-3">
+                      {request.maintenanceID}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {request.assetName}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {new Date(request.requestDate).toLocaleDateString()}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {request.location}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {request.issue}
+                    </td>
+                    <td
+                      className={`border border-gray-300 px-4 py-2 font-medium ${
+                        request.maintenanceStatus === "Pending"
+                          ? "text-yellow-600"
+                          : request.maintenanceStatus === "Rejected"
+                          ? "text-red-600"
+                          : request.maintenanceStatus === "Approved"
+                          ? "text-green-500"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      {request.maintenanceStatus}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3 text-center">
+                      <div className="flex items-center gap-4 justify-center">
                         <button
                           type="button"
                           onClick={() => openViewModal(request)}
-                          className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                          className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5 transition duration-150"
                         >
                           <i className="fa-regular fa-eye"></i> View
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
       {addModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-            <h5 className="text-lg font-semibold">New Maintenance Request</h5>
+          <div className="bg-white p-8 rounded-lg shadow-2xl max-w-lg w-full mx-4 md:mx-0 relative">
+            <h5 className="text-xl font-bold text-gray-800 mb-4">
+              New Maintenance Request
+            </h5>
             <form onSubmit={handleRequestMaintenance}>
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <input
-                  className="bg-gray-100 p-3 rounded-lg"
+                  className="bg-gray-100 p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
                   type="text"
                   name="AssetName"
                   placeholder="Asset Name"
@@ -252,7 +298,7 @@ export default function MaintenanceRequests() {
                 />
                 <div className="relative">
                   <input
-                    className="bg-gray-100 p-3 rounded-lg w-full"
+                    className="bg-gray-100 p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
                     type="text"
                     name="AssetCode"
                     placeholder="Asset Code"
@@ -261,11 +307,11 @@ export default function MaintenanceRequests() {
                     required
                   />
                   {isDropdownOpen && (
-                    <ul className="absolute z-10 bg-white border rounded-lg w-full shadow-md max-h-48 overflow-y-auto">
+                    <ul className="absolute z-20 bg-white border rounded-lg w-full shadow-lg max-h-48 overflow-y-auto mt-1">
                       {filteredAssetCodes.map((code, index) => (
                         <li
                           key={index}
-                          className="px-3 py-2 hover:bg-gray-200 cursor-pointer"
+                          className="px-3 py-2 hover:bg-blue-100 cursor-pointer transition-colors"
                           onClick={() => handleSelectAssetCode(code)}
                         >
                           {code}
@@ -275,7 +321,7 @@ export default function MaintenanceRequests() {
                   )}
                 </div>
                 <input
-                  className="bg-gray-100 p-3 rounded-lg"
+                  className="bg-gray-100 p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
                   type="text"
                   name="Location"
                   placeholder="Location"
@@ -284,7 +330,7 @@ export default function MaintenanceRequests() {
                   required
                 />
                 <input
-                  className="bg-gray-100 p-3 rounded-lg"
+                  className="bg-gray-100 p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
                   type="text"
                   name="Issue"
                   placeholder="Issue"
@@ -296,27 +342,70 @@ export default function MaintenanceRequests() {
               <textarea
                 placeholder="Description"
                 name="Description"
-                className="h-32 bg-gray-100 p-3 rounded-lg w-full mt-5"
+                className="bg-gray-100 p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 w-full mt-5 h-32"
                 value={requestMaintenance.Description}
                 onChange={handleChange}
                 required
               ></textarea>
-              <div className="flex justify-end mt-4">
+              <div className="flex justify-end mt-6">
                 <button
                   type="button"
                   onClick={closeAddModal}
-                  className="bg-gray-200 px-4 py-2 rounded-lg mr-2"
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium px-5 py-2 rounded-lg transition duration-150 mr-3"
                 >
                   Close
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg transition duration-150"
                 >
                   Save Request
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {viewModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg shadow-2xl max-w-lg w-full mx-4 md:mx-0 relative">
+            <h5 className="text-xl font-bold text-gray-800 mb-4">
+              Request Details
+            </h5>
+            {selectedRequest && (
+              <div>
+                <p>
+                  <strong>Request ID:</strong> {selectedRequest.maintenanceID}
+                </p>
+                <p>
+                  <strong>Asset Name:</strong> {selectedRequest.assetName}
+                </p>
+                <p>
+                  <strong>Request Date:</strong>{" "}
+                  {new Date(selectedRequest.requestDate).toLocaleDateString()}
+                </p>
+                <p>
+                  <strong>Location:</strong> {selectedRequest.location}
+                </p>
+                <p>
+                  <strong>Issue:</strong> {selectedRequest.issue}
+                </p>
+                <p>
+                  <strong>Description:</strong> {selectedRequest.description}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedRequest.maintenanceStatus}
+                </p>
+              </div>
+            )}
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={closeViewModal}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg transition duration-150"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
