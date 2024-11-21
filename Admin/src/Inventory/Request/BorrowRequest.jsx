@@ -6,7 +6,6 @@ export default function BorrowedItems() {
   const [declineModalOpen, setDeclineModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusQuery, setStatusQuery] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -159,7 +158,9 @@ export default function BorrowedItems() {
       <div className="limiter w-full">
         <div className="container mx-auto p-6">
           <div className="bg-gray-200 p-6 shadow-lg rounded-lg mb-8 text-center">
-            <h2 className="text-3xl font-bold text-gray-700">Borrow Request</h2>
+            <h2 className="text-3xl font-bold text-gray-700">
+              Borrow Request List
+            </h2>
           </div>
           <div className="bg-white p-6 shadow-md rounded-lg mb-8 flex justify-between items-center">
             <input
@@ -183,6 +184,7 @@ export default function BorrowedItems() {
                   </th>
                   <th className="border border-gray-300 px-5 py-3">Date</th>
                   <th className="border border-gray-300 px-5 py-3">Purpose</th>
+                  <th className="border border-gray-300 px-5 py-3">Priority</th>
                   <th className="border border-gray-300 px-5 py-3">Status</th>
                   <th className="border border-gray-300 px-5 py-3">Approval</th>
                   <th className="border border-gray-300 px-5 py-3 text-center">
@@ -205,10 +207,48 @@ export default function BorrowedItems() {
                     <td className="border border-gray-300 px-5 py-3">
                       {item.Purpose}
                     </td>
-                    <td className="border border-gray-300 px-5 py-3">
+                    <td
+                      className={`border border-gray-300 px-5 py-3 ${
+                        item.Priority === "High"
+                          ? "text-red-600 font-bold"
+                          : item.Priority === "Medium"
+                          ? "text-yellow-600 font-medium"
+                          : item.Priority === "Low"
+                          ? "text-green-600 font-light"
+                          : "text-gray-600 "
+                      }`}
+                    >
+                      {item.Priority}
+                    </td>
+
+                    <td
+                      className={`border border-gray-300 px-5 py-3 ${
+                        item.Status === "Pending"
+                          ? "text-yellow-600"
+                          : item.Status === "Canceled"
+                          ? "text-red-600"
+                          : item.Status === "In Progress"
+                          ? "text-blue-600"
+                          : item.Status === "Rejected"
+                          ? "text-red-600"
+                          : item.Status === "Approved"
+                          ? "text-green-500"
+                          : "text-green-600"
+                      }`}
+                    >
                       {item.Status}
                     </td>
-                    <td className="border border-gray-300 px-5 py-3">
+                    <td
+                      className={`border border-gray-300 px-5 py-3  ${
+                        item.Admin1Approval === "Pending"
+                          ? "text-yellow-600"
+                          : item.Admin1Approval === "Rejected"
+                          ? "text-red-600"
+                          : item.Admin1Approval === "Approved"
+                          ? "text-green-500"
+                          : "text-green-600"
+                      }`}
+                    >
                       {item.Admin1Approval}
                     </td>
                     <td className="border border-gray-300 px-5 py-3 text-center">
