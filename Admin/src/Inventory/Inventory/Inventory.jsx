@@ -17,7 +17,7 @@ export default function Inventory() {
     category: null,
   });
   const [newCategory, setNewCategory] = useState("");
-  const navigate = useNavigate(); // Use react-router-dom's useNavigate
+  const navigate = useNavigate();
 
   const FetchCategory = async () => {
     try {
@@ -38,7 +38,7 @@ export default function Inventory() {
       setModalState({ isVisible: false, isEditMode: false, category: null });
       setNewCategory("");
       FetchCategory();
-      toast.success(`You added Category successfully!`);
+      toast.success(`Category added successfully!`);
     } catch (error) {
       console.error("Failed to add category", error);
     }
@@ -58,7 +58,7 @@ export default function Inventory() {
 
       setModalState({ isVisible: false, isEditMode: false, category: null });
       setNewCategory("");
-      toast.success(`Category Name Updated Succesfully!`);
+      toast.success(`Category updated successfully!`);
       FetchCategory();
     } catch (error) {
       console.error("Failed to edit category", error);
@@ -73,7 +73,7 @@ export default function Inventory() {
           "DELETE"
         );
         FetchCategory();
-        toast.error(`Delete Category Succesfully`);
+        toast.error(`Category deleted successfully`);
       } catch (error) {
         console.error("Failed to delete category", error);
       }
@@ -85,7 +85,6 @@ export default function Inventory() {
     setNewCategory(category.categoryName);
   };
 
-  // When a category is selected, navigate to Inventory_table with the selected category
   const handleCategoryClick = (category) => {
     navigate(`/InventoryTable`, {
       state: {
@@ -102,11 +101,12 @@ export default function Inventory() {
   }, []);
 
   return (
-    <div>
-      <div className="text-center mb-8 w-full ml-5">
-        <h1 className="text-3xl font-bold mb-8">Stocks and Inventory</h1>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold mb-6">Stocks and Inventory</h1>
 
-        <div className="flex items-center justify-center gap-4 mb-8">
+        <div className="flex flex-wrap justify-center gap-4 mb-6">
+          {/* Edit Button */}
           <button
             onClick={() =>
               setModalState({
@@ -114,7 +114,7 @@ export default function Inventory() {
                 isEditMode: !modalState.isEditMode,
               })
             }
-            className="text-white  bg-green-700 hover:bg-green-800 font-medium rounded-lg text-base px-3 py-1.5 me-2  flex items-center"
+            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
           >
             {modalState.isEditMode ? (
               <FaTimes className="mr-2" />
@@ -124,6 +124,7 @@ export default function Inventory() {
             {modalState.isEditMode ? "Cancel" : "Edit"}
           </button>
 
+          {/* Add Category Button */}
           <button
             onClick={() =>
               setModalState({
@@ -132,7 +133,7 @@ export default function Inventory() {
                 category: null,
               })
             }
-            className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2 flex items-center"
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
             <FaPlus className="mr-2" />
             Add Category
@@ -144,7 +145,7 @@ export default function Inventory() {
           handleEditClick={handleEditClick}
           handleDeleteCategory={handleDeleteCategory}
           isEditMode={modalState.isEditMode}
-          onCategoryClick={handleCategoryClick} // Pass the click handler to Inventory_Card
+          onCategoryClick={handleCategoryClick}
         />
       </div>
 

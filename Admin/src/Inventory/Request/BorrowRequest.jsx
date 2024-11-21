@@ -142,7 +142,8 @@ export default function BorrowedItems() {
   const filteredItems = items.filter(
     (item) =>
       item.RequestedBy.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      item.Admin1Approval === "Pending"
+      item.Admin1Approval === "Pending" &&
+      item.Status === "Pending"
   );
 
   if (loading) {
@@ -155,53 +156,63 @@ export default function BorrowedItems() {
 
   return (
     <>
-      <div className="limiter">
-        <div className="container-table100">
-          <div className="wrap-table100">
-            <div className="table100">
-              <div className="flex justify-between mb-4">
-                <input
-                  type="text"
-                  placeholder="Search by Requester Name"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="p-2 border rounded border-black"
-                />
-                <select
-                  value={statusQuery}
-                  onChange={(e) => setStatusQuery(e.target.value)}
-                  className="p-2 border rounded border-black"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="Complete">Complete</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Pending">Pending</option>
-                </select>
-              </div>
-              <table>
-                <thead>
-                  <tr className="table100-head">
-                    <th className="column1">Borrow ID</th>
-                    <th className="column2">Requested By</th>
-                    <th className="column3">Date</th>
-                    <th className="column4">Purpose</th>
-                    <th className="column5">Status</th>
-                    <th className="column6">Approval</th>
-                    <th className="column7" style={{ paddingRight: 20 }}>
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredItems.map((item) => (
-                    <tr key={item.BorrowId}>
-                      <td className="column1">{item.BorrowId}</td>
-                      <td className="column2">{item.RequestedBy}</td>
-                      <td className="column3">{item.ReqBorrowDate}</td>
-                      <td className="column4">{item.Purpose}</td>
-                      <td className="column5">{item.Status}</td>
-                      <td className="column6">{item.Admin1Approval}</td>
-                      <td className="flex items-center justify-center mt-2 space-x-2">
+      <div className="limiter w-full">
+        <div className="container mx-auto p-6">
+          <div className="bg-gray-200 p-6 shadow-lg rounded-lg mb-8 text-center">
+            <h2 className="text-3xl font-bold text-gray-700">Borrow Request</h2>
+          </div>
+          <div className="bg-white p-6 shadow-md rounded-lg mb-8 flex justify-between items-center">
+            <input
+              type="text"
+              placeholder="Search by Requester Name"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="p-2 border rounded border-black"
+            />
+          </div>
+
+          <div className="overflow-x-auto shadow-md rounded-lg">
+            <table className="min-w-full border-collapse border border-gray-200 bg-white">
+              <thead className="bg-gray-200">
+                <tr className="font-semibold text-md text-zinc-50">
+                  <th className="border border-gray-300 px-5 py-3">
+                    Borrow ID
+                  </th>
+                  <th className="border border-gray-300 px-5 py-3">
+                    Requested By
+                  </th>
+                  <th className="border border-gray-300 px-5 py-3">Date</th>
+                  <th className="border border-gray-300 px-5 py-3">Purpose</th>
+                  <th className="border border-gray-300 px-5 py-3">Status</th>
+                  <th className="border border-gray-300 px-5 py-3">Approval</th>
+                  <th className="border border-gray-300 px-5 py-3 text-center">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredItems.map((item) => (
+                  <tr key={item.BorrowId}>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {item.BorrowId}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {item.RequestedBy}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {item.ReqBorrowDate}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {item.Purpose}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {item.Status}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {item.Admin1Approval}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           type="button"
                           onClick={() => openViewModal(item)}
@@ -216,63 +227,84 @@ export default function BorrowedItems() {
                         >
                           <i className="fa-solid fa-edit"></i>
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
       {/* View Modal */}
       {viewModalOpen && currentItem && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-8 relative">
+            {/* Close Button */}
             <button
               onClick={closeViewModal}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-2xl"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              ✕
             </button>
-            <h2 className="text-2xl font-semibold mb-4">Borrowed Items</h2>
+
+            {/* Modal Title */}
+            <h2 className="text-3xl font-bold text-gray-700 text-center mb-8">
+              Borrowed Items
+            </h2>
+
             {borrowLoading ? (
-              <div>Loading borrowed items...</div>
+              <div className="text-center text-gray-500 text-lg">
+                Loading borrowed items...
+              </div>
             ) : borrowedItems.length === 0 ? (
-              <div>No borrowed items found</div>
+              <div className="text-center text-gray-500 text-lg">
+                No borrowed items found
+              </div>
             ) : (
-              <ul>
+              <div className="space-y-6">
                 {borrowedItems.map((borrowItem) => (
-                  <li key={borrowItem.ItemId}>
-                    Item: {borrowItem.ItemName} - Qty: {borrowItem.Quantity}
-                  </li>
+                  <div
+                    key={borrowItem.ItemId}
+                    className="flex items-center border border-gray-200 rounded-lg bg-gray-50 hover:shadow-lg transition-shadow duration-300 p-5"
+                  >
+                    {/* Image Section */}
+                    <div className="flex-shrink-0">
+                      <img
+                        src="https://via.placeholder.com/100"
+                        alt={borrowItem.ItemName}
+                        className="w-24 h-24 object-cover rounded-lg"
+                      />
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="ml-6 flex-1">
+                      <h3 className="text-xl font-semibold text-gray-800">
+                        {borrowItem.ItemName}
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-2">
+                        Quantity:{" "}
+                        <span className="font-medium text-gray-800">
+                          {borrowItem.Quantity}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             )}
           </div>
         </div>
       )}
 
+      {/* Update Modal */}
       {updateModalOpen && currentItem && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
             <button
               onClick={closeUpdateModal}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+              className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition duration-200"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -289,13 +321,13 @@ export default function BorrowedItems() {
                 />
               </svg>
             </button>
-            <h2 className="text-2xl font-semibold mb-4">
+            <h2 className="text-xl font-bold text-gray-800 mb-6">
               Update Admin Approval
             </h2>
             <select
               value={adminApproval}
               onChange={(e) => setAdminApproval(e.target.value)}
-              className="p-2 border rounded border-black w-full mb-4"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6"
             >
               <option value="Pending">Pending</option>
               <option value="Approved">Approved</option>
@@ -303,9 +335,11 @@ export default function BorrowedItems() {
             </select>
             <button
               onClick={handleUpdate}
-              className={`text-white ${
-                isUpdating ? "bg-gray-600" : "bg-green-600"
-              } hover:bg-green-700 font-medium rounded-lg text-sm px-4 py-2`}
+              className={`w-full py-3 rounded-lg text-white font-semibold transition duration-200 ${
+                isUpdating
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
               disabled={isUpdating}
             >
               {isUpdating ? "Updating..." : "Update Approval"}
@@ -316,11 +350,11 @@ export default function BorrowedItems() {
 
       {/* Decline Reason Modal */}
       {declineModalOpen && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
             <button
               onClick={closeDeclineModal}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+              className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition duration-200"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -337,16 +371,19 @@ export default function BorrowedItems() {
                 />
               </svg>
             </button>
-            <h2 className="text-2xl font-semibold mb-4">Decline Reason</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-6">
+              Decline Reason
+            </h2>
             <textarea
               value={declineReason}
               onChange={(e) => setDeclineReason(e.target.value)}
-              className="p-2 border rounded border-black w-full mb-4"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-6"
               placeholder="Enter reason for decline"
-            />
+              rows="4"
+            ></textarea>
             <button
-              onClick={handleUpdate} // Updated to call handleUpdate directly
-              className="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-4 py-2"
+              onClick={handleUpdate} // Call handleUpdate directly
+              className="w-full py-3 bg-red-500 hover:bg-red-600 rounded-lg text-white font-semibold transition duration-200"
             >
               Submit Decline Reason
             </button>

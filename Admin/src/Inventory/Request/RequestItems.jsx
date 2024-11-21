@@ -4,10 +4,8 @@ import "../CSS/Electronics.css";
 export default function RequestItems() {
   const [editModal, setEditModalOpen] = useState(false);
   const [viewModal, setViewModalOpen] = useState(false);
-  const [addModal, setAddModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusQuery, setStatusQuery] = useState("");
   const [items, setItems] = useState([]);
   const [admin1Approvals, setAdmin1Approval] = useState(""); // State for approval selection
 
@@ -32,9 +30,6 @@ export default function RequestItems() {
 
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
-
-  const openAddModal = () => setAddModalOpen(true);
-  const closeAddModal = () => setAddModalOpen(false);
 
   const openEditModal = (item) => {
     setCurrentItem(item);
@@ -131,23 +126,6 @@ export default function RequestItems() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="p-2 border rounded border-black"
                 />
-                <select
-                  value={statusQuery}
-                  onChange={(e) => setStatusQuery(e.target.value)}
-                  className="p-2 border rounded border-black"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="Complete">Complete</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Pending">Pending</option>
-                </select>
-                <button
-                  type="button"
-                  onClick={openAddModal}
-                  className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
-                >
-                  Add Request
-                </button>
               </div>
               <table>
                 <thead>
@@ -247,76 +225,6 @@ export default function RequestItems() {
                 Save Changes
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {addModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-            <div className="flex justify-between items-center">
-              <h5 className="text-lg font-semibold">Add Request</h5>
-              <button
-                type="button"
-                onClick={closeAddModal}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-            <form action="">
-              <div className="mt-4">
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
-                  <input
-                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
-                    type="text"
-                    placeholder="Item Name"
-                  />
-                  <input
-                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
-                    type="text"
-                    placeholder="Requested By"
-                  />
-                  <input
-                    className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black"
-                    type="date"
-                    placeholder="Requested Date"
-                  />
-                  <select className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black">
-                    <option value="Complete">Complete</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Pending">Pending</option>
-                  </select>
-                  <select className="bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline border border-black">
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                  </select>
-                </div>
-                <div className="my-4">
-                  <textarea
-                    placeholder="Description"
-                    className="h-32 bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline w-full border border-black"
-                  ></textarea>
-                </div>
-              </div>
-
-              <div className="flex justify-end mt-4">
-                <button
-                  type="button"
-                  onClick={closeAddModal}
-                  className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg mr-2"
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

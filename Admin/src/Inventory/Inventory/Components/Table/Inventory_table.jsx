@@ -174,47 +174,69 @@ export default function Inventory_table() {
 
   return (
     <div>
-      <div className="limiter">
-        <div className="container-table100">
-          <div className="wrap-table100">
-            <div className="table100">
-              <div className="flex space justify-between mb-4">
-                <h2 className="text-2xl mb-4">
-                  Items in {selectedCategory?.categoryName || "All Categories"}
-                </h2>
-                <button
-                  onClick={() => toggleModal("add")}
-                  className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
-                >
-                  <i className="fa-solid fa-plus"></i> Add Item
-                </button>
-              </div>
-
-              {loading ? (
-                <p>Loading...</p>
-              ) : (
-                <table>
-                  <thead>
-                    <tr className="table100-head">
-                      <th className="column1">Item ID</th>
-                      <th className="column2">Item Name</th>
-                      <th className="column3">Quantity</th>
-                      <th className="column3">Date Added</th>
-                      <th className="column3">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredItems.length > 0 ? (
-                      filteredItems.map((item) => (
-                        <tr key={item.itemID}>
-                          <td className="column1">{item.itemID}</td>
-                          <td className="column2">{item.itemName}</td>
-                          <td className="column3">{item.quantity}</td>
-
-                          <td className="column3">
-                            {new Date(item.dateAdded).toLocaleDateString()}
-                          </td>
-                          <td className="column3  w-32 flex">
+      <div className="limiter w-full">
+        <div className="container mx-auto p-6">
+          <div className="bg-gray-200 p-6 shadow-lg rounded-lg mb-8 text-center">
+            <h2 className="text-3xl font-bold text-gray-700">
+              Items in {selectedCategory?.categoryName || "All Categories"}
+            </h2>
+          </div>
+          {/* Action Section */}
+          <div className="bg-white p-6 shadow-md rounded-lg mb-8 flex justify-between items-center">
+            <button
+              onClick={() => toggleModal("add")}
+              className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
+            >
+              <i className="fa-solid fa-plus"></i> Add Item
+            </button>
+          </div>
+          <div className="overflow-x-auto shadow-md rounded-lg">
+            {loading ? (
+              <p className="text-center p-4">Loading...</p>
+            ) : (
+              <table className="min-w-full border-collapse border border-gray-200 bg-white">
+                <thead className="bg-gray-200">
+                  <tr className="font-semibold text-md text-zinc-50">
+                    <th className="border border-gray-300 px-5 py-3">
+                      Item ID
+                    </th>
+                    <th className="border border-gray-300 px-5 py-3">
+                      Item Name
+                    </th>
+                    <th className="border border-gray-300 px-5 py-3">
+                      Quantity
+                    </th>
+                    <th className="border border-gray-300 px-5 py-3">
+                      Date Added
+                    </th>
+                    <th className="border border-gray-300 px-5 py-3 text-center">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredItems.length > 0 ? (
+                    filteredItems.map((item, index) => (
+                      <tr
+                        key={item.itemID}
+                        className={`${
+                          index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                        } hover:bg-gray-100 transition duration-200`}
+                      >
+                        <td className="border border-gray-300 px-5 py-3">
+                          {item.itemID}
+                        </td>
+                        <td className="border border-gray-300 px-5 py-3">
+                          {item.itemName}
+                        </td>
+                        <td className="border border-gray-300 px-5 py-3">
+                          {item.quantity}
+                        </td>
+                        <td className="border border-gray-300 px-5 py-3">
+                          {new Date(item.dateAdded).toLocaleDateString()}
+                        </td>
+                        <td className="border border-gray-300 px-5 py-3 text-center">
+                          <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={() => {
                                 setSelectedItem(item);
@@ -225,7 +247,7 @@ export default function Inventory_table() {
                                 });
                                 toggleModal("update");
                               }}
-                              className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                              className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5"
                             >
                               <i className="fa-solid fa-pen"></i>
                             </button>
@@ -234,16 +256,16 @@ export default function Inventory_table() {
                                 setSelectedItem(item);
                                 toggleModal("delete");
                               }}
-                              className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                              className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5"
                             >
                               <i className="fa-solid fa-trash"></i>
                             </button>
                             <button
                               onClick={() => {
                                 setSelectedItem(item);
-                                toggleModal("addQuantity"); // Open the add quantity modal
+                                toggleModal("addQuantity");
                               }}
-                              className="text-white bg-orange-500 hover:bg-orange-600 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
+                              className="text-white bg-orange-500 hover:bg-orange-600 font-medium rounded-lg text-sm px-3 py-1.5"
                             >
                               <i className="fa-solid fa-plus"></i>
                             </button>
@@ -256,20 +278,20 @@ export default function Inventory_table() {
                             >
                               <i className="fa-solid fa-eye"></i>
                             </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="6" className="text-center">
-                          No items in this category.
+                          </div>
                         </td>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              )}
-            </div>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="text-center p-4 text-gray-500">
+                        No items in this category.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>

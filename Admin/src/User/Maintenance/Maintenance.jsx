@@ -5,7 +5,7 @@ export default function MaintenanceRequests() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("Pending", "In Progress");
   const [allAssetCodes, setAllAssetCodes] = useState([]);
   const [filteredAssetCodes, setFilteredAssetCodes] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -155,7 +155,7 @@ export default function MaintenanceRequests() {
         Issue: "",
         Description: "",
       });
-      alert("Maintenance request submitted successfully.");
+      toast.success("Maintenance request submitted successfully.");
     } catch (error) {
       console.error("Error submitting maintenance request:", error);
       alert(error.message || "Failed to submit the maintenance request.");
@@ -164,7 +164,11 @@ export default function MaintenanceRequests() {
 
   const filteredRequests =
     statusFilter === "All"
-      ? requests
+      ? requests.filter(
+          (request) =>
+            request.maintenanceStatus === "Pending" ||
+            request.maintenanceStatus === "In Progress"
+        )
       : requests.filter(
           (request) => request.maintenanceStatus === statusFilter
         );
@@ -369,39 +373,57 @@ export default function MaintenanceRequests() {
       {viewModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-lg shadow-2xl max-w-lg w-full mx-4 md:mx-0 relative">
-            <h5 className="text-xl font-bold text-gray-800 mb-4">
+            <h5 className="text-2xl font-bold text-gray-800 mb-6 text-center border-b pb-4">
               Request Details
             </h5>
             {selectedRequest && (
-              <div>
-                <p>
-                  <strong>Request ID:</strong> {selectedRequest.maintenanceID}
+              <div className="space-y-4 text-gray-700">
+                <p className="flex justify-between">
+                  <span className="font-semibold">Request ID:</span>
+                  <span>{selectedRequest.maintenanceID}</span>
                 </p>
-                <p>
-                  <strong>Asset Name:</strong> {selectedRequest.assetName}
+                <p className="flex justify-between">
+                  <span className="font-semibold">Asset Name:</span>
+                  <span>{selectedRequest.assetName}</span>
                 </p>
-                <p>
-                  <strong>Request Date:</strong>{" "}
-                  {new Date(selectedRequest.requestDate).toLocaleDateString()}
+                <p className="flex justify-between">
+                  <span className="font-semibold">Request Date:</span>
+                  <span>
+                    {new Date(selectedRequest.requestDate).toLocaleDateString()}
+                  </span>
                 </p>
-                <p>
-                  <strong>Location:</strong> {selectedRequest.location}
+                <p className="flex justify-between">
+                  <span className="font-semibold">Location:</span>
+                  <span>{selectedRequest.location}</span>
                 </p>
-                <p>
-                  <strong>Issue:</strong> {selectedRequest.issue}
+                <p className="flex justify-between">
+                  <span className="font-semibold">Issue:</span>
+                  <span>{selectedRequest.issue}</span>
                 </p>
-                <p>
-                  <strong>Description:</strong> {selectedRequest.description}
+                <p className="flex justify-between">
+                  <span className="font-semibold">Description:</span>
+                  <span>{selectedRequest.description}</span>
                 </p>
-                <p>
-                  <strong>Status:</strong> {selectedRequest.maintenanceStatus}
+                <p className="flex justify-between">
+                  <span className="font-semibold">Status:</span>
+                  <span
+                    className={`px-3 py-1 rounded-full font-medium ${
+                      selectedRequest.maintenanceStatus === "Pending"
+                        ? "bg-yellow-200 text-yellow-800"
+                        : selectedRequest.maintenanceStatus === "Approved"
+                        ? "bg-green-200 text-green-800"
+                        : "bg-red-200 text-red-800"
+                    }`}
+                  >
+                    {selectedRequest.maintenanceStatus}
+                  </span>
                 </p>
               </div>
             )}
-            <div className="flex justify-end mt-6">
+            <div className="flex justify-end mt-8">
               <button
                 onClick={closeViewModal}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg transition duration-150"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg shadow-md transition duration-200 transform hover:scale-105"
               >
                 Close
               </button>

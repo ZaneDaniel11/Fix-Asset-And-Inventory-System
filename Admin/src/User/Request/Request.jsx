@@ -7,7 +7,7 @@ export default function Request() {
   const [addModalOpen, setIsModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("Pending", "In Progress");
   const [requests, setRequests] = useState([]);
   const [requestItem, setRequestItem] = useState({
     ItemName: "",
@@ -111,8 +111,9 @@ export default function Request() {
   }
 
   // Filter requests by status
+
   const filteredRequests =
-    statusFilter === "All"
+    statusFilter === ""
       ? requests
       : requests.filter((request) => request.status === statusFilter);
 
@@ -144,10 +145,8 @@ export default function Request() {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-                <option value="All">All</option>
                 <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
+                <option value="In Progress">In Progress</option>
               </select>
             </div>
 

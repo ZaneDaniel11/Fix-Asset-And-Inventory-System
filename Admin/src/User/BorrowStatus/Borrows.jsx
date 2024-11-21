@@ -109,7 +109,7 @@ export default function BorrowStatus() {
       setItems((prevItems) =>
         prevItems.map((item) =>
           item.BorrowId === currentItem.BorrowId
-            ? { ...item, Status: "Cancelled" }
+            ? { ...item, Status: "Canceled" }
             : item
         )
       );
@@ -123,7 +123,9 @@ export default function BorrowStatus() {
   };
 
   const filteredItems = Array.isArray(items)
-    ? items.filter((item) => statusQuery === "" || item.Status === statusQuery)
+    ? items.filter(
+        (item) => item.Status === "Pending" || item.Status === "In Progress"
+      )
     : [];
 
   if (loading) {
@@ -151,8 +153,6 @@ export default function BorrowStatus() {
             <option value="">All Statuses</option>
             <option value="Pending">Pending</option>
             <option value="In Progress">In Progress</option>
-            <option value="Rejected">Rejected</option>
-            <option value="Declined">Declined</option>
           </select>
         </div>
 
