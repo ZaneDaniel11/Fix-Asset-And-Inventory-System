@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+import { toast } from "react-toastify";
 export default function RequestRepair() {
   const [updateModalOpen, setEditModalOpen] = useState(false);
 
@@ -122,6 +122,7 @@ export default function RequestRepair() {
       setItems(updatedItems);
 
       closeEditModal();
+      toast.success(`Request Updated successfully!`);
       if (admin1Approvals === "Declined") {
         closeDeclineModal();
       }

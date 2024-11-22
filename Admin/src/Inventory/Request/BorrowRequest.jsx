@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+import { toast } from "react-toastify";
 export default function BorrowedItems() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
@@ -129,7 +129,8 @@ export default function BorrowedItems() {
 
       closeUpdateModal();
       closeDeclineModal();
-      setDeclineReason(""); // Reset decline reason after submission
+      setDeclineReason("");
+      toast.success(`Request Updated successfully!`); // Reset decline reason after submission
     } catch (error) {
       console.error("Error updating approval:", error.message);
       setError(error.message);

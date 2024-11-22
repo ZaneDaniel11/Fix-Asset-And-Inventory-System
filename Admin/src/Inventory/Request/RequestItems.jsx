@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function RequestItems() {
   const [updateModalOpen, setEditModalOpen] = useState(false);
@@ -100,8 +101,6 @@ export default function RequestItems() {
         };
       }
 
-      console.log("Response data:", responseData);
-
       const updatedItems = items.map((item) =>
         item.id === currentItem.id
           ? {
@@ -117,6 +116,7 @@ export default function RequestItems() {
       setItems(updatedItems);
 
       closeEditModal();
+      toast.success(`Request Updated successfully!`);
       if (admin1Approvals === "Declined") {
         closeDeclineModal();
       }
