@@ -129,50 +129,6 @@ namespace Backend.Controllers
 
         // API for updating Admin1 approval and setting status based on approval, returning updated request
         // API for updating Admin1 approval and setting status based on approval, returning updated request
-        [HttpPut("UpdateAdmin1Approval/{requestId}")]
-        public async Task<IActionResult> UpdateAdmin1Approval(int requestId, [FromBody] string admin1Approval)
-        {
-            // Query to update Admin1Approval and Status
-            string updateQuery = @"
-        UPDATE RequestItems_tb 
-        SET Admin1Approval = @Admin1Approval, 
-            Status = CASE 
-                WHEN @Admin1Approval = 'Approved' THEN 'In Progress'
-                WHEN @Admin1Approval = 'Declined' THEN 'Rejected'
-                ELSE Status 
-            END
-        WHERE RequestID = @RequestId;
-    ";
-
-            // Query to select updated request
-            string selectQuery = @"
-        SELECT * FROM RequestItems_tb WHERE RequestID = @RequestId;
-    ";
-
-            // Using the database connection
-            using (var connection = new SqliteConnection(_connectionString))
-            {
-                connection.Open();
-
-                // Update Admin1Approval and Status
-                await connection.ExecuteAsync(updateQuery, new
-                {
-                    Admin1Approval = admin1Approval,
-                    RequestId = requestId
-                });
-
-                // Retrieve the updated request
-                var updatedRequest = await connection.QuerySingleOrDefaultAsync<RequestItem>(selectQuery, new { RequestId = requestId });
-
-                // Return the updated request in the response body
-                if (updatedRequest == null)
-                {
-                    return NotFound($"Request with ID {requestId} not found.");
-                }
-
-                return Ok(updatedRequest);
-            }
-        }
 
         // API for updating Admin2 approval and setting status based on approval, returning updated request
         [HttpPut("UpdateAdmin2Approval/{requestId}")]
@@ -279,6 +235,100 @@ namespace Backend.Controllers
                 return Ok($"Request with RequestID {requestId} has been successfully canceled.");
             }
         }
+        // API to reject a request with a reason
+
+        // Admin1 Approved and Reject aproval
+        [HttpPut("Admin1UpdateApproval/{requestId}")]
+        public async Task<IActionResult> UpdateApproval(int requestId, [FromBody] UpdateApprovalRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.Admin1Approval))
+                return BadRequest("Invalid request. Admin1Approval must be provided.");
+
+            if (request.Admin1Approval == "Declined" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
+                return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // Check if RequestID exists
+                        string checkExistQuery = "SELECT COUNT(1) FROM RequestItems_tb WHERE RequestID = @RequestId";
+                        var exists = await connection.ExecuteScalarAsync<bool>(checkExistQuery, new { RequestId = requestId });
+
+                        if (!exists)
+                            return NotFound($"Request with ID {requestId} not found.");
+
+                        // Update Admin1Approval
+                        string updateApprovalQuery = @"
+                UPDATE RequestItems_tb 
+                SET Admin1Approval = @Admin1Approval
+                WHERE RequestID = @RequestId";
+
+                        await connection.ExecuteAsync(updateApprovalQuery, new
+                        {
+                            Admin1Approval = request.Admin1Approval,
+                            RequestId = requestId
+                        }, transaction);
+
+                        // If Admin1Approval is "Approved", update Status to "In Progress"
+                        if (request.Admin1Approval == "Approved")
+                        {
+                            string updateStatusQuery = @"
+                    UPDATE RequestItems_tb 
+                    SET Status = 'In Progress'
+                    WHERE RequestID = @RequestId";
+
+                            await connection.ExecuteAsync(updateStatusQuery, new { RequestId = requestId }, transaction);
+                        }
+                        // If Admin1Approval is "Rejected", update Status, RejectReason, and RejectBy
+                        else if (request.Admin1Approval == "Declined")
+                        {
+                            string updateRejectionQuery = @"
+                    UPDATE RequestItems_tb 
+                    SET Status = 'Rejected', 
+                        RejectedReason = @RejectReason, 
+                        RejectedBy = @RejectBy
+                    WHERE RequestID = @RequestId";
+
+                            await connection.ExecuteAsync(updateRejectionQuery, new
+                            {
+                                RequestId = requestId,
+                                RejectReason = request.RejectReason,
+                                RejectBy = request.RejectBy
+                            }, transaction);
+                        }
+
+                        transaction.Commit();
+                        return Ok("Approval and status updated successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        // Log the exception if logging is configured
+                        // _logger.LogError(ex, "Error updating approval");
+                        return StatusCode(500, $"Internal server error: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+
+
 
     }
+
+
+
+
+
+}
+public class UpdateApprovalRequest
+{
+    public string Admin1Approval { get; set; }
+    public string RejectReason { get; set; }
+    public string RejectBy { get; set; }
 }

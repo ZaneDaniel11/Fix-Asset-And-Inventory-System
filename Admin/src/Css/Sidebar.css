@@ -1,33 +1,36 @@
-/* Rotate arrow when submenu is open */
+/* Sidebar */
+.sidebar.close .sub-menu {
+  display: none; /* Hide submenu when sidebar is closed */
+}
+
+.sub-menu {
+  display: none;
+  background-color: #002c32;
+  padding: 10px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.sub-menu.show {
+  display: block; /* Show submenu when open */
+}
+
+.sub-menu.hover-only {
+  display: none; /* Ensure hidden by default */
+}
+
+.sidebar.close .hover-only {
+  display: none;
+}
+
+.sidebar.close .hoverable:hover .sub-menu {
+  display: block; /* Show submenu on hover when sidebar is closed */
+}
+
 .arrow {
   transition: transform 0.3s ease;
 }
 
 .arrow.rotate {
-  transform: rotate(180deg); /* Rotate arrow 180 degrees */
-}
-
-/* Submenu styling */
-.sub-menu.show {
-  display: block; /* Ensure submenu is shown when the 'show' class is added */
-  transition: all 0.3s ease;
-}
-/* Sidebar Styling */
-.sidebar .nav-links li .sub-menu {
-  padding: 6px 6px 14px 80px;
-  background: #002c32;
-  display: none; /* Keep submenu hidden by default */
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-.sidebar .nav-links li .sub-menu.show {
-  display: block; /* Show submenu when the 'show' class is added */
-  opacity: 1;
-  transition: all 0.3s ease;
-}
-
-/* Override for sidebar close state */
-.sidebar.close .nav-links li .sub-menu {
-  padding-left: 78px; /* Adjust padding for the closed sidebar */
+  transform: rotate(180deg);
 }

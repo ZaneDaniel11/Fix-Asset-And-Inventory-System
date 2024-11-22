@@ -15,7 +15,7 @@ export default function BorrowedItems() {
   const [declineReason, setDeclineReason] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const storedUsername = localStorage.getItem("username");
+  const storedUsername = localStorage.getItem("userType");
 
   useEffect(() => {
     const fetchBorrowRequests = async () => {
