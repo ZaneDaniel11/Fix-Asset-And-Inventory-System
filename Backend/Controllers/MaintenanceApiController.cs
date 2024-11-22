@@ -32,7 +32,7 @@ namespace Backend.Controllers
         [HttpGet("GetMaintenanceByRequester/{requesterId}")]
         public async Task<IActionResult> GetMaintenanceByRequesterAsync(int requesterId)
         {
-            const string query = "SELECT * FROM maintenance_tb WHERE RequesterID = @RequesterID";
+            const string query = "SELECT * FROM maintenance_tb WHERE RequesterID = @RequesterID  ORDER BY MaintenanceID DESC";
 
             using (var connection = new SqliteConnection(_connectionString))
             {
@@ -86,6 +86,83 @@ namespace Backend.Controllers
                 return Ok(result); // Return the newly inserted maintenance record
             }
         }
+        [HttpPut("Admin1UpdateApproval/{maintenanceId}")]
+        public async Task<IActionResult> Admin1UpdateApprovalAsync(int maintenanceId, [FromBody] MaintenanceAdmin1Aproval request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.Admin1Approval))
+                return BadRequest("Invalid request. Admin1Approval must be provided.");
+
+            if (request.Admin1Approval == "Declined" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
+                return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // Check if MaintenanceID exists
+                        string checkExistQuery = "SELECT COUNT(1) FROM maintenance_tb WHERE MaintenanceID = @MaintenanceId";
+                        var exists = await connection.ExecuteScalarAsync<bool>(checkExistQuery, new { MaintenanceId = maintenanceId });
+
+                        if (!exists)
+                            return NotFound($"Maintenance request with ID {maintenanceId} not found.");
+
+                        // Update Admin1Approval
+                        string updateApprovalQuery = @"
+                UPDATE maintenance_tb 
+                SET ApprovedByAdmin1 = @Admin1Approval
+                WHERE MaintenanceID = @MaintenanceId";
+
+                        await connection.ExecuteAsync(updateApprovalQuery, new
+                        {
+                            Admin1Approval = request.Admin1Approval,
+                            MaintenanceId = maintenanceId
+                        }, transaction);
+
+                        // If Admin1Approval is "Approved", update ApprovalStatus to "In Progress"
+                        if (request.Admin1Approval == "Approved")
+                        {
+                            string updateStatusQuery = @"
+                    UPDATE maintenance_tb 
+                    SET ApprovalStatus = 'In Progress'
+                    WHERE MaintenanceID = @MaintenanceId";
+
+                            await connection.ExecuteAsync(updateStatusQuery, new { MaintenanceId = maintenanceId }, transaction);
+                        }
+                        // If Admin1Approval is "Declined", update ApprovalStatus, RejectReason, and RejectBy
+                        else if (request.Admin1Approval == "Declined")
+                        {
+                            string updateRejectionQuery = @"
+                    UPDATE maintenance_tb 
+                    SET ApprovalStatus = 'Rejected', 
+                        RejectReason = @RejectReason, 
+                        RejectBy = @RejectBy
+                    WHERE MaintenanceID = @MaintenanceId";
+
+                            await connection.ExecuteAsync(updateRejectionQuery, new
+                            {
+                                MaintenanceId = maintenanceId,
+                                RejectReason = request.RejectReason,
+                                RejectBy = request.RejectBy
+                            }, transaction);
+                        }
+
+                        transaction.Commit();
+                        return Ok("Admin1 approval and status updated successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return StatusCode(500, $"Internal server error: {ex.Message}");
+                    }
+                }
+            }
+        }
+
 
     }
+
 }

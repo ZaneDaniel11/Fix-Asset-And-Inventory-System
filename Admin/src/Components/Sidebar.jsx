@@ -146,7 +146,7 @@ const Sidebar = () => {
                     <a href="/RequestItem">Request Items</a>
                   </li>
                   <li>
-                    <a href="/Request">Request Repair</a>
+                    <a href="/RequestRepair">Request Repair</a>
                   </li>
                 </ul>
               )}

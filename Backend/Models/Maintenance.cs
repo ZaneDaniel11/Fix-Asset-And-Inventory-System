@@ -22,5 +22,13 @@ namespace Maintenace.Models
         public string ApprovalStatus { get; set; }      // Approval status of the request
         public string ApprovedByAdmin1 { get; set; }    // Admin1 who approved the request
         public string ApprovedByAdmin2 { get; set; }
+        public string RejectBy { get; set; }
+        public string RejectReason { get; set; }
+    }
+    public class MaintenanceAdmin1Aproval
+    {
+        public string Admin1Approval { get; set; } // Either "Approved" or "Declined"
+        public string RejectReason { get; set; }  // Optional, only for "Declined"
+        public string RejectBy { get; set; }      // Optional, only for "Declined"
     }
 }

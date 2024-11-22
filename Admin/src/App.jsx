@@ -8,6 +8,7 @@ import Dashboard from "./Inventory/Dashboard/Dashboard.jsx";
 import InventoryTable from "./Inventory/Inventory/Components/Table/Inventory_table.jsx";
 import BorrowedRequest from "./Inventory/Request/BorrowRequest.jsx";
 import RequestItems from "./Inventory/Request/RequestItems.jsx";
+import RequestRepair from "./Inventory/Request/RequestRepair.jsx";
 import Logs from "./Inventory/Logs/Log.jsx";
 import Sidebar from "./Components/Sidebar.jsx";
 import BorrowedItems from "./Inventory/Borrowed/BorrowedItems.jsx";
@@ -110,6 +111,17 @@ function App() {
                 allowedUsertypes={["Inventory_Admin"]}
               />
             }
+            
+          />
+            <Route
+            path="/RequestRepair"
+            element={
+              <ProtectedRoute
+                element={<RequestRepair />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
+            
           />
           <Route
             path="/BorrowedTable"
@@ -119,7 +131,9 @@ function App() {
                 allowedUsertypes={["Inventory_Admin"]}
               />
             }
+            
           />
+            
           <Route
             path="/Logs"
             element={
