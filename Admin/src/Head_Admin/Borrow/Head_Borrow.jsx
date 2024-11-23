@@ -1,5 +1,5 @@
-import Sidebar from "../../Components/Sidebar";
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function Borrow() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -16,7 +16,7 @@ export default function Borrow() {
   const [declineReason, setDeclineReason] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const storedUsername = localStorage.getItem("username");
+  const storedUsername = localStorage.getItem("userType");
   useEffect(() => {
     const fetchApprovedBorrowRequests = async () => {
       try {
@@ -66,6 +66,7 @@ export default function Borrow() {
           )
         );
         closeUpdateModal();
+        toast.success(`Request Updated successfully!`);
       } else {
         console.error("Failed to update approval");
       }
@@ -277,9 +278,11 @@ export default function Borrow() {
       </div>
 
       {/* Decline Reason Modal */}
+      {/* Decline Reason Modal */}
       {declineReasonModalOpen && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            {/* Close Button */}
             <button
               onClick={() => setDeclineReasonModalOpen(false)}
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
@@ -299,21 +302,31 @@ export default function Borrow() {
                 />
               </svg>
             </button>
-            <h2 className="text-2xl font-semibold mb-4">
+            {/* Header */}
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
               Reason for Declining
             </h2>
+            {/* Text Area */}
             <textarea
               value={declineReason}
               onChange={(e) => setDeclineReason(e.target.value)}
-              className="p-2 border border-gray-300 rounded w-full"
-              placeholder="Enter reason for declining"
-            ></textarea>
-            <div className="flex justify-end mt-4">
+              className="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-red-500 focus:outline-none resize-none mb-4"
+              placeholder="Please provide the reason for declining..."
+              rows={5}
+            />
+            {/* Actions */}
+            <div className="flex justify-end space-x-4">
               <button
-                onClick={() => handleUpdateApproval()}
-                className="text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md"
+                onClick={() => setDeclineReasonModalOpen(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-200"
               >
-                Submit Reason & Update
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateApproval}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200"
+              >
+                Submit
               </button>
             </div>
           </div>
@@ -323,35 +336,42 @@ export default function Borrow() {
       {/* Update Modal */}
       {updateModalOpen && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-            <h2 className="text-2xl font-semibold mb-4">Update Approval</h2>
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            {/* Header */}
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+              Update Approval
+            </h2>
+            {/* Select Approval */}
             <select
               value={adminApproval}
               onChange={(e) => handleAdminApprovalChange(e.target.value)}
-              className="p-2 border border-gray-300 rounded w-full mb-4"
+              className="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none mb-4"
             >
               <option value="">Select Approval</option>
               <option value="Approved">Approved</option>
               <option value="Declined">Declined</option>
             </select>
+            {/* Decline Reason (Conditional) */}
             {adminApproval === "Declined" && (
               <textarea
                 value={declineReason}
                 onChange={(e) => setDeclineReason(e.target.value)}
-                className="p-2 border border-gray-300 rounded w-full mb-4"
-                placeholder="Enter reason for declining"
-              ></textarea>
+                className="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-red-500 focus:outline-none resize-none mb-4"
+                placeholder="Provide a reason for declining..."
+                rows={5}
+              />
             )}
-            <div className="flex justify-end space-x-2">
+            {/* Actions */}
+            <div className="flex justify-end space-x-4">
               <button
                 onClick={closeUpdateModal}
-                className="text-white bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-md"
+                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-200"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdateApproval}
-                className="text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md"
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200"
               >
                 Update
               </button>
@@ -363,19 +383,41 @@ export default function Borrow() {
       {/* View Modal */}
       {viewModalOpen && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-            <h2 className="text-2xl font-semibold mb-4">View Borrowed Items</h2>
-            <ul>
-              {borrowedItems.map((item) => (
-                <li key={item.ItemID} className="mb-2">
-                  {item.ItemName} (Quantity: {item.Quantity})
-                </li>
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+            {/* Header */}
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+              Borrowed Items
+            </h2>
+            {/* Borrowed Items List */}
+            <div className="space-y-4">
+              {borrowedItems.map((borrowItem) => (
+                <div
+                  key={borrowItem.ItemId}
+                  className="flex items-center border border-gray-200 rounded-lg bg-gray-50 p-4 shadow-sm hover:shadow-lg transition-shadow duration-200"
+                >
+                  {/* Image */}
+                  <img
+                    src="https://via.placeholder.com/100"
+                    alt={borrowItem.ItemName}
+                    className="w-20 h-20 object-cover rounded-lg"
+                  />
+                  {/* Item Info */}
+                  <div className="ml-4">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      {borrowItem.ItemName}
+                    </h3>
+                    <p className="text-gray-600">
+                      Quantity: {borrowItem.Quantity}
+                    </p>
+                  </div>
+                </div>
               ))}
-            </ul>
-            <div className="flex justify-end mt-4">
+            </div>
+            {/* Close Button */}
+            <div className="flex justify-end mt-6">
               <button
                 onClick={closeViewModal}
-                className="text-white bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-md"
+                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-200"
               >
                 Close
               </button>

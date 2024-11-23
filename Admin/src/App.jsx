@@ -28,8 +28,8 @@ import UserRequestMaintenance from "./User/Maintenance/Maintenance.jsx";
 import UserRequestLogs from "./User/History/RequestHistory.jsx";
 
 // Head Admin Side
-import HadminBorrow from "./Head_Admin/Borrow/Borrow.jsx";
-import HadminRequestItems from "./Head_Admin/RequestItems/RequestItems.jsx";
+import HadminBorrow from "./Head_Admin/Borrow/Head_Borrow.jsx";
+import HadminRequestItems from "./Head_Admin/RequestItems/Head_RequestItems.jsx";
 import HadminLogs from "./Head_Admin/Logs/Logs.jsx";
 function App() {
   const location = useLocation();
