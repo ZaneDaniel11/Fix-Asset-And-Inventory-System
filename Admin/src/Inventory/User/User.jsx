@@ -142,95 +142,124 @@ export default function Users() {
 
   return (
     <>
-      <div className="limiter">
-        <div className="container-table100">
-          <div className="wrap-table100">
-            <div className="mb-8 text-center">
-              <h1 className="text-3xl font-bold text-gray-800">
-                User Management
-              </h1>
-              <p className="text-gray-500 mt-2">
-                Manage users, their details, and roles efficiently.
-              </p>
-            </div>
-            <div className="table100">
-              <div className="flex justify-between mb-4">
-                <input
-                  type="text"
-                  placeholder="Search by User Name"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="p-2 border rounded border-black"
-                />
-                <select
-                  value={userTypeQuery}
-                  onChange={(e) => setUserTypeQuery(e.target.value)}
-                  className="p-2 border rounded border-black"
-                >
-                  <option value="">All User Types</option>
-                  <option value="Inventory_Admin">Inventory Admin</option>
-                  <option value="Member">Member</option>
-                  <option value="Asset_Admin">Asset Admin</option>
-                  <option value="School_Admin">School Admin</option>
-                </select>
-                <button
-                  onClick={() => toggleModal("add")}
-                  className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
-                >
-                  <i className="fa-solid fa-plus"></i> Add User
-                </button>
-              </div>
-              <table>
-                <thead>
-                  <tr className="table100-head ">
-                    <th className="column1">Name</th>
-                    <th className="column2">Department</th>
-                    <th className="column3">User Name</th>
-                    <th className="column4">Email</th>
-                    <th className="column5">User Type</th>
-                    <th className="column6">Operation</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map((user) => (
-                    <tr key={user.userId}>
-                      <td className="column1">{user.name}</td>{" "}
-                      {/* Display name */}
-                      <td className="column2">{user.department}</td>
-                      <td className="column3">{user.userName}</td>
-                      <td className="column4">{user.email}</td>
-                      <td className="column5">{user.userType}</td>
-                      <td className="column6">
-                        <button
-                          type="button"
-                          onClick={() => toggleModal("update", user)}
-                          className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
-                        >
-                          <i className="fa-solid fa-pen"></i>
-                        </button>
-                        <button
-                          onClick={() => toggleModal("delete", user)}
-                          type="button"
-                          className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 me-2 mb-2"
-                        >
-                          <i className="fa-solid fa-trash"></i>
-                        </button>
-                        <button
-                          onClick={() => toggleModal("view", user)}
-                          type="button"
-                          className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
-                        >
-                          <i className="fa-solid fa-eye"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+      <div className="limiter w-full bg-gray-100 min-h-screen p-6">
+        <div className="container mx-auto p-6">
+          {/* Header */}
+          <div className="bg-gray-200 p-6 shadow-lg rounded-lg mb-8 text-center">
+            <h2 className="text-4xl font-bold text-gray-700">User List</h2>
           </div>
+
+          {/* Search and Filter Section */}
+          <div className="bg-white p-6 shadow-md rounded-lg mb-8 flex flex-wrap gap-4 justify-between items-center">
+            <input
+              type="text"
+              placeholder="Search by User Name"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="p-3 border rounded border-gray-300 focus:outline-none focus:ring focus:ring-blue-200"
+            />
+            <select
+              value={userTypeQuery}
+              onChange={(e) => setUserTypeQuery(e.target.value)}
+              className="p-3 border rounded border-gray-300 focus:outline-none focus:ring focus:ring-blue-200"
+            >
+              <option value="">All User Types</option>
+              <option value="Inventory_Admin">Inventory Admin</option>
+              <option value="Member">Member</option>
+              <option value="Asset_Admin">Asset Admin</option>
+              <option value="School_Admin">School Admin</option>
+            </select>
+            <button
+              onClick={() => toggleModal("add")}
+              className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2 shadow-md"
+            >
+              <i className="fa-solid fa-plus"></i> Add User
+            </button>
+          </div>
+
+          {/* User Table */}
+          <table className="min-w-full border-collapse border border-gray-200 bg-white">
+            <thead className="bg-gray-200">
+              <tr className="font-semibold text-md text-white">
+                <th className="border border-gray-300 px-5 py-3">
+                  Profile Picture
+                </th>
+                <th className="border border-gray-300 px-5 py-3">Name</th>
+
+                <th className="border border-gray-300 px-5 py-3">Department</th>
+                <th className="border border-gray-300 px-5 py-3">User Name</th>
+                <th className="border border-gray-300 px-5 py-3">Email</th>
+                <th className="border border-gray-300 px-5 py-3">User Type</th>
+                <th className="border border-gray-300 px-5 py-3 text-center">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.map((user) => (
+                <tr key={user.userId} className="hover:bg-gray-50">
+                  <td className="border border-gray-300 px-5 py-3 text-center">
+                    <img
+                      src={
+                        user.profilePicture || "https://via.placeholder.com/50"
+                      }
+                      alt={`${user.name}'s profile`}
+                      className="w-12 h-12 rounded-full mx-auto"
+                    />
+                  </td>
+
+                  {/* Name Column */}
+                  <td className="border border-gray-300 px-5 py-3">
+                    {user.name}
+                  </td>
+
+                  {/* Profile Picture Column */}
+
+                  {/* Other Columns */}
+                  <td className="border border-gray-300 px-5 py-3">
+                    {user.department}
+                  </td>
+                  <td className="border border-gray-300 px-5 py-3">
+                    {user.userName}
+                  </td>
+                  <td className="border border-gray-300 px-5 py-3">
+                    {user.email}
+                  </td>
+                  <td className="border border-gray-300 px-5 py-3">
+                    {user.userType}
+                  </td>
+
+                  {/* Actions Column */}
+                  <td className="border border-gray-300 px-5 py-3 text-center">
+                    <button
+                      type="button"
+                      onClick={() => toggleModal("update", user)}
+                      className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5 shadow-md"
+                    >
+                      <i className="fa-solid fa-pen"></i>
+                    </button>
+                    <button
+                      onClick={() => toggleModal("delete", user)}
+                      type="button"
+                      className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5 shadow-md ml-2"
+                    >
+                      <i className="fa-solid fa-trash"></i>
+                    </button>
+                    <button
+                      onClick={() => toggleModal("view", user)}
+                      type="button"
+                      className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5 shadow-md ml-2"
+                    >
+                      <i className="fa-solid fa-eye"></i>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
+
       {modals.update && currentItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full mx-4 md:mx-0">
@@ -370,6 +399,7 @@ export default function Users() {
                       <option value="Inventory_Admin">Inventory Admin</option>
                       <option value="Asset_Admin">Asset Admin</option>
                       <option value="School_Admin">School Admin</option>
+                      <option value="Head_Admin">Head Admin</option>
                       {/* <option value="Asset_Admin">Asset Admin</option> */}
                     </select>
                   </div>

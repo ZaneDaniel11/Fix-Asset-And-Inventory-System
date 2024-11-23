@@ -25,44 +25,44 @@ const Sidebar = () => {
       title: "Borrow Request",
       icon: "bx bx-book-alt",
       path: "/home",
-      visibleTo: ["Senior_Admin"],
+      visibleTo: ["Head_Admin"],
     },
     {
       title: "Item Request",
       icon: "fas fa-box-archive",
       path: "/Request",
-      visibleTo: ["Senior_Admin"],
+      visibleTo: ["Head_Admin"],
     },
     {
       title: "SuperBorrow",
       icon: "bx bx-book-reader",
       path: "/SuperBorrow",
-      visibleTo: ["Head_Admin"],
+      visibleTo: ["School_Admin"],
     },
     {
       title: "Maintenance Request",
       icon: "fas fa-screwdriver-wrench",
       path: "/maintenance",
-      visibleTo: ["Senior_Admin"],
+      visibleTo: ["Head_Admin"],
     },
     {
       title: "Logs",
       icon: "bx bx-list-ul",
       path: "/Logs",
-      visibleTo: ["Senior_Admin"],
+      visibleTo: ["Head_Admin"],
     },
 
     {
       title: "SuperRequest",
       icon: "fas fa-box-archive",
       path: "/SuperRequest",
-      visibleTo: ["Head_Admin"],
+      visibleTo: ["School_Admin"],
     },
     {
       title: "SuperLogs",
       icon: "bx bx-clipboard",
       path: "/SuperLogs",
-      visibleTo: ["Head_Admin"],
+      visibleTo: ["School_Admin"],
     },
   ];
 

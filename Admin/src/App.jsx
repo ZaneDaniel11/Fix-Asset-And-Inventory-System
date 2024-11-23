@@ -12,6 +12,7 @@ import RequestRepair from "./Inventory/Request/RequestRepair.jsx";
 import Logs from "./Inventory/Logs/Log.jsx";
 import Sidebar from "./Components/Sidebar.jsx";
 import BorrowedItems from "./Inventory/Borrowed/BorrowedItems.jsx";
+import EmailTest from "./Inventory/Email/email.jsx";
 
 // Asset Admin
 import AssetInventory from "./Asset/Inventory/AInventory.jsx";
@@ -26,6 +27,10 @@ import UserRequestItem from "./User/Request/Request.jsx";
 import UserRequestMaintenance from "./User/Maintenance/Maintenance.jsx";
 import UserRequestLogs from "./User/History/RequestHistory.jsx";
 
+// Head Admin Side
+import HadminBorrow from "./Head_Admin/Borrow/Borrow.jsx";
+import HadminRequestItems from "./Head_Admin/RequestItems/RequestItems.jsx";
+import HadminLogs from "./Head_Admin/Logs/Logs.jsx";
 function App() {
   const location = useLocation();
   const isAuthenticated = !!localStorage.getItem("token"); // Check if token is present
@@ -49,6 +54,34 @@ function App() {
           <Route path="/" element={<Login />} />
 
           {/* Protected routes */}
+          {/* Head Admin */}
+          <Route
+            path="/HadminBorrow"
+            element={
+              <ProtectedRoute
+                element={<HadminBorrow />}
+                allowedUsertypes={["Head_Admin"]}
+              />
+            }
+          />
+          <Route
+            path="/HadminRequestItems"
+            element={
+              <ProtectedRoute
+                element={<HadminRequestItems />}
+                allowedUsertypes={["Head_Admin"]}
+              />
+            }
+          />
+          <Route
+            path="/HadminLogs"
+            element={
+              <ProtectedRoute
+                element={<HadminLogs />}
+                allowedUsertypes={["Head_Admin"]}
+              />
+            }
+          />
           <Route
             path="/Dashboard"
             element={
@@ -111,9 +144,8 @@ function App() {
                 allowedUsertypes={["Inventory_Admin"]}
               />
             }
-            
           />
-            <Route
+          <Route
             path="/RequestRepair"
             element={
               <ProtectedRoute
@@ -121,7 +153,6 @@ function App() {
                 allowedUsertypes={["Inventory_Admin"]}
               />
             }
-            
           />
           <Route
             path="/BorrowedTable"
@@ -131,14 +162,22 @@ function App() {
                 allowedUsertypes={["Inventory_Admin"]}
               />
             }
-            
           />
-            
+
           <Route
             path="/Logs"
             element={
               <ProtectedRoute
                 element={<Logs />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
+          />
+          <Route
+            path="/email"
+            element={
+              <ProtectedRoute
+                element={<EmailTest />}
                 allowedUsertypes={["Inventory_Admin"]}
               />
             }

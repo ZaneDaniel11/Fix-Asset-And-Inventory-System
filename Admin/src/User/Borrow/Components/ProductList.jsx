@@ -11,6 +11,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
     try {
       const response = await fetch(`${API_URL}GetItemCountsByCategory`);
       const result = await response.json();
+      console.log("Categories Data:", result); // Debugging API response
 
       const mappedCategories = result.map((category) => ({
         id: category.categoryID,
@@ -36,11 +37,13 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
         response = await fetch(`${API_URL}GetAllItems`);
       } else {
         response = await fetch(
-          `${API_URL}GetItemsByCategory?categoryID=${categoryId}`
+          `http://localhost:5075/api/ItemApi/GetItemsByCategory?categoryID=${categoryId}`
         );
       }
 
       const result = await response.json();
+      console.log("Products Data:", result); // Debugging API response
+
       const processedProducts = result.map((product) => ({
         ...product,
         initialQuantity: product.quantity,
@@ -54,12 +57,15 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
     }
   };
 
+  // Initial fetch for categories and all products
   useEffect(() => {
     FetchCategoryWithCounts();
     FetchProductsByCategory(0);
   }, []);
 
+  // Fetch products whenever the selected category changes
   useEffect(() => {
+    console.log("Selected Category ID:", selectedCategoryId); // Debugging category selection
     FetchProductsByCategory(selectedCategoryId);
   }, [selectedCategoryId]);
 
@@ -127,50 +133,56 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
 
       {/* Products Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {products.map((product) => (
-          <div
-            key={product.itemID}
-            className="flex items-center border p-4 rounded-lg shadow-lg space-x-4"
-          >
-            {/* Image Section */}
-            <div className="flex-shrink-0">
-              <img
-                src="https://via.placeholder.com/100"
-                alt={product.itemName}
-                className="w-24 h-24 object-cover rounded-lg"
-              />
-            </div>
+        {products.length > 0 ? (
+          products.map((product) => (
+            <div
+              key={product.itemID}
+              className="flex items-center border p-4 rounded-lg shadow-lg space-x-4"
+            >
+              {/* Image Section */}
+              <div className="flex-shrink-0">
+                <img
+                  src="https://via.placeholder.com/100"
+                  alt={product.itemName}
+                  className="w-24 h-24 object-cover rounded-lg"
+                />
+              </div>
 
-            {/* Content Section */}
-            <div className="flex-1">
-              <h3 className="text-2xl font-semibold text-gray-800">
-                {product.itemName}
-              </h3>
-              <p className="text-lg text-gray-600 mb-2">
-                Quantity: {product.quantity}
-              </p>
+              {/* Content Section */}
+              <div className="flex-1">
+                <h3 className="text-2xl font-semibold text-gray-800">
+                  {product.itemName}
+                </h3>
+                <p className="text-lg text-gray-600 mb-2">
+                  Quantity: {product.quantity}
+                </p>
 
-              {/* Out of Stock or Button */}
-              {product.quantity === 0 ? (
-                <p className="text-red-500 font-bold">Out of Stock</p>
-              ) : product.isRequested ? (
-                <button
-                  className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded-lg transition duration-300"
-                  onClick={() => handleRemoveRequest(product.itemID)}
-                >
-                  Requested
-                </button>
-              ) : (
-                <button
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-300"
-                  onClick={() => handleAddProduct(product)}
-                >
-                  Request
-                </button>
-              )}
+                {/* Out of Stock or Button */}
+                {product.quantity === 0 ? (
+                  <p className="text-red-500 font-bold">Out of Stock</p>
+                ) : product.isRequested ? (
+                  <button
+                    className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded-lg transition duration-300"
+                    onClick={() => handleRemoveRequest(product.itemID)}
+                  >
+                    Requested
+                  </button>
+                ) : (
+                  <button
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-300"
+                    onClick={() => handleAddProduct(product)}
+                  >
+                    Request
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p className="text-gray-500">
+            No products available in this category.
+          </p>
+        )}
       </div>
     </div>
   );
