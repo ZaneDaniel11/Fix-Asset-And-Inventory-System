@@ -78,7 +78,7 @@ const RequestSummary = ({
   const handleRemove = (itemID) => onRemoveProduct(itemID);
 
   return (
-    <div className="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-lg">
+    <div className="w-full bg-white p-6 rounded-lg shadow-lg block">
       <h2 className="text-2xl font-semibold mb-6 text-gray-800 text-center">
         Borrow Summary
       </h2>

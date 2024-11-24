@@ -127,74 +127,7 @@ namespace Backend.Controllers
             }
         }
 
-        // API for updating Admin1 approval and setting status based on approval, returning updated request
-        // API for updating Admin1 approval and setting status based on approval, returning updated request
-
-        // API for updating Admin2 approval and setting status based on approval, returning updated request
-        [HttpPut("UpdateAdmin2Approval/{requestId}")]
-        public async Task<IActionResult> UpdateAdmin2Approval(int requestId, [FromBody] string admin2Approval)
-        {
-            string updateQuery = @"
-                UPDATE RequestItems_tb 
-                SET Admin2Approval = @Admin2Approval, 
-                    Status = CASE 
-                        WHEN @Admin2Approval = 'Approved' AND Admin1Approval = 'Approved' THEN 'In Progress'
-                        WHEN @Admin2Approval = 'Declined' THEN 'Rejected'
-                        ELSE Status 
-                    END
-                WHERE RequestID = @RequestId;
-            ";
-
-            string selectQuery = @"
-                SELECT * FROM RequestItems_tb WHERE RequestID = @RequestId;
-            ";
-
-            using (var connection = new SqliteConnection(_connectionString))
-            {
-                connection.Open();
-                await connection.ExecuteAsync(updateQuery, new
-                {
-                    Admin2Approval = admin2Approval,
-                    RequestId = requestId
-                });
-
-                var updatedRequest = await connection.QuerySingleOrDefaultAsync<RequestItem>(selectQuery, new { RequestId = requestId });
-                return Ok(updatedRequest);
-            }
-        }
-
         // API for updating Admin3 approval and setting status based on approval, returning updated request
-        [HttpPut("UpdateAdmin3Approval/{requestId}")]
-        public async Task<IActionResult> UpdateAdmin3Approval(int requestId, [FromBody] string admin3Approval)
-        {
-            string updateQuery = @"
-                UPDATE RequestItems_tb 
-                SET Admin3Approval = @Admin3Approval, 
-                    Status = CASE 
-                        WHEN @Admin3Approval = 'Approved' AND Admin1Approval = 'Approved' AND Admin2Approval = 'Approved' THEN 'Approved'
-                        WHEN @Admin3Approval = 'Declined' THEN 'Rejected'
-                        ELSE Status 
-                    END
-                WHERE RequestID = @RequestId;
-            ";
-
-            string selectQuery = @"
-                SELECT * FROM RequestItems_tb WHERE RequestID = @RequestId;
-            ";
-
-            using (var connection = new SqliteConnection(_connectionString))
-            {
-                connection.Open();
-                await connection.ExecuteAsync(updateQuery, new
-                {
-                    Admin3Approval = admin3Approval,
-                    RequestId = requestId
-                });
-
-                var updatedRequest = await connection.QuerySingleOrDefaultAsync<RequestItem>(selectQuery, new { RequestId = requestId });
-                return Ok(updatedRequest);
-            }
-        }
 
         [HttpGet("GetRequestsByBorrower/{borrowerId}")]
         public async Task<IActionResult> GetRequestsByBorrower(int borrowerId)
@@ -316,7 +249,175 @@ namespace Backend.Controllers
             }
         }
 
+        [HttpPut("UpdateAdmin2Approval/{requestId}")]
+        public async Task<IActionResult> UpdateAdmin2Approval(int requestId, [FromBody] UpdateAdmin2ApprovalRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.Admin2Approval))
+                return BadRequest("Invalid request. Admin2Approval must be provided.");
 
+            if (request.Admin2Approval == "Declined" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
+                return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // Check if RequestID exists
+                        string checkExistQuery = "SELECT COUNT(1) FROM RequestItems_tb WHERE RequestID = @RequestId";
+                        var exists = await connection.ExecuteScalarAsync<bool>(checkExistQuery, new { RequestId = requestId });
+
+                        if (!exists)
+                            return NotFound($"Request with ID {requestId} not found.");
+
+                        // Update Admin2Approval
+                        string updateApprovalQuery = @"
+                    UPDATE RequestItems_tb 
+                    SET Admin2Approval = @Admin2Approval
+                    WHERE RequestID = @RequestId";
+
+                        await connection.ExecuteAsync(updateApprovalQuery, new
+                        {
+                            Admin2Approval = request.Admin2Approval,
+                            RequestId = requestId
+                        }, transaction);
+
+                        // Update status based on Admin2Approval and other conditions
+                        if (request.Admin2Approval == "Approved")
+                        {
+                            string updateStatusQuery = @"
+                        UPDATE RequestItems_tb 
+                        SET Status = CASE 
+                            WHEN Admin1Approval = 'Approved' THEN 'In Progress'
+                            ELSE Status
+                        END
+                        WHERE RequestID = @RequestId";
+
+                            await connection.ExecuteAsync(updateStatusQuery, new { RequestId = requestId }, transaction);
+                        }
+                        else if (request.Admin2Approval == "Declined")
+                        {
+                            string updateRejectionQuery = @"
+                        UPDATE RequestItems_tb 
+                        SET Status = 'Rejected', 
+                            RejectedReason = @RejectReason, 
+                            RejectedBy = @RejectBy
+                        WHERE RequestID = @RequestId";
+
+                            await connection.ExecuteAsync(updateRejectionQuery, new
+                            {
+                                RequestId = requestId,
+                                RejectReason = request.RejectReason,
+                                RejectBy = request.RejectBy
+                            }, transaction);
+                        }
+
+                        // Fetch and return the updated record
+                        string selectQuery = @"
+                    SELECT * FROM RequestItems_tb WHERE RequestID = @RequestId";
+                        var updatedRequest = await connection.QuerySingleOrDefaultAsync<RequestItem>(selectQuery, new { RequestId = requestId }, transaction);
+
+                        transaction.Commit();
+                        return Ok(updatedRequest);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        // Log the exception if logging is configured
+                        // _logger.LogError(ex, "Error updating Admin2 approval");
+                        return StatusCode(500, $"Internal server error: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        [HttpPut("UpdateAdmin3Approval/{requestId}")]
+        public async Task<IActionResult> UpdateAdmin3Approval(int requestId, [FromBody] UpdateAdmin3ApprovalRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.Admin3Approval))
+                return BadRequest("Invalid request. Admin3Approval must be provided.");
+
+            if (request.Admin3Approval == "Declined" && (string.IsNullOrEmpty(request.RejectReason) || string.IsNullOrEmpty(request.RejectBy)))
+                return BadRequest("RejectReason and RejectBy must be provided when rejecting.");
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        // Check if RequestID exists
+                        string checkExistQuery = "SELECT COUNT(1) FROM RequestItems_tb WHERE RequestID = @RequestId";
+                        var exists = await connection.ExecuteScalarAsync<bool>(checkExistQuery, new { RequestId = requestId });
+
+                        if (!exists)
+                            return NotFound($"Request with ID {requestId} not found.");
+
+                        // Update Admin3Approval
+                        string updateApprovalQuery = @"
+                    UPDATE RequestItems_tb 
+                    SET Admin3Approval = @Admin3Approval
+                    WHERE RequestID = @RequestId";
+
+                        await connection.ExecuteAsync(updateApprovalQuery, new
+                        {
+                            Admin3Approval = request.Admin3Approval,
+                            RequestId = requestId
+                        }, transaction);
+
+                        // Update status based on Admin3Approval and other conditions
+                        if (request.Admin3Approval == "Approved")
+                        {
+                            string updateStatusQuery = @"
+                        UPDATE RequestItems_tb 
+                        SET Status = CASE 
+                            WHEN Admin1Approval = 'Approved' AND Admin2Approval = 'Approved' THEN 'Approved'
+                            ELSE Status
+                        END
+                        WHERE RequestID = @RequestId";
+
+                            await connection.ExecuteAsync(updateStatusQuery, new { RequestId = requestId }, transaction);
+                        }
+                        else if (request.Admin3Approval == "Declined")
+                        {
+                            string updateRejectionQuery = @"
+                        UPDATE RequestItems_tb 
+                        SET Status = 'Rejected', 
+                            RejectedReason = @RejectReason, 
+                            RejectedBy = @RejectBy
+                        WHERE RequestID = @RequestId";
+
+                            await connection.ExecuteAsync(updateRejectionQuery, new
+                            {
+                                RequestId = requestId,
+                                RejectReason = request.RejectReason,
+                                RejectBy = request.RejectBy
+                            }, transaction);
+                        }
+
+                        // Fetch and return the updated record
+                        string selectQuery = @"
+                    SELECT * FROM RequestItems_tb WHERE RequestID = @RequestId";
+                        var updatedRequest = await connection.QuerySingleOrDefaultAsync<RequestItem>(selectQuery, new { RequestId = requestId }, transaction);
+
+                        transaction.Commit();
+                        return Ok(updatedRequest);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        // Log the exception if logging is configured
+                        // _logger.LogError(ex, "Error updating Admin3 approval");
+                        return StatusCode(500, $"Internal server error: {ex.Message}");
+                    }
+                }
+            }
+        }
 
 
     }
@@ -328,7 +429,23 @@ namespace Backend.Controllers
 }
 public class UpdateApprovalRequest
 {
+
     public string Admin1Approval { get; set; }
+    public string RejectReason { get; set; }
+    public string RejectBy { get; set; }
+}
+
+public class UpdateAdmin2ApprovalRequest
+{
+
+    public string Admin2Approval { get; set; }
+    public string RejectReason { get; set; }
+    public string RejectBy { get; set; }
+}
+
+public class UpdateAdmin3ApprovalRequest
+{
+    public string Admin3Approval { get; set; }
     public string RejectReason { get; set; }
     public string RejectBy { get; set; }
 }

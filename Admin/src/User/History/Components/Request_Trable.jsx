@@ -16,9 +16,34 @@ export default function Request_History() {
   const [requests, setRequests] = useState([]);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [isApprovedModalOpen, setIsApprovedModalOpen] = useState(false);
+
+  const openApprovedModal = (item) => {
+    setSelectedItem(item);
+    setIsApprovedModalOpen(true);
+  };
+
+  const closeApprovedModal = () => {
+    setSelectedItem(null);
+    setIsApprovedModalOpen(false);
+  };
+
   const closeViewModal = () => {
     setViewModalOpen(false);
     setSelectedRequest(null);
+  };
+
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const openRejectModal = (item) => {
+    setSelectedItem(item);
+    setIsRejectModalOpen(true);
+  };
+
+  const closeRejectModal = () => {
+    setIsRejectModalOpen(false);
+    setSelectedItem(null);
   };
 
   useEffect(() => {
@@ -30,12 +55,6 @@ export default function Request_History() {
       fetchMaintenanceRequests();
     }
   }, [activeTab]);
-
-  const statusColors = {
-    Pending: "text-orange-400",
-    Approved: "text-green-700",
-    Rejected: "text-red-700",
-  };
 
   const statusIcons = {
     Pending: "fa-hourglass-start",
@@ -171,7 +190,6 @@ export default function Request_History() {
       <div className="bg-gray-200 p-4 shadow-lg rounded-lg mb-6 text-center">
         <h2 className="text-2xl font-bold">Request History</h2>
       </div>
-
       {/* Tab Buttons */}
       <div className="flex space-x-4 mb-6">
         <button
@@ -205,7 +223,6 @@ export default function Request_History() {
           Maintenance Request
         </button>
       </div>
-
       {/* Search Bar */}
       <div className="p-4 mb-4 bg-white shadow-md rounded-md">
         <div className="flex justify-between">
@@ -222,14 +239,14 @@ export default function Request_History() {
             className="p-2 border rounded border-gray-400"
           >
             <option value="">All Statuses</option>
-            <option value="Complete">Complete</option>
+            <option value="Approved">Approved</option>
             <option value="In Progress">In Progress</option>
+            <option value="Rejected">Rejected</option>
             <option value="Pending">Pending</option>
             <option value="Canceled">Canceled</option>
           </select>
         </div>
       </div>
-
       {/* Items Table */}
       {activeTab === "Borrow Items" && (
         <div className="overflow-x-auto shadow-md rounded-lg">
@@ -243,7 +260,7 @@ export default function Request_History() {
                 <th className="border border-gray-300 px-5 py-3">Date</th>
                 <th className="border border-gray-300 px-5 py-3">Purpose</th>
                 <th className="border border-gray-300 px-5 py-3">Status</th>
-                <th className="border border-gray-300 px-5 py-3">Aproval</th>
+
                 <th className="border border-gray-300 px-5 py-3 text-center">
                   Actions
                 </th>
@@ -282,11 +299,10 @@ export default function Request_History() {
                   >
                     {item.Status}
                   </td>
-                  <td className="border border-gray-300 px-5 py-3">
-                    {item.Admin1Approval}
-                  </td>
+
                   <td className="border border-gray-300 px-5 py-3 text-center">
                     <div className="flex items-center gap-4 justify-center">
+                      {/* View Item Button */}
                       <button
                         type="button"
                         onClick={() => openViewModal(item, "Borrow")}
@@ -294,6 +310,26 @@ export default function Request_History() {
                       >
                         <i className="fa-solid fa-eye"></i>
                       </button>
+                      {/* Rejected Reason Icon */}
+                      {item.Status === "Rejected" && (
+                        <button
+                          type="button"
+                          onClick={() => openRejectModal(item)}
+                          className="text-red-600 hover:text-red-800 transition duration-150"
+                        >
+                          <i className="fa-solid fa-circle-info text-xl"></i>
+                        </button>
+                      )}
+                      {/* Approved Note Icon */}
+                      {item.Status === "Approved" && (
+                        <button
+                          type="button"
+                          onClick={() => openApprovedModal(item)}
+                          className="text-green-600 hover:text-green-800 transition duration-150"
+                        >
+                          <i className="fa-solid fa-note-sticky text-xl"></i>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -462,7 +498,6 @@ export default function Request_History() {
           </table>
         </div>
       )}
-
       {/* Borrow Modal */}
       {viewBorrowModalOpen && currentItem && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -512,12 +547,6 @@ export default function Request_History() {
                   <i className="fa-solid fa-info-circle text-blue-500"></i>
                   <span>
                     <strong>Status:</strong> {currentItem.Status}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-700">
-                  <i className="fa-solid fa-thumbs-up text-blue-500"></i>
-                  <span>
-                    <strong>Approval:</strong> {currentItem.Admin1Approval}
                   </span>
                 </div>
               </div>
@@ -573,7 +602,6 @@ export default function Request_History() {
           </div>
         </div>
       )}
-
       {/* Requested Modal */}
       {viewRequestedModalOpen && currentItem && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -713,6 +741,96 @@ export default function Request_History() {
               <button
                 onClick={closeViewModal}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg shadow-md transition duration-200 transform hover:scale-105"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isRejectModalOpen && selectedItem && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          onClick={closeRejectModal}
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg w-1/3 max-w-md p-6 relative"
+            onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
+          >
+            {/* Close Icon */}
+            <button
+              onClick={closeRejectModal}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              aria-label="Close"
+            >
+              <i className="fas fa-times text-lg"></i>
+            </button>
+
+            {/* Header with Icon */}
+            <div className="flex items-center mb-4">
+              <i className="fas fa-exclamation-triangle text-red-600 text-2xl mr-3"></i>
+              <h2 className="text-lg font-bold text-red-600">
+                Rejection Details
+              </h2>
+            </div>
+
+            {/* Rejection Details */}
+            <div className="text-gray-700">
+              <div className="flex items-center mb-3">
+                <i className="fas fa-user text-gray-500 mr-2"></i>
+                <p>
+                  <span className="font-semibold">Rejected By:</span>{" "}
+                  {selectedItem.RejectBy || "Not specified"}
+                </p>
+              </div>
+              <div className="flex items-start">
+                <i className="fas fa-comment-alt text-gray-500 mr-2 mt-1"></i>
+                <p>
+                  <span className="font-semibold">Rejection Reason:</span>{" "}
+                  {selectedItem.RejectReason || "No reason provided"}
+                </p>
+              </div>
+            </div>
+
+            {/* Footer with Close Button */}
+            <div className="mt-6 flex justify-end">
+              <button
+                className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition duration-150"
+                onClick={closeRejectModal}
+              >
+                <i className="fas fa-times-circle mr-2"></i> Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isApprovedModalOpen && selectedItem && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          onClick={closeApprovedModal}
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg w-1/3 max-w-md p-6"
+            onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
+          >
+            <h2 className="text-lg font-bold text-green-600 mb-4">
+              Approval Note
+            </h2>
+            <div className="text-gray-700">
+              <p className="mb-2">
+                <span className="font-semibold">Approved By:</span>{" "}
+                {selectedItem.ApprovedBy || "Not specified"}
+              </p>
+              <p>
+                <span className="font-semibold">Approval Note:</span>{" "}
+                {selectedItem.Note || "No note provided"}
+              </p>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-150"
+                onClick={closeApprovedModal}
               >
                 Close
               </button>

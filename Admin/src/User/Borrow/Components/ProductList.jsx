@@ -107,22 +107,25 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
   };
 
   return (
-    <div className="w-full ml-4">
+    <div className="w-9/12 ml-4 mr-4">
+      {/* Categories Section */}
       {/* Categories Section */}
       <div className="overflow-x-auto mb-6">
-        <div className="flex gap-4 w-full max-w-full overflow-x-auto">
+        <div className="flex gap-4 w-full max-w-full overflow-x-auto py-4 px-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
           {categories.map((category) => (
             <button
               key={category.id}
-              className={`flex flex-col items-center p-4 w-28 min-w-max rounded-lg border shadow-md ${
+              className={`flex flex-col items-center p-4 w-32 min-w-[8rem] rounded-lg border shadow-md transition-all duration-300 ${
                 selectedCategoryId === category.id
-                  ? "bg-green-100 border-green-400"
-                  : "bg-white border-gray-200"
-              } hover:bg-green-50 transition-all duration-300`}
+                  ? "bg-green-100 border-green-400 shadow-lg"
+                  : "bg-white border-gray-300 hover:shadow-md hover:bg-gray-50"
+              }`}
               onClick={() => setSelectedCategoryId(category.id)}
             >
-              <div className="text-3xl mb-2">{category.icon}</div>
-              <div className="font-semibold">{category.name}</div>
+              <div className="text-4xl mb-2">{category.icon}</div>
+              <div className="font-semibold text-base truncate">
+                {category.name}
+              </div>
               <div className="text-gray-500 text-sm">
                 {category.count} items
               </div>
@@ -132,17 +135,18 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
       </div>
 
       {/* Products Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {/* Products Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.length > 0 ? (
           products.map((product) => (
             <div
               key={product.itemID}
-              className="flex items-center border p-4 rounded-lg shadow-lg space-x-4"
+              className="flex items-center border rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 bg-white space-x-4"
             >
               {/* Image Section */}
               <div className="flex-shrink-0">
                 <img
-                  src="https://via.placeholder.com/100"
+                  src="https://via.placeholder.com/150"
                   alt={product.itemName}
                   className="w-24 h-24 object-cover rounded-lg"
                 />
@@ -150,10 +154,10 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
 
               {/* Content Section */}
               <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-gray-800">
+                <h3 className="text-lg font-semibold text-gray-800">
                   {product.itemName}
                 </h3>
-                <p className="text-lg text-gray-600 mb-2">
+                <p className="text-gray-600 text-sm mb-2">
                   Quantity: {product.quantity}
                 </p>
 
@@ -179,7 +183,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
             </div>
           ))
         ) : (
-          <p className="text-gray-500">
+          <p className="text-gray-500 col-span-full text-center">
             No products available in this category.
           </p>
         )}

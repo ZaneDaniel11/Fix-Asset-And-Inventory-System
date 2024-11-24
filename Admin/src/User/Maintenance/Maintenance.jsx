@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "../../Components/Sidebar";
+import { toast } from "react-toastify";
 
 export default function MaintenanceRequests() {
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -30,22 +30,22 @@ export default function MaintenanceRequests() {
 
   const RequesterID = localStorage.getItem("userId");
   const RequesterName = localStorage.getItem("name");
+  const fetchRequests = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5075/api/MaintenanceApi/GetMaintenanceByRequester/${RequesterID}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch maintenance requests");
+      const data = await response.json();
+      setRequests(data);
+      console.log(data);
+    } catch (error) {
+      console.error("Error fetching maintenance requests:", error);
+    }
+  };
 
   useEffect(() => {
     // Fetch maintenance requests
-    const fetchRequests = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5075/api/MaintenanceApi/GetMaintenanceByRequester/${RequesterID}`
-        );
-        if (!response.ok)
-          throw new Error("Failed to fetch maintenance requests");
-        const data = await response.json();
-        setRequests(data);
-      } catch (error) {
-        console.error("Error fetching maintenance requests:", error);
-      }
-    };
 
     fetchRequests();
   }, [RequesterID]);
@@ -58,6 +58,7 @@ export default function MaintenanceRequests() {
         );
         if (!response.ok) throw new Error("Failed to fetch asset codes");
         const data = await response.json();
+
         setAllAssetCodes(data);
       } catch (error) {
         console.error("Error fetching asset codes:", error);
@@ -78,75 +79,126 @@ export default function MaintenanceRequests() {
         );
         setFilteredAssetCodes(filtered);
         setIsDropdownOpen(filtered.length > 0);
+        setRequestMaintenance((prev) => ({
+          ...prev,
+          AssetName: "",
+          Location: "",
+        })); // Clear fields when Asset Code changes
       } else {
         setIsDropdownOpen(false);
+        // Allow manual input for AssetName and Location
+        setRequestMaintenance((prev) => ({
+          ...prev,
+          AssetName: "",
+          Location: "",
+        }));
       }
     }
   };
 
-  const handleSelectAssetCode = (code) => {
+  const handleSelectAssetCode = async (code) => {
     setRequestMaintenance((prev) => ({ ...prev, AssetCode: code }));
     setIsDropdownOpen(false);
+
+    try {
+      // Fetch asset details based on the selected AssetCode
+      const response = await fetch(
+        `http://localhost:5075/api/AssetItemApi/GetAssetByCode?assetCode=${code}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch asset details");
+      const assetData = await response.json();
+
+      // Automatically fill in AssetName and Location
+      setRequestMaintenance((prev) => ({
+        ...prev,
+        AssetName: assetData.assetName || "",
+        Location: assetData.location || "",
+      }));
+    } catch (error) {
+      console.error("Error fetching asset details:", error);
+      alert("Failed to fetch asset details. Please try again.");
+    }
   };
 
   const handleRequestMaintenance = async (e) => {
     e.preventDefault();
 
-    let itemID = 0; // Default value
-    let categoryID = 0; // Default value
-    let assetName = requestMaintenance.AssetName; // Use user-provided name if asset not found
+    let itemID = 0;
+    let categoryID = 0;
+    let assetName = requestMaintenance.AssetName || "Unknown";
 
     try {
+      if (!requestMaintenance.AssetCode) {
+        if (!requestMaintenance.AssetName || !requestMaintenance.Location) {
+          alert(
+            "Please provide either an Asset Code or fill in both the Asset Name and Location."
+          );
+          return;
+        }
+      }
+
       if (requestMaintenance.AssetCode) {
-        // Fetch asset details only if AssetCode is provided
         const assetResponse = await fetch(
           `http://localhost:5075/api/AssetItemApi/GetAssetByCode?assetCode=${requestMaintenance.AssetCode}`
         );
 
         if (assetResponse.ok) {
           const assetData = await assetResponse.json();
-          itemID = assetData.assetId; // Set AssetID from the fetched data
-          categoryID = assetData.categoryID; // Set CategoryID from the fetched data
-          assetName = assetData.assetName; // Use fetched AssetName
+
+          if (!assetData.assetId || !assetData.categoryID) {
+            throw new Error("Incomplete asset data received from the server.");
+          }
+
+          itemID = assetData.assetId;
+          categoryID = assetData.categoryID;
+          assetName = assetData.assetName;
+        } else {
+          throw new Error("Failed to fetch asset data. Check the Asset Code.");
         }
       }
 
-      // Submit the maintenance request
+      const payload = {
+        maintenanceID: 0,
+        itemID,
+        categoryID,
+        assetName,
+        assetCode: requestMaintenance.AssetCode || "N/A",
+        location: requestMaintenance.Location,
+        issue: requestMaintenance.Issue,
+        requestDate: new Date().toISOString(),
+        requestedBy: RequesterName || "Unknown",
+        requesterID: RequesterID,
+        maintenanceStatus: "Pending",
+        AssignedTo: "",
+        RejectBy: "",
+        RejectReason: "",
+        scheduledDate: null,
+        completionDate: null,
+        description: requestMaintenance.Description,
+        approvalStatus: "Pending",
+        approvedByAdmin1: "Pending",
+        approvedByAdmin2: "Pending",
+      };
+
+      console.log("Submitting payload:", payload);
+
       const response = await fetch(
         "http://localhost:5075/api/MaintenanceApi/InsertMaintenance",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            maintenanceID: 0,
-            itemID, // Use retrieved or default value
-            categoryID, // Use retrieved or default value
-            assetName, // Use retrieved or user-provided name
-            assetCode: requestMaintenance.AssetCode || "N/A", // Use user input or default
-            location: requestMaintenance.Location, // User-provided location
-            issue: requestMaintenance.Issue, // User-provided issue
-            requestDate: new Date().toISOString(), // Current date
-            requestedBy: RequesterName || "none", // Placeholder
-            requesterID: RequesterID, // User's ID
-            maintenanceStatus: "Pending", // Default status
-            assignedTo: "string", // Placeholder
-            scheduledDate: null,
-            completionDate: null,
-            description: requestMaintenance.Description, // User-provided description
-            approvalStatus: "Pending", // Default approval status
-            approvedByAdmin1: "Pending",
-            approvedByAdmin2: "Pending",
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to submit the maintenance request.");
+        const errorDetails = await response.json();
+        console.error("Backend error:", errorDetails);
+        throw new Error(
+          errorDetails.message || "Failed to submit the maintenance request."
+        );
       }
 
-      // Reset the form and close the modal
       setAddModalOpen(false);
       setRequestMaintenance({
         AssetName: "",
@@ -155,7 +207,8 @@ export default function MaintenanceRequests() {
         Issue: "",
         Description: "",
       });
-      toast.success("Maintenance request submitted successfully.");
+      fetchRequests();
+      toast.success("Maintenance request submitted successfully!");
     } catch (error) {
       console.error("Error submitting maintenance request:", error);
       alert(error.message || "Failed to submit the maintenance request.");
@@ -174,8 +227,7 @@ export default function MaintenanceRequests() {
         );
 
   return (
-    <div className="flex">
-      <Sidebar />
+    <>
       <div className="limiter w-full">
         <div className="container mx-auto p-6">
           {/* Header Section */}
@@ -298,8 +350,10 @@ export default function MaintenanceRequests() {
                   placeholder="Asset Name"
                   value={requestMaintenance.AssetName}
                   onChange={handleChange}
+                  readOnly={!!requestMaintenance.AssetCode} // Read-only if AssetCode is provided
                   required
                 />
+
                 <div className="relative">
                   <input
                     className="bg-gray-100 p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -308,7 +362,6 @@ export default function MaintenanceRequests() {
                     placeholder="Asset Code"
                     value={requestMaintenance.AssetCode}
                     onChange={handleChange}
-                    required
                   />
                   {isDropdownOpen && (
                     <ul className="absolute z-20 bg-white border rounded-lg w-full shadow-lg max-h-48 overflow-y-auto mt-1">
@@ -331,8 +384,10 @@ export default function MaintenanceRequests() {
                   placeholder="Location"
                   value={requestMaintenance.Location}
                   onChange={handleChange}
+                  readOnly={!!requestMaintenance.AssetCode} // Read-only if AssetCode is provided
                   required
                 />
+
                 <input
                   className="bg-gray-100 p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
                   type="text"
@@ -431,6 +486,6 @@ export default function MaintenanceRequests() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

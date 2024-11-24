@@ -119,9 +119,7 @@ export default function Request() {
 
   return (
     <>
-      <div className="flex h-screen gap-5">
-        <Sidebar />
-
+      <>
         <div className="limiter w-full">
           <div className="container mx-auto p-6">
             {/* Header Section */}
@@ -431,7 +429,7 @@ export default function Request() {
             </div>
           </div>
         )}
-      </div>
+      </>
     </>
   );
 }

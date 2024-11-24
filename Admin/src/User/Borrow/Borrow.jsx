@@ -97,8 +97,7 @@ export default function Borrow() {
   };
 
   return (
-    <div className="flex gap-5">
-      <Sidebar />
+    <div className="flex">
       <ProductList
         products={products}
         onAddProduct={handleAddProduct}

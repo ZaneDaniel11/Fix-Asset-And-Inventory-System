@@ -133,10 +133,7 @@ export default function BorrowStatus() {
   }
 
   return (
-    <div className="flex">
-      {/* Sidebar */}
-      <Sidebar />
-
+    <>
       {/* Main Content */}
       <div className="flex-grow p-6">
         <div className="bg-gray-200 p-6 shadow-lg rounded-lg mb-8 text-center">
@@ -176,9 +173,7 @@ export default function BorrowStatus() {
                 <th className="border border-gray-300 px-4 py-2 text-left">
                   Status
                 </th>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Approval
-                </th>
+
                 <th className="border border-gray-300 px-4 py-2 text-center">
                   Actions
                 </th>
@@ -221,17 +216,7 @@ export default function BorrowStatus() {
                   >
                     {item.Status}
                   </td>
-                  <td
-                    className={`border border-gray-300 px-4 py-2 font-medium ${
-                      item.Admin1Approval === "Approved"
-                        ? "text-green-600"
-                        : item.Admin1Approval === "Declined"
-                        ? "text-red-600"
-                        : "text-yellow-600"
-                    }`}
-                  >
-                    {item.Admin1Approval}
-                  </td>
+
                   <td className="border border-gray-300 px-4 py-2 text-center flex items-center justify-center space-x-2">
                     <button
                       type="button"
@@ -355,6 +340,6 @@ export default function BorrowStatus() {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
