@@ -1,15 +1,20 @@
+// File: RequestItems.js
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+
 export default function RequestItems() {
-  const [editModal, setEditModalOpen] = useState(false);
+  // All state variables
   const [viewModal, setViewModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [admin2Approvals, setAdmin2Approval] = useState("");
+  const [declineReason, setDeclineReason] = useState("");
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [declineModalOpen, setDeclineModalOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [items, setItems] = useState([]);
-  const [adminApprovals, setAdminApproval] = useState(""); // State for approval selection
 
-  // Fetch API data
+  // Fetching API data
   useEffect(() => {
     fetch("http://localhost:5075/api/RequestItemsApi/GetAllRequests")
       .then((response) => response.json())
@@ -26,66 +31,72 @@ export default function RequestItems() {
           Description: item.Description,
         }));
         setItems(mappedItems);
-        console.log(mappedItems);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
+  // Functions for modals
+  const openViewModal = (item) =>
+    setCurrentItem(item) || setViewModalOpen(true);
   const openEditModal = (item) => {
+    console.log("Opening modal for item:", item);
     setCurrentItem(item);
-    setAdminApproval(item.Admin2);
-    setEditModalOpen(true);
+    setAdmin2Approval(item.Admin2);
+    setUpdateModalOpen(true);
   };
-  const closeEditModal = () => setEditModalOpen(false);
 
-  const openViewModal = (item) => {
-    setCurrentItem(item);
-    setViewModalOpen(true);
-  };
+  const closeEditModal = () => setUpdateModalOpen(false);
   const closeViewModal = () => setViewModalOpen(false);
-
+  const closeDeclineModal = () => {
+    setDeclineModalOpen(false);
+    setDeclineReason("");
+  };
   const filteredItems = items.filter(
     (item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      item.Admin1 === "Approved" && // Only show items where Admin1 is Approved
-      item.Admin2 === "Pending" // Only show items where Admin2 is Pending
+      item.Admin1 === "Approved" &&
+      item.Admin2 === "Pending"
   );
 
-  const handleSaveChanges = () => {
-    fetch(
-      `http://localhost:5075/api/RequestItemsApi/UpdateAdmin2Approval/${currentItem.id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(adminApprovals), // Pass the string directly as the body
-      }
-    )
-      .then((response) => {
-        if (!response.ok) {
-          console.log("Response status:", response.status);
-          return response.text(); // Log error message if the response isn't OK
+  const handleSaveChanges = async () => {
+    if (admin2Approvals === "Declined" && !declineReason) {
+      setDeclineModalOpen(true);
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const response = await fetch(
+        `http://localhost:5075/api/RequestItemsApi/UpdateAdmin2Approval/${currentItem.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            admin2Approval: admin2Approvals,
+            rejectReason: admin2Approvals === "Declined" ? declineReason : "",
+            rejectBy: admin2Approvals === "Declined" ? "StoredUsername" : "",
+          }),
         }
-        return response.text(); // Parse response as a string
-      })
-      .then((message) => {
-        console.log("Request updated:", message); // Log success message
+      );
 
-        // Optionally update the UI if necessary
-        const updatedItems = items.map((item) =>
-          item.id === currentItem.id
-            ? { ...item, Admin2: adminApprovals } // Update the item's Admin1 field
-            : item
-        );
-        setItems(updatedItems);
-        closeEditModal(); // Close the modal after saving
-      })
-      .catch((error) => {
-        console.error("Error updating request:", error);
-      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to update approval status");
+      }
+
+      const updatedItems = items.map((item) =>
+        item.id === currentItem.id ? { ...item, Admin2: admin2Approvals } : item
+      );
+      setItems(updatedItems);
+      toast.success("Request updated successfully!");
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setIsUpdating(false);
+      closeEditModal();
+      closeDeclineModal();
+    }
   };
-
   return (
     <>
       <div className="limiter w-full">
@@ -203,57 +214,96 @@ export default function RequestItems() {
           </div>
         </div>
 
-        {/* Edit Modal */}
-        {/* Edit Admin Approval Modal */}
-        {editModal && currentItem && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4 shadow-lg">
-              {/* Modal Header */}
-              <div className="flex justify-between items-center border-b pb-3">
-                <h5 className="text-lg font-semibold text-gray-800">
-                  Edit Admin Approval
-                </h5>
-                <button
-                  type="button"
-                  onClick={closeEditModal}
-                  className="text-gray-500 hover:text-gray-700 focus:outline-none"
+        {updateModalOpen && currentItem && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
+              <button
+                onClick={closeEditModal}
+                className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition duration-200"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  <i className="fa-solid fa-xmark text-xl"></i>
-                </button>
-              </div>
-
-              {/* Modal Content */}
-              <form>
-                <div className="mt-4">
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Admin Approval
-                  </label>
-                  <select
-                    className="bg-gray-50 text-gray-900 border border-gray-300 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    value={adminApprovals}
-                    onChange={(e) => setAdminApproval(e.target.value)}
-                  >
-                    <option value="">Select Admin1 Approval</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Declined">Declined</option>
-                  </select>
-                </div>
-              </form>
-
-              {/* Modal Footer */}
-              <div className="flex justify-end mt-5">
-                <button
-                  type="button"
-                  onClick={handleSaveChanges}
-                  className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-                >
-                  Save Changes
-                </button>
-              </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+              <h2 className="text-xl font-bold text-gray-800 mb-6">
+                Update Admin Approval
+              </h2>
+              <select
+                value={admin2Approvals}
+                onChange={(e) => setAdmin2Approval(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6"
+              >
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Declined">Declined</option>
+              </select>
+              <button
+                onClick={handleSaveChanges}
+                className={`w-full py-3 rounded-lg text-white font-semibold transition duration-200 ${
+                  isUpdating
+                    ? "bg-gray-500 cursor-not-allowed"
+                    : "bg-green-500 hover:bg-green-600"
+                }`}
+                disabled={isUpdating}
+              >
+                {isUpdating ? "Updating..." : "Update Approval"}
+              </button>
             </div>
           </div>
         )}
-
+        {declineModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
+              <button
+                onClick={closeDeclineModal}
+                className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition duration-200"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+              <h2 className="text-xl font-bold text-gray-800 mb-6">
+                Decline Reason
+              </h2>
+              <textarea
+                value={declineReason}
+                onChange={(e) => setDeclineReason(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-6"
+                placeholder="Enter reason for decline"
+                rows="4"
+              ></textarea>
+              <button
+                onClick={handleSaveChanges}
+                // Call handleUpdate directly
+                className="w-full py-3 bg-red-500 hover:bg-red-600 rounded-lg text-white font-semibold transition duration-200"
+              >
+                Submit Decline Reason
+              </button>
+            </div>
+          </div>
+        )}
         {/* View Item Details Modal */}
         {viewModal && currentItem && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
