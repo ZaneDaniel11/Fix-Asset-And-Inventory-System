@@ -55,6 +55,29 @@ const Sidebar = () => {
 
       {/* Navigation Links */}
       <ul className="nav-links mt-6">
+        {usertype === "School_Admin" && (
+          <>
+            <li>
+              <a href="/SadminBorrow" className="flex items-center">
+                <i className="bx bx-cart text-xl"></i>
+                <span className="link_name">Borrow</span>
+              </a>
+            </li>
+            <li>
+              <a href="/SadminRequest" className="flex items-center">
+                <i className="bx bx-plus-circle text-xl"></i>
+                <span className="link_name">Request Item</span>
+              </a>
+            </li>
+
+            <li>
+              <a href="/SadminLogs" className="flex items-center">
+                <i className="bx bx-log text-xl"></i>
+                <span className="link_name">Logs</span>
+              </a>
+            </li>
+          </>
+        )}
         {usertype === "Head_Admin" && (
           <>
             <li>

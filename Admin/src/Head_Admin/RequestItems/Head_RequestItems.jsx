@@ -120,7 +120,7 @@ export default function RequestItems() {
           <div className="overflow-x-auto shadow-md rounded-lg">
             <table className="min-w-full border-collapse border border-gray-200 bg-white">
               <thead className="bg-gray-200">
-                <tr className="font-semibold text-md text-white">
+                <tr className="font-semibold text-md text-white ">
                   <th className="border border-gray-300 px-6 py-3">
                     Request ID
                   </th>

@@ -60,6 +60,34 @@ function App() {
           <Route path="/" element={<Login />} />
 
           {/* Protected routes */}
+          {/* Schoo Admin */}
+          <Route
+            path="/SadminBorrow"
+            element={
+              <ProtectedRoute
+                element={<SadminBorrow />}
+                allowedUsertypes={["School_Admin"]}
+              />
+            }
+          />
+          <Route
+            path="/SadminRequest"
+            element={
+              <ProtectedRoute
+                element={<SadminRequest />}
+                allowedUsertypes={["School_Admin"]}
+              />
+            }
+          />
+          <Route
+            path="/SadminLogs"
+            element={
+              <ProtectedRoute
+                element={<SadminLogs />}
+                allowedUsertypes={["School_Admin"]}
+              />
+            }
+          />
           {/* Head Admin */}
           <Route
             path="/HadminBorrow"
