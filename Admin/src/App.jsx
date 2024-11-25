@@ -2,17 +2,17 @@ import React from "react";
 import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import Login from "./Login.jsx";
-import Users from "./Inventory/User/User.jsx";
-import Inventory from "./Inventory/Inventory/Inventory.jsx";
-import Dashboard from "./Inventory/Dashboard/Dashboard.jsx";
-import InventoryTable from "./Inventory/Inventory/Components/Table/Inventory_table.jsx";
-import BorrowedRequest from "./Inventory/Request/BorrowRequest.jsx";
-import RequestItems from "./Inventory/Request/RequestItems.jsx";
-import RequestRepair from "./Inventory/Request/RequestRepair.jsx";
-import Logs from "./Inventory/Logs/Log.jsx";
+import Users from "./Inventory_Admin/User/User.jsx";
+import Inventory from "./Inventory_Admin/Inventory/Inventory.jsx";
+import Dashboard from "./Inventory_Admin/Dashboard/Dashboard.jsx";
+import InventoryTable from "./Inventory_Admin/Inventory/Components/Table/Inventory_table.jsx";
+import BorrowedRequest from "./Inventory_Admin/Request/BorrowRequest.jsx";
+import RequestItems from "./Inventory_Admin/Request/RequestItems.jsx";
+import RequestRepair from "./Inventory_Admin/Request/RequestRepair.jsx";
+import Logs from "./Inventory_Admin/Logs/Log.jsx";
 import Sidebar from "./Components/Sidebar.jsx";
-import BorrowedItems from "./Inventory/Borrowed/BorrowedItems.jsx";
-import EmailTest from "./Inventory/Email/email.jsx";
+import BorrowedItems from "./Inventory_Admin/Borrowed/BorrowedItems.jsx";
+import EmailTest from "./Inventory_Admin/Email/email.jsx";
 
 // Asset Admin
 import AssetInventory from "./Asset/Inventory/AInventory.jsx";
@@ -31,6 +31,12 @@ import UserRequestLogs from "./User/History/RequestHistory.jsx";
 import HadminBorrow from "./Head_Admin/Borrow/Head_Borrow.jsx";
 import HadminRequestItems from "./Head_Admin/RequestItems/Head_RequestItems.jsx";
 import HadminLogs from "./Head_Admin/Logs/Logs.jsx";
+import HadminMaintenance from "./Head_Admin/MaintenanceRequest/MaintenanceReq.jsx";
+
+// School Admin
+import SadminBorrow from "./School_Admin/Borrow/SuperBorrow.jsx";
+import SadminRequest from "./School_Admin/RequestItems/SuperRequestItems.jsx";
+import SadminLogs from "./School_Admin/Logs/SuperLogs.jsx";
 function App() {
   const location = useLocation();
   const isAuthenticated = !!localStorage.getItem("token"); // Check if token is present
@@ -78,6 +84,15 @@ function App() {
             element={
               <ProtectedRoute
                 element={<HadminLogs />}
+                allowedUsertypes={["Head_Admin"]}
+              />
+            }
+          />
+          <Route
+            path="/HadminMaintenance"
+            element={
+              <ProtectedRoute
+                element={<HadminMaintenance />}
                 allowedUsertypes={["Head_Admin"]}
               />
             }

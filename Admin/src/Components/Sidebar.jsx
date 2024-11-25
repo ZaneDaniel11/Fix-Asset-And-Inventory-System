@@ -70,7 +70,7 @@ const Sidebar = () => {
               </a>
             </li>
             <li>
-              <a href="/HadminRequestItems" className="flex items-center">
+              <a href="/HadminMaintenance" className="flex items-center">
                 <i className="bx bx-wrench text-xl"></i>
                 <span className="link_name">Request Maintenance</span>
               </a>
@@ -83,7 +83,7 @@ const Sidebar = () => {
             </li>
           </>
         )}
-        
+
         {usertype === "Member" && (
           <>
             <li>
