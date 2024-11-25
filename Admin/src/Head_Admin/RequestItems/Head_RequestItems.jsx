@@ -117,35 +117,57 @@ export default function RequestItems() {
             />
           </div>
 
-          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <table className="w-full text-sm text-left text-gray-500">
-              <thead className="font-semibold text-md text-zinc-50">
-                <tr>
-                  <th className="px-6 py-3">Request ID</th>
-                  <th className="px-6 py-3">Item Name</th>
-                  <th className="px-6 py-3">Requested By</th>
-                  <th className="px-6 py-3">Requested Date</th>
-                  <th className="px-6 py-3">Status</th>
-                  <th className="px-6 py-3">Priority</th>
-                  <th className="px-6 py-3">Inventory Admin</th>
-                  <th className="px-6 py-3">Approval</th>
-                  <th className="px-6 py-3 text-center">Actions</th>
+          <div className="overflow-x-auto shadow-md rounded-lg">
+            <table className="min-w-full border-collapse border border-gray-200 bg-white">
+              <thead className="bg-gray-200">
+                <tr className="font-semibold text-md text-white">
+                  <th className="border border-gray-300 px-6 py-3">
+                    Request ID
+                  </th>
+                  <th className="border border-gray-300 px-6 py-3">
+                    Item Name
+                  </th>
+                  <th className="border border-gray-300 px-6 py-3">
+                    Requested By
+                  </th>
+                  <th className="border border-gray-300 px-6 py-3">
+                    Requested Date
+                  </th>
+                  <th className="border border-gray-300 px-6 py-3">Status</th>
+                  <th className="border border-gray-300 px-6 py-3">Priority</th>
+                  <th className="border border-gray-300 px-6 py-3">
+                    Inventory Admin
+                  </th>
+                  <th className="border border-gray-300 px-6 py-3">Approval</th>
+                  <th className="border border-gray-300 px-6 py-3 text-center">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item) => (
+                {filteredItems.map((item, index) => (
                   <tr
                     key={item.id}
-                    className="bg-white border-b hover:bg-gray-100"
+                    className={`${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } hover:bg-gray-100 transition duration-200`}
                   >
-                    <td className="px-6 py-4">{item.id}</td>
-                    <td className="px-6 py-4">{item.name}</td>
-                    <td className="px-6 py-4">{item.requestedBy}</td>
-                    <td className="px-6 py-4">{item.requestedDate}</td>
+                    <td className="border border-gray-300 px-6 py-4">
+                      {item.id}
+                    </td>
+                    <td className="border border-gray-300 px-6 py-4">
+                      {item.name}
+                    </td>
+                    <td className="border border-gray-300 px-6 py-4">
+                      {item.requestedBy}
+                    </td>
+                    <td className="border border-gray-300 px-6 py-4">
+                      {new Date(item.requestedDate).toLocaleDateString()}
+                    </td>
 
                     {/* Status with Conditional Styling */}
                     <td
-                      className={`px-6 py-4 ${
+                      className={`border border-gray-300 px-6 py-4 font-medium ${
                         item.status === "Pending"
                           ? "text-yellow-500"
                           : item.status === "Approved"
@@ -158,11 +180,13 @@ export default function RequestItems() {
                       {item.status}
                     </td>
 
-                    <td className="px-6 py-4">{item.priority}</td>
+                    <td className="border border-gray-300 px-6 py-4">
+                      {item.priority}
+                    </td>
 
                     {/* Admin1 with Conditional Styling */}
                     <td
-                      className={`px-6 py-4 ${
+                      className={`border border-gray-300 px-6 py-4 font-medium ${
                         item.Admin1 === "Pending"
                           ? "text-yellow-500"
                           : item.Admin1 === "Approved"
@@ -177,7 +201,7 @@ export default function RequestItems() {
 
                     {/* Admin2 with Conditional Styling */}
                     <td
-                      className={`px-6 py-4 ${
+                      className={`border border-gray-300 px-6 py-4 font-medium ${
                         item.Admin2 === "Pending"
                           ? "text-yellow-500"
                           : item.Admin2 === "Approved"
@@ -191,21 +215,23 @@ export default function RequestItems() {
                     </td>
 
                     {/* Action Buttons */}
-                    <td className="px-6 py-4 flex justify-center space-x-2">
-                      <button
-                        type="button"
-                        onClick={() => openViewModal(item)}
-                        className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
-                      >
-                        <i className="fa-solid fa-eye"></i>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openEditModal(item)}
-                        className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5"
-                      >
-                        <i className="fa-solid fa-pen"></i>
-                      </button>
+                    <td className="border border-gray-300 px-6 py-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openViewModal(item)}
+                          className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5 transition duration-150"
+                        >
+                          <i className="fa-solid fa-eye"></i>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(item)}
+                          className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5"
+                        >
+                          <i className="fa-solid fa-pen"></i>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

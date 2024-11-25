@@ -208,12 +208,65 @@ export default function MaintenanceRequests() {
                           : "text-blue-600"
                       }`}
                     >
+                      <i
+                        className={`fa ${
+                          request.status === "Approved"
+                            ? "fa-check-circle"
+                            : request.status === "Rejected"
+                            ? "fa-times-circle"
+                            : request.status === "Pending"
+                            ? "fa-hourglass-half"
+                            : "fa-circle"
+                        } mr-1`}
+                      ></i>
                       {request.status}
                     </td>
-                    <td className="border border-gray-300 px-5 py-3">
+                    <td
+                      className={`border border-gray-300 px-4 py-2 font-medium ${
+                        request.Admin1 === "Pending"
+                          ? "text-yellow-600"
+                          : request.Admin1 === "Rejected"
+                          ? "text-red-600"
+                          : request.Admin1 === "Approved"
+                          ? "text-green-500"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      <i
+                        className={`fa ${
+                          request.Admin1 === "Approved"
+                            ? "fa-check-circle"
+                            : request.Admin1 === "Rejected"
+                            ? "fa-times-circle"
+                            : request.Admin1 === "Pending"
+                            ? "fa-hourglass-half"
+                            : "fa-circle"
+                        } mr-1`}
+                      ></i>
                       {request.Admin1}
                     </td>
-                    <td className="border border-gray-300 px-5 py-3">
+                    <td
+                      className={`border border-gray-300 px-4 py-2 font-medium ${
+                        request.Admin2 === "Pending"
+                          ? "text-yellow-600"
+                          : request.Admin2 === "Rejected"
+                          ? "text-red-600"
+                          : request.Admin2 === "Approved"
+                          ? "text-green-500"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      <i
+                        className={`fa ${
+                          request.Admin2 === "Approved"
+                            ? "fa-check-circle"
+                            : request.Admin2 === "Rejected"
+                            ? "fa-times-circle"
+                            : request.Admin2 === "Pending"
+                            ? "fa-hourglass-half"
+                            : "fa-circle"
+                        } mr-1`}
+                      ></i>
                       {request.Admin2}
                     </td>
                     <td className="border border-gray-300 px-5 py-3 text-center">

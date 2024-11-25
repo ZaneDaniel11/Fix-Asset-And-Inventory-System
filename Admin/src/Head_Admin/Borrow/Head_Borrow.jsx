@@ -215,38 +215,75 @@ export default function Borrow() {
                       {item.Priority}
                     </td>
                     <td
-                      className={`border border-gray-300 px-5 py-3 ${
+                      className={`border border-gray-300 px-4 py-2 font-medium ${
                         item.Status === "Pending"
                           ? "text-yellow-600"
-                          : item.Status === "Approved"
-                          ? "text-green-500"
                           : item.Status === "Rejected"
                           ? "text-red-600"
-                          : "text-gray-600"
+                          : item.Status === "Approved"
+                          ? "text-green-500"
+                          : "text-blue-600"
                       }`}
                     >
+                      <i
+                        className={`fa ${
+                          item.Status === "Approved"
+                            ? "fa-check-circle"
+                            : item.Status === "Rejected"
+                            ? "fa-times-circle"
+                            : item.Status === "Pending"
+                            ? "fa-hourglass-half"
+                            : "fa-circle"
+                        } mr-1`}
+                      ></i>
                       {item.Status}
                     </td>
                     <td
-                      className={`border border-gray-300 px-5 py-3 ${
-                        item.Admin1Approval === "Approved"
-                          ? "text-green-500"
+                      className={`border border-gray-300 px-4 py-2 font-medium ${
+                        item.Admin1Approval === "Pending"
+                          ? "text-yellow-600"
                           : item.Admin1Approval === "Rejected"
                           ? "text-red-600"
-                          : "text-gray-600"
+                          : item.Admin1Approval === "Approved"
+                          ? "text-green-500"
+                          : "text-blue-600"
                       }`}
                     >
+                      <i
+                        className={`fa ${
+                          item.Admin1Approval === "Approved"
+                            ? "fa-check-circle"
+                            : item.Admin1Approval === "Rejected"
+                            ? "fa-times-circle"
+                            : item.Admin1Approval === "Pending"
+                            ? "fa-hourglass-half"
+                            : "fa-circle"
+                        } mr-1`}
+                      ></i>
                       {item.Admin1Approval}
                     </td>
                     <td
-                      className={`border border-gray-300 px-5 py-3 ${
-                        item.Admin2Approval === "Approved"
-                          ? "text-green-500"
+                      className={`border border-gray-300 px-4 py-2 font-medium ${
+                        item.Admin2Approval === "Pending"
+                          ? "text-yellow-600"
                           : item.Admin2Approval === "Rejected"
                           ? "text-red-600"
-                          : "text-gray-600"
+                          : item.Admin2Approval === "Approved"
+                          ? "text-green-500"
+                          : "text-blue-600"
                       }`}
                     >
+                      <i
+                        className={`fa ${
+                          item.Admin2Approval === "Approved"
+                            ? "fa-check-circle"
+                            : item.Admin2Approval === "Rejected"
+                            ? "fa-times-circle"
+                            : item.Admin2Approval === "Pending"
+                            ? "fa-hourglass-half"
+                            : "fa-circle"
+                        } mr-1`}
+                      ></i>
                       {item.Admin2Approval}
                     </td>
                     <td className="border border-gray-300 px-5 py-3 text-center">
