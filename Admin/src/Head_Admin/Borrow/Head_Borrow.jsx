@@ -180,11 +180,9 @@ export default function Borrow() {
                   <th className="border border-gray-300 px-5 py-3">Priority</th>
                   <th className="border border-gray-300 px-5 py-3">Status</th>
                   <th className="border border-gray-300 px-5 py-3">
-                    Admin1 Approval
+                    Inventory Admin
                   </th>
-                  <th className="border border-gray-300 px-5 py-3">
-                    Admin2 Approval
-                  </th>
+                  <th className="border border-gray-300 px-5 py-3">Approval</th>
                   <th className="border border-gray-300 px-5 py-3 text-center">
                     Actions
                   </th>

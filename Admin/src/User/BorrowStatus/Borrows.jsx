@@ -141,17 +141,7 @@ export default function BorrowStatus() {
         </div>
 
         {/* Search Bar */}
-        <div className="p-4 mb-4 bg-white shadow-md rounded-md">
-          <select
-            value={statusQuery}
-            onChange={(e) => setStatusQuery(e.target.value)}
-            className="p-2 border rounded border-gray-400"
-          >
-            <option value="">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
-          </select>
-        </div>
+        <div className="p-4 mb-4 bg-white shadow-md rounded-md"></div>
 
         {/* Borrow Request Table */}
         <div className="overflow-x-auto">

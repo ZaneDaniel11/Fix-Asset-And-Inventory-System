@@ -47,7 +47,7 @@ export default function MaintenanceRequests() {
     setIsUpdating(true);
 
     try {
-      const apiUrl = `${API_URL}/Admin1UpdateApproval/${currentItem.id}`;
+      const apiUrl = `${API_URL}/Admin2UpdateApproval/${currentItem.id}`;
       const requestBody = {
         Admin2Approval: admin2Approvals,
         RejectReason: admin2Approvals === "Declined" ? declineReason : "",
@@ -121,7 +121,8 @@ export default function MaintenanceRequests() {
   const filteredItems = items.filter(
     (item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      item.Admin1 === "Approved"
+      item.Admin1 === "Approved" &&
+      item.status === "In Progress"
   );
 
   return (
@@ -164,6 +165,9 @@ export default function MaintenanceRequests() {
                   <th className="border border-gray-300 px-5 py-3">Location</th>
                   <th className="border border-gray-300 px-5 py-3">Issue</th>
                   <th className="border border-gray-300 px-5 py-3">Status</th>
+                  <th className="border border-gray-300 px-5 py-3">
+                    Inventory Admin
+                  </th>
                   <th className="border border-gray-300 px-5 py-3">Approval</th>
                   <th className="border border-gray-300 px-5 py-3 text-center">
                     Actions
@@ -205,6 +209,9 @@ export default function MaintenanceRequests() {
                       }`}
                     >
                       {request.status}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {request.Admin1}
                     </td>
                     <td className="border border-gray-300 px-5 py-3">
                       {request.Admin2}

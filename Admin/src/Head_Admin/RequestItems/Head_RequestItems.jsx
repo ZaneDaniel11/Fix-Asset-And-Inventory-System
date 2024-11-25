@@ -127,8 +127,8 @@ export default function RequestItems() {
                   <th className="px-6 py-3">Requested Date</th>
                   <th className="px-6 py-3">Status</th>
                   <th className="px-6 py-3">Priority</th>
-                  <th className="px-6 py-3">Admin1</th>
-                  <th className="px-6 py-3">Admin2</th>
+                  <th className="px-6 py-3">Inventory Admin</th>
+                  <th className="px-6 py-3">Approval</th>
                   <th className="px-6 py-3 text-center">Actions</th>
                 </tr>
               </thead>
