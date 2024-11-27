@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "../CSS/Product.css";
 
 const API_URL = "http://localhost:5075/api/UserItemApi/";
 
@@ -135,58 +136,59 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
       </div>
 
       {/* Products Section */}
-      {/* Products Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.length > 0 ? (
-          products.map((product) => (
-            <div
-              key={product.itemID}
-              className="flex items-center border rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 bg-white space-x-4"
-            >
-              {/* Image Section */}
-              <div className="flex-shrink-0">
-                <img
-                  src="https://via.placeholder.com/150"
-                  alt={product.itemName}
-                  className="w-24 h-24 object-cover rounded-lg"
-                />
-              </div>
+      <div className="overflow-y-auto max-h-[calc(5*8rem)] p-2 border rounded-lg scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.length > 0 ? (
+            products.map((product) => (
+              <div
+                key={product.itemID}
+                className="flex items-center border rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 bg-white space-x-4"
+              >
+                {/* Image Section */}
+                <div className="flex-shrink-0">
+                  <img
+                    src="https://via.placeholder.com/150"
+                    alt={product.itemName}
+                    className="w-24 h-24 object-cover rounded-lg"
+                  />
+                </div>
 
-              {/* Content Section */}
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  {product.itemName}
-                </h3>
-                <p className="text-gray-600 text-sm mb-2">
-                  Quantity: {product.quantity}
-                </p>
+                {/* Content Section */}
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {product.itemName}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-2">
+                    Quantity: {product.quantity}
+                  </p>
 
-                {/* Out of Stock or Button */}
-                {product.quantity === 0 ? (
-                  <p className="text-red-500 font-bold">Out of Stock</p>
-                ) : product.isRequested ? (
-                  <button
-                    className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded-lg transition duration-300"
-                    onClick={() => handleRemoveRequest(product.itemID)}
-                  >
-                    Requested
-                  </button>
-                ) : (
-                  <button
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-300"
-                    onClick={() => handleAddProduct(product)}
-                  >
-                    Request
-                  </button>
-                )}
+                  {/* Out of Stock or Button */}
+                  {product.quantity === 0 ? (
+                    <p className="text-red-500 font-bold">Out of Stock</p>
+                  ) : product.isRequested ? (
+                    <button
+                      className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded-lg transition duration-300"
+                      onClick={() => handleRemoveRequest(product.itemID)}
+                    >
+                      Requested
+                    </button>
+                  ) : (
+                    <button
+                      className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-300"
+                      onClick={() => handleAddProduct(product)}
+                    >
+                      Request
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-500 col-span-full text-center">
-            No products available in this category.
-          </p>
-        )}
+            ))
+          ) : (
+            <p className="text-gray-500 col-span-full text-center">
+              No products available in this category.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

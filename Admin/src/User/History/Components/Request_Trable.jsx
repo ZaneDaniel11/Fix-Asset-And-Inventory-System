@@ -559,36 +559,32 @@ export default function Request_History() {
               <i className="fa-solid fa-boxes-stacked text-green-600"></i>{" "}
               Borrowed Items
             </h4>
-            <ul className="space-y-4">
-              {borrowedItems.map((item) => (
-                <div
-                  key={item.ItemId}
-                  className="flex items-center gap-6 border border-gray-200 rounded-lg p-4 bg-gray-50 hover:shadow-lg transition-shadow duration-300"
-                >
-                  {/* Image Section */}
-                  <img
-                    src="https://via.placeholder.com/100"
-                    alt={item.ItemName}
-                    className="w-24 h-24 object-cover rounded-lg shadow-sm"
-                  />
-
-                  {/* Content Section */}
-                  <div className="flex-1">
-                    <h5 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                      <i className="fa-solid fa-cube text-indigo-500"></i>{" "}
-                      {item.ItemName}
-                    </h5>
-                    <p className="text-sm text-gray-600 mt-2 flex items-center gap-2">
-                      <i className="fa-solid fa-cubes text-indigo-400"></i>{" "}
-                      Quantity:{" "}
-                      <span className="font-medium text-gray-800">
-                        {item.Quantity}
-                      </span>
-                    </p>
+            <div className="overflow-y-auto max-h-[300px] space-y-4">
+              <ul>
+                {borrowedItems.map((item) => (
+                  <div
+                    key={item.ItemId}
+                    className="flex items-center gap-6 border border-gray-200 rounded-lg p-4 bg-gray-50 hover:shadow-lg transition-shadow duration-300 mb-3"
+                  >
+                    {/* Image Section */}
+                    <img
+                      src="https://via.placeholder.com/100"
+                      alt={item.ItemName}
+                      className="w-20 h-20 object-cover rounded-lg"
+                    />
+                    {/* Content Section */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {item.ItemName}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Quantity: <strong>{item.Quantity}</strong>
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </ul>
+                ))}
+              </ul>
+            </div>
 
             {/* Modal Footer */}
             <div className="mt-8 flex justify-end">

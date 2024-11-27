@@ -109,12 +109,14 @@ export default function RequestItems() {
 
   return (
     <>
-      <div className="flex-1 p-6">
-        <div className="container mx-auto bg-white shadow-md rounded-lg p-6">
-          <div className="bg-gray-200 p-4 shadow-lg rounded-lg mb-6 text-center">
-            <h2 className="text-2xl font-bold">Request Item Overview</h2>
+      <div className="limiter w-full">
+        <div className="container mx-auto p-6">
+          <div className="bg-gray-200 p-6 shadow-lg rounded-lg mb-8 text-center">
+            <h2 className="text-3xl font-bold text-gray-700">
+              Request Overview
+            </h2>
           </div>
-          <div className="flex justify-between mb-4 shadow-lg p-6 bg-white rounded-lg mb-6">
+          <div className="bg-white p-6 shadow-md rounded-lg mb-8 flex justify-between items-center">
             <input
               type="text"
               placeholder="Search by Item Name"
@@ -133,46 +135,154 @@ export default function RequestItems() {
               <option value="Pending">Pending</option>
             </select>
           </div>
-          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <table>
-              <thead>
-                <tr className="table100-head">
-                  <th className="column1">Request ID</th>
-                  <th className="column2">Item Name</th>
-                  <th className="column3">Requested By</th>
-                  <th className="column4">Requested Date</th>
-                  <th className="column5">Status</th>
-                  <th className="column6">Priority</th>
-                  <th className="column6">Admin1</th>
-                  <th className="column6">Admin2</th>
-                  <th className="column6">Admin3</th>
-                  <th className="column7" style={{ paddingRight: 20 }}>
+          <div className="overflow-x-auto shadow-md rounded-lg">
+            <table className="min-w-full border-collapse border border-gray-200 bg-white">
+              <thead className="bg-gray-200">
+                <tr className="font-semibold text-md text-zinc-50">
+                  <th className="border border-gray-300 px-5 py-3">
+                    Request ID
+                  </th>
+                  <th className="border border-gray-300 px-5 py-3">
+                    Item Name
+                  </th>
+                  <th className="border border-gray-300 px-5 py-3">
+                    Requested By
+                  </th>
+                  <th className="border border-gray-300 px-5 py-3">
+                    Requested Date
+                  </th>
+                  <th className="border border-gray-300 px-5 py-3">Status</th>
+                  <th className="border border-gray-300 px-5 py-3">Priority</th>
+                  <th className="border border-gray-300 px-5 py-3">
+                    Inventory Admin
+                  </th>
+                  <th className="border border-gray-300 px-5 py-3">
+                    Head Admin
+                  </th>
+                  <th className="border border-gray-300 px-5 py-3">
+                    School Admin
+                  </th>
+                  <th className="border border-gray-300 px-5 py-3 text-center">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item) => {
-                  const statusInfo = getStatusInfo(item.status);
-                  return (
-                    <tr key={item.id}>
-                      <td className="column1">{item.id}</td>
-                      <td className="column2">{item.name}</td>
-                      <td className="column3">{item.requestedBy}</td>
-                      <td className="column4">{item.requestedDate}</td>
-                      <td className={`column5 ${statusInfo.className}`}>
-                        <i
-                          className={`fa ${statusInfo.icon} ${
-                            statusInfo.spin ? "spin" : ""
-                          } mr-2`}
-                        ></i>
-                        {item.status}
-                      </td>
-                      <td className="column6">{item.priority}</td>
-                      <td className="column6">{item.Admin1}</td>
-                      <td className="column6">{item.Admin2}</td>
-                      <td className="column6">{item.Admin3}</td>
-                      <td className="flex items-center justify-center mt-2 space-x-2">
+                {filteredItems.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50">
+                    <td className="border border-gray-300 px-5 py-3">
+                      {item.id}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {item.name}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {item.requestedBy}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3">
+                      {item.requestedDate}
+                    </td>
+                    <td
+                      className={`border border-gray-300 px-5 py-3 font-medium ${
+                        item.status === "Pending"
+                          ? "text-yellow-600"
+                          : item.status === "Rejected"
+                          ? "text-red-600"
+                          : item.status === "In Progress"
+                          ? "text-blue-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      <i
+                        className={`fa mr-1 ${
+                          item.status === "Approved"
+                            ? "fa-check-circle"
+                            : item.status === "Rejected"
+                            ? "fa-times-circle"
+                            : "fa-hourglass-half"
+                        }`}
+                      ></i>
+                      {item.status}
+                    </td>
+                    <td
+                      className={`border border-gray-300 px-5 py-3 font-medium ${
+                        item.priority === "High"
+                          ? "text-red-600"
+                          : item.priority === "Medium"
+                          ? "text-yellow-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      {item.priority}
+                    </td>
+                    <td
+                      className={`border border-gray-300 px-5 py-3 font-medium ${
+                        item.Admin1 === "Pending"
+                          ? "text-yellow-600"
+                          : item.Admin1 === "Rejected"
+                          ? "text-red-600"
+                          : item.Admin1 === "In Progress"
+                          ? "text-blue-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      <i
+                        className={`fa mr-1 ${
+                          item.Admin1 === "Approved"
+                            ? "fa-check-circle"
+                            : item.Admin1 === "Rejected"
+                            ? "fa-times-circle"
+                            : "fa-hourglass-half"
+                        }`}
+                      ></i>
+                      {item.Admin1}
+                    </td>
+                    <td
+                      className={`border border-gray-300 px-5 py-3 font-medium ${
+                        item.Admin2 === "Pending"
+                          ? "text-yellow-600"
+                          : item.Admin2 === "Rejected"
+                          ? "text-red-600"
+                          : item.Admin2 === "In Progress"
+                          ? "text-blue-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      <i
+                        className={`fa mr-1 ${
+                          item.Admin2 === "Approved"
+                            ? "fa-check-circle"
+                            : item.Admin2 === "Rejected"
+                            ? "fa-times-circle"
+                            : "fa-hourglass-half"
+                        }`}
+                      ></i>
+                      {item.Admin2}
+                    </td>
+                    <td
+                      className={`border border-gray-300 px-5 py-3 font-medium ${
+                        item.Admin3 === "Pending"
+                          ? "text-yellow-600"
+                          : item.Admin3 === "Rejected"
+                          ? "text-red-600"
+                          : item.Admin3 === "In Progress"
+                          ? "text-blue-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      <i
+                        className={`fa mr-1 ${
+                          item.Admin3 === "Approved"
+                            ? "fa-check-circle"
+                            : item.Admin3 === "Rejected"
+                            ? "fa-times-circle"
+                            : "fa-hourglass-half"
+                        }`}
+                      ></i>
+                      {item.Admin3}
+                    </td>
+                    <td className="border border-gray-300 px-5 py-3 text-center">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           type="button"
                           onClick={() => openViewModal(item)}
@@ -187,10 +297,10 @@ export default function RequestItems() {
                         >
                           <i className="fa-solid fa-pen"></i>
                         </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

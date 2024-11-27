@@ -1,0 +1,18 @@
+/* Custom Scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px; /* Make scrollbar smaller */
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #6b7280; /* Gray color for thumb */
+  border-radius: 10px; /* Rounded edges */
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: #4b5563; /* Darker gray on hover */
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background-color: #e5e7eb; /* Light gray for track */
+  border-radius: 10px;
+}

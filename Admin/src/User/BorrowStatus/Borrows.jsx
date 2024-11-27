@@ -283,8 +283,52 @@ export default function BorrowStatus() {
 
               {/* Modal Title */}
               <h2 className="text-3xl font-bold text-gray-700 text-center mb-8">
-                Borrowed Items
+                Borrow Request Details
               </h2>
+
+              {/* Borrow Request Details */}
+              <div className="space-y-6 mt-6">
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i className="fa-solid fa-id-card text-blue-500"></i>
+                    <span>
+                      <strong>ID:</strong> {currentItem.BorrowId}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i className="fa-solid fa-user text-blue-500"></i>
+                    <span>
+                      <strong>Requested By:</strong> {currentItem.RequestedBy}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i className="fa-solid fa-calendar-day text-blue-500"></i>
+                    <span>
+                      <strong>Request Date:</strong> {currentItem.ReqBorrowDate}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i className="fa-solid fa-bullseye text-blue-500"></i>
+                    <span>
+                      <strong>Purpose:</strong> {currentItem.Purpose}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i className="fa-solid fa-info-circle text-blue-500"></i>
+                    <span>
+                      <strong>Status:</strong> {currentItem.Status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <hr className="my-6 border-gray-300" />
+
+              {/* Borrowed Items Section */}
+              <h4 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+                <i className="fa-solid fa-boxes-stacked text-green-600"></i>{" "}
+                Borrowed Items
+              </h4>
 
               {borrowLoading ? (
                 <div className="text-center text-gray-500 text-lg">
@@ -295,35 +339,31 @@ export default function BorrowStatus() {
                   No borrowed items found
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {borrowedItems.map((borrowItem) => (
-                    <div
-                      key={borrowItem.ItemId}
-                      className="flex items-center border border-gray-200 rounded-lg bg-gray-50 hover:shadow-lg transition-shadow duration-300 p-5"
-                    >
-                      {/* Image Section */}
-                      <div className="flex-shrink-0">
+                <div className="overflow-y-auto max-h-[300px] space-y-4">
+                  <ul>
+                    {borrowedItems.map((item) => (
+                      <div
+                        key={item.ItemId}
+                        className="flex items-center gap-6 border border-gray-200 rounded-lg p-4 bg-gray-50 hover:shadow-lg transition-shadow duration-300 mb-3"
+                      >
+                        {/* Image Section */}
                         <img
                           src="https://via.placeholder.com/100"
-                          alt={borrowItem.ItemName}
-                          className="w-24 h-24 object-cover rounded-lg"
+                          alt={item.ItemName}
+                          className="w-20 h-20 object-cover rounded-lg"
                         />
+                        {/* Content Section */}
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-800">
+                            {item.ItemName}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            Quantity: <strong>{item.Quantity}</strong>
+                          </p>
+                        </div>
                       </div>
-
-                      {/* Content Section */}
-                      <div className="ml-6 flex-1">
-                        <h3 className="text-xl font-semibold text-gray-800">
-                          {borrowItem.ItemName}
-                        </h3>
-                        <p className="text-sm text-gray-600 mt-2">
-                          Quantity:{" "}
-                          <span className="font-medium text-gray-800">
-                            {borrowItem.Quantity}
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
