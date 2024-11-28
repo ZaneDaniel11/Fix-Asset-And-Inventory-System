@@ -350,7 +350,10 @@ export default function SupperBorrow() {
       {/* View Modal */}
       {viewModalOpen && currentItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-8 relative">
+          <div
+            id="printContent" // Content to print
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-8 relative"
+          >
             {/* Close Button */}
             <button
               onClick={closeViewModal}
@@ -398,6 +401,66 @@ export default function SupperBorrow() {
                   </span>
                 </div>
               </div>
+
+              {/* Approval Status Section */}
+              <div className="mt-6">
+                <h4 className="text-xl font-bold text-gray-800 mb-4">
+                  Approval Status
+                </h4>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i
+                      className={`fa-solid fa-circle-check ${
+                        currentItem.Admin1Approval === "Approved"
+                          ? "text-green-600"
+                          : currentItem.Admin1Approval === "Rejected"
+                          ? "text-red-600"
+                          : "text-yellow-600"
+                      }`}
+                    ></i>
+                    <span>
+                      <strong>Inventory Admin:</strong>{" "}
+                      <span
+                        className={`${
+                          currentItem.Admin1Approval === "Approved"
+                            ? "text-green-600"
+                            : currentItem.Admin1Approval === "Rejected"
+                            ? "text-red-600"
+                            : "text-yellow-600"
+                        }`}
+                      >
+                        {currentItem.Admin1Approval}
+                      </span>
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i
+                      className={`fa-solid fa-circle-check ${
+                        currentItem.Admin2Approval === "Approved"
+                          ? "text-green-600"
+                          : currentItem.Admin2Approval === "Rejected"
+                          ? "text-red-600"
+                          : "text-yellow-600"
+                      }`}
+                    ></i>
+                    <span>
+                      <strong>Head Admin:</strong>{" "}
+                      <span
+                        className={`${
+                          currentItem.Admin2Approval === "Approved"
+                            ? "text-green-600"
+                            : currentItem.Admin2Approval === "Rejected"
+                            ? "text-red-600"
+                            : "text-yellow-600"
+                        }`}
+                      >
+                        {currentItem.Admin2Approval}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <hr className="my-6 border-gray-300" />
@@ -424,13 +487,11 @@ export default function SupperBorrow() {
                       key={item.ItemId}
                       className="flex items-center gap-6 border border-gray-200 rounded-lg p-4 bg-gray-50 hover:shadow-lg transition-shadow duration-300 mb-3"
                     >
-                      {/* Image Section */}
                       <img
                         src="https://via.placeholder.com/100"
                         alt={item.ItemName}
                         className="w-20 h-20 object-cover rounded-lg"
                       />
-                      {/* Content Section */}
                       <div>
                         <h3 className="text-lg font-semibold text-gray-800">
                           {item.ItemName}
@@ -444,11 +505,105 @@ export default function SupperBorrow() {
                 </ul>
               </div>
             )}
+
+            {/* Print Button */}
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={() => {
+                  const printContent = document.getElementById("printContent");
+                  const printWindow = window.open("", "_blank");
+                  printWindow.document.write(`
+      <html>
+      <head>
+        <title>Print Borrow Request Details</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+          }
+          h1, h2, h3, h4 {
+            color: #4A5568;
+          }
+          .section-title {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2D3748;
+            border-bottom: 2px solid #CBD5E0;
+            padding-bottom: 5px;
+          }
+          .details {
+            margin-top: 10px;
+            line-height: 1.6;
+          }
+          .details div {
+            margin-bottom: 10px;
+          }
+          .approval-status, .borrowed-items {
+            margin-top: 20px;
+          }
+          .borrowed-items ul {
+            columns: 2; /* Two-column layout */
+            list-style-type: none;
+            padding: 0;
+          }
+          .borrowed-items li {
+            margin-bottom: 5px;
+          }
+          .print-footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 12px;
+            color: #718096;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Borrow Request Details</h1>
+        <div class="details">
+          <div><strong>ID:</strong> ${currentItem.BorrowId}</div>
+          <div><strong>Requested By:</strong> ${currentItem.RequestedBy}</div>
+          <div><strong>Request Date:</strong> ${currentItem.ReqBorrowDate}</div>
+          <div><strong>Purpose:</strong> ${currentItem.Purpose}</div>
+          <div><strong>Status:</strong> ${currentItem.Status}</div>
+        </div>
+        <div class="approval-status">
+          <h2 class="section-title">Approval Status</h2>
+          <div><strong>Inventory Admin:</strong> ${
+            currentItem.Admin1Approval
+          }</div>
+          <div><strong>Head Admin:</strong> ${currentItem.Admin2Approval}</div>
+        </div>
+        <div class="borrowed-items">
+          <h2 class="section-title">Borrowed Items</h2>
+          <ul>
+            ${borrowedItems
+              .map(
+                (item) =>
+                  `<li>${item.ItemName}, Quantity: ${item.Quantity}x</li>`
+              )
+              .join("")}
+          </ul>
+        </div>
+        <div class="print-footer">
+          Printed on ${new Date().toLocaleString()}
+        </div>
+      </body>
+      </html>
+    `);
+                  printWindow.document.close();
+                  printWindow.print();
+                }}
+                className="bg-green-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-600 text-lg"
+              >
+                Print
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Update Approval Modal */}
       {/* Update Modal */}
       {updateModalOpen && currentItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

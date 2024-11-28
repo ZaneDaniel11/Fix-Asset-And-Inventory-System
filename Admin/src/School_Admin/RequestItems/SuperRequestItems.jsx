@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
+import "../CSS/print.css";
 
 export default function RequestItems() {
+  const [viewRequestModalOpen, setViewRequestModalOpen] = useState(false);
   const [editModal, setEditModalOpen] = useState(false);
-  const [viewModal, setViewModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusQuery, setStatusQuery] = useState("");
@@ -11,7 +12,93 @@ export default function RequestItems() {
   const [declineModalOpen, setDeclineModalOpen] = useState(false);
   const [declineReason, setDeclineReason] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const handleBeforePrint = () => {
+    setIsPrinting(true); // Hide buttons before printing
+  };
+  useEffect(() => {
+    const handleAfterPrint = () => {
+      setIsPrinting(false); // Show buttons after printing
+    };
+
+    window.addEventListener("beforeprint", handleBeforePrint);
+    window.addEventListener("afterprint", handleAfterPrint);
+
+    return () => {
+      window.removeEventListener("beforeprint", handleBeforePrint);
+      window.removeEventListener("afterprint", handleAfterPrint);
+    };
+  }, []);
+
+  const handlePrint = () => {
+    const printContent = document.getElementById("printContent");
+    const printWindow = window.open("", "_blank");
+    const style = `
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 20px;
+        }
+        .details {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
+        }
+        .approval-status .admin-row {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1rem;
+        }
+        .approval-status .admin-row div {
+          text-align: center;
+          padding: 10px;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+        }
+        .no-print {
+          display: none;
+        }
+        .text-gray-600 {
+          color: #6b7280;
+        }
+        .text-gray-800 {
+          color: #374151;
+        }
+        .font-semibold {
+          font-weight: 600;
+        }
+        .rounded-lg {
+          border-radius: 0.5rem;
+        }
+        .text-xl {
+          font-size: 1.25rem;
+        }
+      </style>
+    `;
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print Request Details</title>
+          ${style}
+        </head>
+        <body>
+          ${printContent.innerHTML}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
+  const openViewRequestModal = (item) => {
+    setCurrentItem(item);
+    setViewRequestModalOpen(true);
+  };
+
   const storedUsername = localStorage.getItem("userType");
+
   const closeDeclineModal = () => {
     setDeclineModalOpen(false);
     setDeclineReason("");
@@ -32,6 +119,9 @@ export default function RequestItems() {
           Admin1: item.admin1Approval,
           Admin2: item.admin2Approval,
           Admin3: item.admin3Approval,
+          cost: item.estimatedCost,
+          description: item.description,
+          suggestedDealer: item.suggestedDealer,
         }));
         setItems(mappedItems);
       })
@@ -49,7 +139,6 @@ export default function RequestItems() {
     setCurrentItem(item);
     setViewModalOpen(true);
   };
-  const closeViewModal = () => setViewModalOpen(false);
 
   // Filter items by search query, status, and Admin1 approval
   const filteredItems = items.filter(
@@ -297,7 +386,7 @@ export default function RequestItems() {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           type="button"
-                          onClick={() => openViewModal(item)}
+                          onClick={() => openViewRequestModal(item)}
                           className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
                         >
                           <i className="fa-solid fa-eye"></i>
@@ -321,32 +410,66 @@ export default function RequestItems() {
 
       {/* Edit Modal */}
 
-      {viewModal && currentItem && (
+      {viewRequestModalOpen && currentItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg max-w-3xl w-full mx-4 md:mx-0 shadow-lg">
+          <div
+            id="printContent" // Content to print
+            className="bg-white p-8 rounded-lg max-w-3xl w-full mx-4 md:mx-0 shadow-lg"
+          >
+            {/* Print Styles */}
+
             {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-              <h5 className="text-2xl font-bold text-gray-800">
-                <i className="fa-solid fa-eye mr-3 text-blue-500"></i> View Item
-                Details
+            <div className="flex justify-between items-center mb-6 border-b pb-4">
+              <h5 className="text-3xl font-bold text-gray-800 flex items-center">
+                <i className="fa-solid fa-eye mr-3 text-blue-500"></i>
+                Request Details
               </h5>
               <button
                 type="button"
-                onClick={closeViewModal}
-                className="text-gray-500 hover:text-gray-700"
+                onClick={() => setViewRequestModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 no-print"
               >
                 <i className="fa-solid fa-xmark text-3xl"></i>
               </button>
             </div>
 
             {/* Item Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-8 border rounded-lg p-4 bg-gray-50 details">
               <div>
-                <p className="text-lg font-semibold text-gray-600">Item Name</p>
+                <p className="text-lg font-semibold text-gray-600 flex items-center">
+                  <i className="fa-solid fa-money-bill mr-2 text-green-500"></i>
+                  Estimated Cost
+                </p>
+                <p className="text-xl text-gray-800">{currentItem.cost}</p>
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-gray-600 flex items-center">
+                  <i className="fa-solid fa-box mr-2 text-blue-500"></i>
+                  Item Name
+                </p>
                 <p className="text-xl text-gray-800">{currentItem.name}</p>
               </div>
               <div>
-                <p className="text-lg font-semibold text-gray-600">
+                <p className="text-lg font-semibold text-gray-600 flex items-center">
+                  <i className="fa-solid fa-user-tag mr-2 text-yellow-500"></i>
+                  Suggested Dealer
+                </p>
+                <p className="text-xl text-gray-800">
+                  {currentItem.suggestedDealer}
+                </p>
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-gray-600 flex items-center">
+                  <i className="fa-solid fa-file-alt mr-2 text-gray-500"></i>
+                  Item Description
+                </p>
+                <p className="text-xl text-gray-800">
+                  {currentItem.description}
+                </p>
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-gray-600 flex items-center">
+                  <i className="fa-solid fa-user mr-2 text-purple-500"></i>
                   Requested By
                 </p>
                 <p className="text-xl text-gray-800">
@@ -354,15 +477,26 @@ export default function RequestItems() {
                 </p>
               </div>
               <div>
-                <p className="text-lg font-semibold text-gray-600">
+                <p className="text-lg font-semibold text-gray-600 flex items-center">
+                  <i className="fa-solid fa-calendar-alt mr-2 text-red-500"></i>
                   Requested Date
                 </p>
                 <p className="text-xl text-gray-800">
-                  {currentItem.requestedDate}
+                  {new Date(currentItem.requestedDate).toLocaleString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
                 </p>
               </div>
               <div>
-                <p className="text-lg font-semibold text-gray-600">Priority</p>
+                <p className="text-lg font-semibold text-gray-600 flex items-center">
+                  <i className="fa-solid fa-exclamation-circle mr-2 text-orange-500"></i>
+                  Priority
+                </p>
                 <p
                   className={`text-xl font-semibold ${
                     currentItem.priority === "High"
@@ -376,10 +510,13 @@ export default function RequestItems() {
                 </p>
               </div>
               <div>
-                <p className="text-lg font-semibold text-gray-600">Status</p>
+                <p className="text-lg font-semibold text-gray-600 flex items-center">
+                  <i className="fa-solid fa-tasks mr-2 text-teal-500"></i>
+                  Status
+                </p>
                 <p
                   className={`text-xl font-semibold ${
-                    currentItem.status === "Complete"
+                    currentItem.status === "Approved"
                       ? "text-green-600"
                       : currentItem.status === "In Progress"
                       ? "text-yellow-600"
@@ -388,7 +525,7 @@ export default function RequestItems() {
                 >
                   <i
                     className={`mr-2 ${
-                      currentItem.status === "Complete"
+                      currentItem.status === "Approved"
                         ? "fa-solid fa-check-circle"
                         : currentItem.status === "In Progress"
                         ? "fa-solid fa-spinner fa-spin"
@@ -401,12 +538,11 @@ export default function RequestItems() {
             </div>
 
             {/* Approval Status */}
-            <div>
+            <div class="approval-status">
               <h6 className="text-lg font-bold text-gray-600 mb-4">
                 Approval Status
               </h6>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Admin 1 */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 admin-row">
                 <div className="flex flex-col items-center bg-gray-50 p-5 rounded-lg shadow-md">
                   <i
                     className={`text-3xl mb-3 ${
@@ -458,48 +594,38 @@ export default function RequestItems() {
                     {currentItem.Admin2}
                   </span>
                 </div>
-                {/* Admin 3 */}
-                <div className="flex flex-col items-center bg-gray-50 p-5 rounded-lg shadow-md">
-                  <i
-                    className={`text-3xl mb-3 ${
-                      currentItem.Admin3 === "Approved"
-                        ? "fa-solid fa-check-circle text-green-600"
-                        : currentItem.Admin3 === "Rejected"
-                        ? "fa-solid fa-times-circle text-red-600"
-                        : "fa-solid fa-hourglass-half text-yellow-600"
-                    }`}
-                  ></i>
-                  <p className="text-lg text-gray-700 font-medium">
-                    School Admin
-                  </p>
-                  <span
-                    className={`text-xl font-semibold ${
-                      currentItem.Admin3 === "Approved"
-                        ? "text-green-600"
-                        : currentItem.Admin3 === "Rejected"
-                        ? "text-red-600"
-                        : "text-yellow-600"
-                    }`}
-                  >
-                    {currentItem.Admin3}
-                  </span>
-                </div>
+              </div>
+              <div className="flex flex-col items-center bg-gray-50 p-5 rounded-lg shadow-md mt-6">
+                <p className="text-lg text-gray-700 font-medium">President</p>
+                <span className="text-xl font-semibold text-gray-800">
+                  Victor Elliot S. Lepiten
+                </span>
               </div>
             </div>
 
-            {/* Close Button */}
-            <div className="flex justify-end mt-8">
-              <button
-                type="button"
-                onClick={closeViewModal}
-                className="bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-600 text-lg"
-              >
-                Close
-              </button>
-            </div>
+            {/* Print and Close Buttons */}
+            {!isPrinting && (
+              <div className="flex justify-between mt-8">
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  className="bg-green-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-600 text-lg no-print"
+                >
+                  Print
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewRequestModalOpen(false)}
+                  className="bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-600 text-lgtext-gray-500 hover:text-gray-700 no-print"
+                >
+                  Close
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
+
       {editModal && currentItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">

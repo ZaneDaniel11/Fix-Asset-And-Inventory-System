@@ -1,0 +1,83 @@
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  #printContent {
+    font-family: Arial, sans-serif;
+    color: #333;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+
+  /* Header */
+  #printContent h5 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #2c3e50;
+  }
+
+  /* Two-column grid for details */
+  #printContent .details {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    gap: 15px; /* Space between items */
+    margin-bottom: 20px;
+  }
+
+  #printContent .details p {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  #printContent .details p strong {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #34495e;
+  }
+
+  /* Approval Status Styling */
+  #printContent .approval-status {
+    margin-top: 20px;
+    border-top: 2px solid #ddd;
+    padding-top: 20px;
+  }
+
+  /* Admin approval row */
+  #printContent .approval-status .admin-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Three columns */
+    text-align: center;
+    gap: 10px;
+  }
+
+  #printContent .approval-status .admin {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+  }
+
+  #printContent .approval-status .admin p {
+    margin: 5px 0;
+    font-size: 14px;
+  }
+
+  #printContent .approval-status .admin strong {
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  /* Hide buttons for print */
+  #printContent button {
+    display: none;
+  }
+}
