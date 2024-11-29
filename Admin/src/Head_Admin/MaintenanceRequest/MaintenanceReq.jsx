@@ -392,49 +392,68 @@ export default function MaintenanceRequests() {
               Request Details
             </h5>
             {selectedRequest && (
-              <div className="space-y-4 text-gray-700">
-                <p className="flex justify-between">
-                  <span className="font-semibold">Request ID:</span>
-                  <span>{selectedRequest.id}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold">Asset Name:</span>
-                  <span>{selectedRequest.name}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold">Request Date:</span>
-                  <span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
+                <div className="flex items-center space-x-3">
+                  <i className="fa-solid fa-id-card text-blue-500"></i>
+                  <p>
+                    <span className="font-semibold">Request ID:</span>{" "}
+                    {selectedRequest.id}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <i className="fa-solid fa-box text-purple-500"></i>
+                  <p>
+                    <span className="font-semibold">Asset Name:</span>{" "}
+                    {selectedRequest.name}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <i className="fa-solid fa-calendar-days text-green-500"></i>
+                  <p>
+                    <span className="font-semibold">Request Date:</span>{" "}
                     {new Date(
                       selectedRequest.requestedDate
                     ).toLocaleDateString()}
-                  </span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold">Location:</span>
-                  <span>{selectedRequest.location}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold">Issue:</span>
-                  <span>{selectedRequest.issue}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold">Description:</span>
-                  <span>{selectedRequest.description}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold">Status:</span>
-                  <span
-                    className={`px-3 py-1 rounded-full font-medium ${
-                      selectedRequest.status === "Pending"
-                        ? "bg-yellow-200 text-yellow-800"
-                        : selectedRequest.status === "Approved"
-                        ? "bg-green-200 text-green-800"
-                        : "bg-red-200 text-red-800"
-                    }`}
-                  >
-                    {selectedRequest.status}
-                  </span>
-                </p>
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <i className="fa-solid fa-location-dot text-red-500"></i>
+                  <p>
+                    <span className="font-semibold">Location:</span>{" "}
+                    {selectedRequest.location}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <i className="fa-solid fa-triangle-exclamation text-yellow-500"></i>
+                  <p>
+                    <span className="font-semibold">Issue:</span>{" "}
+                    {selectedRequest.issue}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <i className="fa-solid fa-align-left text-gray-500"></i>
+                  <p>
+                    <span className="font-semibold">Description:</span>{" "}
+                    {selectedRequest.description}
+                  </p>
+                </div>
+                <div className="col-span-full flex items-center space-x-3">
+                  <i className="fa-solid fa-circle-check text-teal-500"></i>
+                  <p>
+                    <span className="font-semibold">Status:</span>{" "}
+                    <span
+                      className={`px-3 py-1 rounded-full font-medium ${
+                        selectedRequest.status === "Pending"
+                          ? "bg-yellow-200 text-yellow-800"
+                          : selectedRequest.status === "Approved"
+                          ? "bg-green-200 text-green-800"
+                          : "bg-red-200 text-red-800"
+                      }`}
+                    >
+                      {selectedRequest.status}
+                    </span>
+                  </p>
+                </div>
               </div>
             )}
             <div className="flex justify-end mt-8">

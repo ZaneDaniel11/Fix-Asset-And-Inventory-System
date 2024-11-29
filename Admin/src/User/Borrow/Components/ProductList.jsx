@@ -159,7 +159,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
                     {product.itemName}
                   </h3>
                   <p className="text-gray-600 text-sm mb-2">
-                    Quantity: {product.quantity}
+                    Stocks: {product.quantity}
                   </p>
 
                   {/* Out of Stock or Button */}

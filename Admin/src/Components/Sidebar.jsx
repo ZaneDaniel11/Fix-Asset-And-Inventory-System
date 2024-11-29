@@ -29,15 +29,14 @@ const Sidebar = () => {
   const toggleSidebar = () => setIsSidebarClosed(!isSidebarClosed);
 
   const toggleRequestMenu = () => {
-    setIsRequestMenuOpen(!isRequestMenuOpen);
-    if (!isRequestMenuOpen) setIsBorrowedMenuOpen(false); // Close borrowed menu if open
+    setIsRequestMenuOpen((prev) => !prev);
   };
-
   const toggleBorrowedMenu = () => {
-    setIsBorrowedMenuOpen(!isBorrowedMenuOpen);
-    if (!isBorrowedMenuOpen) setIsRequestMenuOpen(false); // Close request menu if open
+    if (!isSidebarClosed) {
+      setIsBorrowedMenuOpen((prev) => !prev);
+      setIsRequestMenuOpen(false); // Ensure Request menu is closed
+    }
   };
-
   return (
     <div
       className={`sidebar bg-gradient-to-b BlackNgadiliBlack ${
@@ -176,63 +175,96 @@ const Sidebar = () => {
             </li>
 
             {/* Request Dropdown */}
-            <li>
-              <div className="iocn-link flex items-center justify-between">
-                <a href="#" className="menu-item flex items-center">
+            <li className=" text-white">
+              <div
+                className="flex items-center justify-between cursor-pointer"
+                onClick={toggleRequestMenu}
+              >
+                <div className="flex items-center">
                   <i className="bx bx-collection text-xl"></i>
-                  <span className="link_name">Request</span>
-                </a>
-                <i
-                  className={`bx bx-chevron-down ${
-                    isRequestMenuOpen ? "rotate" : ""
-                  }`}
-                  onClick={toggleRequestMenu}
-                ></i>
+                  <span
+                    className={`link_name ${isSidebarClosed ? "hidden" : ""}`}
+                  >
+                    Request
+                  </span>
+                </div>
+                {!isSidebarClosed && (
+                  <i
+                    className={`bx bx-chevron-down transition-transform duration-300 ${
+                      isRequestMenuOpen ? "rotate-180" : ""
+                    }`}
+                  ></i>
+                )}
               </div>
-              {isRequestMenuOpen && (
-                <ul className="sub-menu bg-blue-700 rounded-lg mt-2 p-2">
-                  <li>
-                    <a href="/BorrowedRequest">Borrow Request</a>
-                  </li>
-                  <li>
-                    <a href="/RequestItem">Request Items</a>
-                  </li>
-                  <li>
-                    <a href="/RequestRepair">Request Repair</a>
-                  </li>
-                </ul>
-              )}
             </li>
-
+            {!isSidebarClosed && isRequestMenuOpen && (
+              <>
+                <li className="pl-8">
+                  <a href="/BorrowedRequest" className="flex items-center">
+                    <i className="bx bx-cart text-sm"></i>
+                    <span className="link_name">Borrow Request</span>
+                  </a>
+                </li>
+                <li className="pl-8">
+                  <a href="/RequestItem" className="flex items-center">
+                    <i className="bx bx-box text-sm"></i>
+                    <span className="link_name">Request Items</span>
+                  </a>
+                </li>
+                <li className="pl-8">
+                  <a href="/RequestRepair" className="flex items-center">
+                    <i className="bx bx-wrench text-sm"></i>
+                    <span className="link_name">Request Repair</span>
+                  </a>
+                </li>
+              </>
+            )}
             <li>
               <a href="/Users" className="flex items-center">
                 <i className="bx bx-user text-xl"></i>
                 <span className="link_name">User</span>
               </a>
             </li>
-
+     
             {/* Borrowed Dropdown */}
-            <li>
-              <div className="iocn-link flex items-center justify-between">
-                <a href="#" className="menu-item flex items-center">
+            <li className="text-white">
+              <div
+                className="flex items-center justify-between cursor-pointer"
+                onClick={toggleBorrowedMenu}
+              >
+                <div className="flex items-center">
                   <i className="bx bx-archive text-xl"></i>
-                  <span className="link_name">Borrowed</span>
-                </a>
-                <i
-                  className={`bx bx-chevron-down ${
-                    isBorrowedMenuOpen ? "rotate" : ""
-                  }`}
-                  onClick={toggleBorrowedMenu}
-                ></i>
+                  <span
+                    className={`link_name ${isSidebarClosed ? "hidden" : ""}`}
+                  >
+                    Borrowed
+                  </span>
+                </div>
+                {!isSidebarClosed && (
+                  <i
+                    className={`bx bx-chevron-down transition-transform duration-300 ${
+                      isBorrowedMenuOpen ? "rotate-180" : ""
+                    }`}
+                  ></i>
+                )}
               </div>
-              {isBorrowedMenuOpen && (
-                <ul className="sub-menu bg-blue-700 rounded-lg mt-2 p-2">
-                  <li>
-                    <a href="/BorrowedTable">Borrowed Items</a>
-                  </li>
-                </ul>
-              )}
             </li>
+            {!isSidebarClosed && isBorrowedMenuOpen && (
+              <>
+                <li className="pl-8">
+                  <a href="/BorrowedTable" className="flex items-center">
+                    <i className="bx bx-book text-sm"></i>
+                    <span className="link_name">Borrowed Items</span>
+                  </a>
+                </li>
+                <li className="pl-8">
+                  <a href="/ReturnBorrowedItems" className="flex items-center">
+                    <i className="bx bx-undo text-sm"></i>
+                    <span className="link_name">Return Items</span>
+                  </a>
+                </li>
+              </>
+            )}
 
             <li>
               <a href="/Logs" className="flex items-center">

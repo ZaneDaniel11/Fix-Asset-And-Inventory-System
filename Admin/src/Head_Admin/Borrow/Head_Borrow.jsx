@@ -24,6 +24,7 @@ export default function Borrow() {
           "http://localhost:5075/api/BorrowRequestApi/ApprovedByAdmin1"
         );
         const data = await response.json();
+        console.log(data);
         setItems(data);
       } catch (error) {
         setError(error.message);
@@ -416,45 +417,153 @@ export default function Borrow() {
       )}
 
       {/* View Modal */}
-      {viewModalOpen && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
-            {/* Header */}
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
-              Borrowed Items
-            </h2>
-            {/* Borrowed Items List */}
-            <div className="space-y-4">
-              {borrowedItems.map((borrowItem) => (
-                <div
-                  key={borrowItem.ItemId}
-                  className="flex items-center border border-gray-200 rounded-lg bg-gray-50 p-4 shadow-sm hover:shadow-lg transition-shadow duration-200"
-                >
-                  {/* Image */}
-                  <img
-                    src="https://via.placeholder.com/100"
-                    alt={borrowItem.ItemName}
-                    className="w-20 h-20 object-cover rounded-lg"
-                  />
-                  {/* Item Info */}
-                  <div className="ml-4">
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {borrowItem.ItemName}
-                    </h3>
-                    <p className="text-gray-600">
-                      Quantity: {borrowItem.Quantity}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {/* Close Button */}
-            <div className="flex justify-end mt-6">
+      {viewModalOpen && currentItem && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-3/4 max-w-5xl p-8 overflow-auto">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center border-b pb-4">
+              <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <i className="fa-solid fa-box-archive text-blue-600"></i> Borrow
+                Item Details
+              </h3>
               <button
                 onClick={closeViewModal}
-                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-200"
+                className="text-gray-500 hover:text-gray-700 transition duration-200"
               >
-                Close
+                <i className="fa-solid fa-times text-2xl"></i>
+              </button>
+            </div>
+
+            {/* Borrow Details */}
+            <div className="space-y-6 mt-6">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-id-card text-blue-500"></i>
+                  <span>
+                    <strong>ID:</strong> {currentItem.BorrowId}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-user text-blue-500"></i>
+                  <span>
+                    <strong>Requested By:</strong> {currentItem.RequestedBy}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-calendar-day text-blue-500"></i>
+                  <span>
+                    <strong>Request Date:</strong> {currentItem.ReqBorrowDate}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-bullseye text-blue-500"></i>
+                  <span>
+                    <strong>Purpose:</strong> {currentItem.Purpose}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-info-circle text-blue-500"></i>
+                  <span>
+                    <strong>Status:</strong> {currentItem.Status}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4 mt-4">
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-user-check text-green-500"></i>
+                <span>
+                  <strong>Inventory Admin:</strong>{" "}
+                  <span
+                    className={
+                      currentItem.Admin1Approval === "Approved"
+                        ? "text-green-500"
+                        : currentItem.Admin1Approval === "Pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {currentItem.Admin1Approval}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-user-check text-green-500"></i>
+                <span>
+                  <strong>Head Admin:</strong>{" "}
+                  <span
+                    className={
+                      currentItem.Admin2Approval === "Approved"
+                        ? "text-green-500"
+                        : currentItem.Admin2Approval === "Pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {currentItem.Admin2Approval}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-user-check text-green-500"></i>
+                <span>
+                  <strong>School Admin:</strong>{" "}
+                  <span
+                    className={
+                      currentItem.Admin3Approval === "Approved"
+                        ? "text-green-500"
+                        : currentItem.Admin3Approval === "Pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {currentItem.Admin3Approval}
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            <hr className="my-6 border-gray-300" />
+
+            {/* Borrowed Items Section */}
+            <h4 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+              <i className="fa-solid fa-boxes-stacked text-green-600"></i>{" "}
+              Borrowed Items
+            </h4>
+            <div className="overflow-y-auto max-h-[300px] space-y-4">
+              <ul>
+                {borrowedItems.map((item) => (
+                  <div
+                    key={item.ItemId}
+                    className="flex items-center gap-6 border border-gray-200 rounded-lg p-4 bg-gray-50 hover:shadow-lg transition-shadow duration-300 mb-3"
+                  >
+                    {/* Image Section */}
+                    <img
+                      src="https://via.placeholder.com/100"
+                      alt={item.ItemName}
+                      className="w-20 h-20 object-cover rounded-lg"
+                    />
+                    {/* Content Section */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {item.ItemName}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Quantity: <strong>{item.Quantity}</strong>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </ul>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={closeViewModal}
+                className="px-6 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition duration-200 flex items-center gap-2"
+              >
+                <i className="fa-solid fa-circle-xmark"></i> Close
               </button>
             </div>
           </div>

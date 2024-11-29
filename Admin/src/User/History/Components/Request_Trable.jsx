@@ -551,6 +551,59 @@ export default function Request_History() {
                 </div>
               </div>
             </div>
+            <div className="grid grid-cols-3 gap-4 mt-4">
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-user-check text-green-500"></i>
+                <span>
+                  <strong>Inventory Admin:</strong>{" "}
+                  <span
+                    className={
+                      currentItem.Admin1Approval === "Approved"
+                        ? "text-green-500"
+                        : currentItem.Admin1Approval === "Pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {currentItem.Admin1Approval}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-user-check text-green-500"></i>
+                <span>
+                  <strong>Head Admin:</strong>{" "}
+                  <span
+                    className={
+                      currentItem.Admin2Approval === "Approved"
+                        ? "text-green-500"
+                        : currentItem.Admin2Approval === "Pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {currentItem.Admin2Approval}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-user-check text-green-500"></i>
+                <span>
+                  <strong>School Admin:</strong>{" "}
+                  <span
+                    className={
+                      currentItem.Admin3Approval === "Approved"
+                        ? "text-green-500"
+                        : currentItem.Admin3Approval === "Pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {currentItem.Admin3Approval}
+                  </span>
+                </span>
+              </div>
+            </div>
 
             <hr className="my-6 border-gray-300" />
 
@@ -668,6 +721,59 @@ export default function Request_History() {
                 </div>
               </div>
             </div>
+            <div className="grid grid-cols-3 gap-4 mt-4">
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-user-check text-green-500"></i>
+                <span>
+                  <strong>Inventory Admin:</strong>{" "}
+                  <span
+                    className={
+                      currentItem.admin1Approval === "Approved"
+                        ? "text-green-500"
+                        : currentItem.admin1Approval === "Pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {currentItem.admin1Approval}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-user-check text-green-500"></i>
+                <span>
+                  <strong>Head Admin:</strong>{" "}
+                  <span
+                    className={
+                      currentItem.admin2Approval === "Approved"
+                        ? "text-green-500"
+                        : currentItem.admin2Approval === "Pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {currentItem.admin2Approval}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-user-check text-green-500"></i>
+                <span>
+                  <strong>School Admin:</strong>{" "}
+                  <span
+                    className={
+                      currentItem.admin3Approval === "Approved"
+                        ? "text-green-500"
+                        : currentItem.admin3Approval === "Pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {currentItem.admin3Approval}
+                  </span>
+                </span>
+              </div>
+            </div>
 
             <hr className="my-6 border-gray-300" />
 
@@ -690,49 +796,69 @@ export default function Request_History() {
               Request Details
             </h5>
             {selectedRequest && (
-              <div className="space-y-4 text-gray-700">
-                <p className="flex justify-between">
-                  <span className="font-semibold">Request ID:</span>
-                  <span>{selectedRequest.maintenanceID}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold">Asset Name:</span>
-                  <span>{selectedRequest.assetName}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold">Request Date:</span>
-                  <span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
+                <div className="flex items-center space-x-3">
+                  <i className="fa-solid fa-id-card text-blue-500"></i>
+                  <p>
+                    <span className="font-semibold">Request ID:</span>{" "}
+                    {selectedRequest.maintenanceID}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <i className="fa-solid fa-box text-purple-500"></i>
+                  <p>
+                    <span className="font-semibold">Asset Name:</span>{" "}
+                    {selectedRequest.assetName}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <i className="fa-solid fa-calendar-days text-green-500"></i>
+                  <p>
+                    <span className="font-semibold">Request Date:</span>{" "}
                     {new Date(selectedRequest.requestDate).toLocaleDateString()}
-                  </span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold">Location:</span>
-                  <span>{selectedRequest.location}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold">Issue:</span>
-                  <span>{selectedRequest.issue}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold">Description:</span>
-                  <span>{selectedRequest.description}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold">Status:</span>
-                  <span
-                    className={`px-3 py-1 rounded-full font-medium ${
-                      selectedRequest.maintenanceStatus === "Pending"
-                        ? "bg-yellow-200 text-yellow-800"
-                        : selectedRequest.maintenanceStatus === "Approved"
-                        ? "bg-green-200 text-green-800"
-                        : "bg-red-200 text-red-800"
-                    }`}
-                  >
-                    {selectedRequest.maintenanceStatus}
-                  </span>
-                </p>
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <i className="fa-solid fa-location-dot text-red-500"></i>
+                  <p>
+                    <span className="font-semibold">Location:</span>{" "}
+                    {selectedRequest.location}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <i className="fa-solid fa-triangle-exclamation text-yellow-500"></i>
+                  <p>
+                    <span className="font-semibold">Issue:</span>{" "}
+                    {selectedRequest.issue}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <i className="fa-solid fa-align-left text-gray-500"></i>
+                  <p>
+                    <span className="font-semibold">Description:</span>{" "}
+                    {selectedRequest.description}
+                  </p>
+                </div>
+                <div className="col-span-full flex items-center space-x-3">
+                  <i className="fa-solid fa-circle-check text-teal-500"></i>
+                  <p>
+                    <span className="font-semibold">Status:</span>{" "}
+                    <span
+                      className={`px-3 py-1 rounded-full font-medium ${
+                        selectedRequest.maintenanceStatus === "Pending"
+                          ? "bg-yellow-200 text-yellow-800"
+                          : selectedRequest.maintenanceStatus === "Approved"
+                          ? "bg-green-200 text-green-800"
+                          : "bg-red-200 text-red-800"
+                      }`}
+                    >
+                      {selectedRequest.maintenanceStatus}
+                    </span>
+                  </p>
+                </div>
               </div>
             )}
+
             <div className="flex justify-end mt-8">
               <button
                 onClick={closeViewModal}

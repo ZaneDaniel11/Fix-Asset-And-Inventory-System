@@ -29,8 +29,10 @@ export default function RequestItems() {
           Cost: item.estimatedCost,
           dealer: item.suggestedDealer,
           description: item.description,
+          email: item.email,
         }));
         setItems(mappedItems);
+        console.log(mappedItems);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
@@ -174,7 +176,7 @@ export default function RequestItems() {
                   </th>
                   <th className="border border-gray-300 px-5 py-3">Status</th>
                   <th className="border border-gray-300 px-5 py-3">Priority</th>
-                  <th className="border border-gray-300 px-5 py-3">Admin1</th>
+                  <th className="border border-gray-300 px-5 py-3">Approval</th>
                   <th className="border border-gray-300 px-5 py-3 text-center">
                     Actions
                   </th>

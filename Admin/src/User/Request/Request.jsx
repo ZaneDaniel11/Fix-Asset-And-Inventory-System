@@ -1,4 +1,3 @@
-import Sidebar from "../../Components/Sidebar";
 import React, { useState, useEffect } from "react";
 import { fetchData } from "../utilities/ApiUti";
 import { toast } from "react-toastify";
@@ -35,7 +34,7 @@ export default function Request() {
       "GET"
     );
     setRequests(response);
-    console.log(requests);
+    console.log(response);
   }
 
   useEffect(() => {
@@ -81,8 +80,9 @@ export default function Request() {
   // Add request handling
   async function handleAddRequest(e) {
     e.preventDefault();
-    const loggedInUsername = localStorage.getItem("username");
+    const loggedInUsername = localStorage.getItem("name");
     const loggedInUserId = localStorage.getItem("userId");
+    const loggedemail = localStorage.getItem("email");
 
     await fetchData(
       "http://localhost:5075/api/RequestItemsApi/InsertRequest",
@@ -102,6 +102,7 @@ export default function Request() {
         admin3Approval: "Pending",
         borrowerId: loggedInUserId,
         description: requestItem.Description || "No description provided",
+        email: loggedemail,
       }
     );
 
@@ -163,6 +164,7 @@ export default function Request() {
                     <th className="border border-gray-300 px-5 py-3">
                       Requested Date
                     </th>
+                    <th className="border border-gray-300 px-5 py-3">Email</th>
                     <th className="border border-gray-300 px-5 py-3">
                       Suggested Dealer
                     </th>
@@ -194,6 +196,9 @@ export default function Request() {
                       </td>
                       <td className="border border-gray-300 px-5 py-3">
                         {request.requestedDate}
+                      </td>
+                      <td className="border border-gray-300 px-5 py-3">
+                        {request.email}
                       </td>
                       <td className="border border-gray-300 px-5 py-3">
                         {request.suggestedDealer}
@@ -254,111 +259,165 @@ export default function Request() {
         {/* Add Request Modal */}
         {addModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
-              <div className="flex justify-between items-center">
-                <h5 className="text-lg font-semibold">Request Form</h5>
+            <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0 shadow-lg">
+              {/* Modal Header */}
+              <div className="flex justify-between items-center border-b pb-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <i className="fa-solid fa-clipboard-list text-blue-700"></i>
+                  <h5 className="text-lg font-semibold text-gray-700">
+                    Request Form
+                  </h5>
+                </div>
                 <button
                   type="button"
                   onClick={closeModal}
                   className="text-gray-500 hover:text-gray-700"
                 >
-                  <i className="fa-solid fa-xmark"></i>
+                  <i className="fa-solid fa-xmark text-xl text-red-600"></i>
                 </button>
               </div>
+
+              {/* Modal Form */}
               <form onSubmit={handleAddRequest}>
                 <div className="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <input
-                    className="bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline"
-                    type="text"
-                    onChange={(e) =>
-                      setRequestItem({
-                        ...requestItem,
-                        ItemName: e.target.value,
-                      })
-                    }
-                    value={requestItem.ItemName}
-                    placeholder="Item Name"
-                  />
-                  <input
-                    className="bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline"
-                    type="number"
-                    placeholder="Quantity"
-                    onChange={(e) =>
-                      setRequestItem({
-                        ...requestItem,
-                        Quantity: e.target.value,
-                      })
-                    }
-                    value={requestItem.Quantity}
-                  />
-                  <input
-                    className="bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline"
-                    type="text"
-                    placeholder="Suggested Dealer"
-                    onChange={(e) =>
-                      setRequestItem({
-                        ...requestItem,
-                        SuggestedDealer: e.target.value,
-                      })
-                    }
-                    value={requestItem.SuggestedDealer}
-                  />
-                  <input
-                    className="bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline"
-                    type="text"
-                    placeholder="Purpose"
-                    onChange={(e) =>
-                      setRequestItem({
-                        ...requestItem,
-                        Purpose: e.target.value,
-                      })
-                    }
-                    value={requestItem.Purpose}
-                  />
-                  <input
-                    className="bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline"
-                    type="number"
-                    placeholder="Estimated Cost"
-                    onChange={(e) =>
-                      setRequestItem({
-                        ...requestItem,
-                        EstimatedCost: e.target.value,
-                      })
-                    }
-                    value={requestItem.EstimatedCost}
-                  />
-                  <input
-                    className="bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline"
-                    type="text"
-                    placeholder="Description"
-                    onChange={(e) =>
-                      setRequestItem({
-                        ...requestItem,
-                        Description: e.target.value,
-                      })
-                    }
-                    value={requestItem.Description}
-                  />
-                  <select
-                    className="bg-gray-100 text-gray-900 p-3 rounded-lg focus:outline-none focus:shadow-outline"
-                    onChange={(e) =>
-                      setRequestItem({
-                        ...requestItem,
-                        Priority: e.target.value,
-                      })
-                    }
-                    value={requestItem.Priority}
-                  >
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                  </select>
+                  <div className="relative">
+                    <i className="fa-solid fa-box absolute left-3 top-3 text-green-500"></i>
+                    <input
+                      className="bg-gray-100 text-gray-900 p-3 pl-10 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                      type="text"
+                      onChange={(e) =>
+                        setRequestItem({
+                          ...requestItem,
+                          ItemName: e.target.value,
+                        })
+                      }
+                      value={requestItem.ItemName}
+                      placeholder="Item Name"
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <i className="fa-solid fa-hashtag absolute left-3 top-3 text-purple-500"></i>
+                    <input
+                      className="bg-gray-100 text-gray-900 p-3 pl-10 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                      type="number"
+                      placeholder="Quantity"
+                      onChange={(e) =>
+                        setRequestItem({
+                          ...requestItem,
+                          Quantity: e.target.value,
+                        })
+                      }
+                      value={requestItem.Quantity}
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <i className="fa-solid fa-store absolute left-3 top-3 text-blue-500"></i>
+                    <input
+                      className="bg-gray-100 text-gray-900 p-3 pl-10 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                      type="text"
+                      placeholder="Suggested Dealer"
+                      onChange={(e) =>
+                        setRequestItem({
+                          ...requestItem,
+                          SuggestedDealer: e.target.value,
+                        })
+                      }
+                      value={requestItem.SuggestedDealer}
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <i className="fa-solid fa-clipboard absolute left-3 top-3 text-orange-500"></i>
+                    <input
+                      className="bg-gray-100 text-gray-900 p-3 pl-10 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                      type="text"
+                      placeholder="Purpose"
+                      onChange={(e) =>
+                        setRequestItem({
+                          ...requestItem,
+                          Purpose: e.target.value,
+                        })
+                      }
+                      value={requestItem.Purpose}
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <i className="fa-solid fa-dollar-sign absolute left-3 top-3 text-yellow-500"></i>
+                    <input
+                      className="bg-gray-100 text-gray-900 p-3 pl-10 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                      type="number"
+                      placeholder="Estimated Cost"
+                      onChange={(e) =>
+                        setRequestItem({
+                          ...requestItem,
+                          EstimatedCost: e.target.value,
+                        })
+                      }
+                      value={requestItem.EstimatedCost}
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <i className="fa-solid fa-align-left absolute left-3 top-3 text-pink-500"></i>
+                    <input
+                      className="bg-gray-100 text-gray-900 p-3 pl-10 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                      type="text"
+                      placeholder="Description"
+                      onChange={(e) =>
+                        setRequestItem({
+                          ...requestItem,
+                          Description: e.target.value,
+                        })
+                      }
+                      value={requestItem.Description}
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <i className="fa-solid fa-flag absolute left-3 top-3 text-teal-500"></i>
+                    <select
+                      className="bg-gray-100 text-gray-900 p-3 pl-10 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                      onChange={(e) =>
+                        setRequestItem({
+                          ...requestItem,
+                          Priority: e.target.value,
+                        })
+                      }
+                      value={requestItem.Priority}
+                    >
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                    </select>
+                  </div>
+
+                  {/* File Upload Input */}
+                  {/* <div className="relative col-span-2">
+                    <i className="fa-solid fa-file-upload absolute left-3 top-3 text-blue-600"></i>
+                    <input
+                      className="bg-gray-100 text-gray-900 p-3 pl-10 rounded-lg focus:outline-none focus:shadow-outline w-full"
+                      type="file"
+                      onChange={(e) =>
+                        setRequestItem({
+                          ...requestItem,
+                          File: e.target.files[0], // Handle the uploaded file
+                        })
+                      }
+                      accept=".pdf, .doc, .docx, .png, .jpg, .jpeg"
+                    />
+                  </div> */}
                 </div>
-                <div className="flex justify-end mt-4">
+
+                {/* Submit Button */}
+                <div className="flex justify-end mt-6">
                   <button
                     type="submit"
-                    className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5"
+                    className="flex items-center gap-2 text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 shadow-lg"
                   >
+                    <i className="fa-solid fa-paper-plane"></i>
                     Submit
                   </button>
                 </div>
@@ -418,6 +477,10 @@ export default function Request() {
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Description:</span>
                   <span>{selectedRequest.description}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Email:</span>
+                  <span>{selectedRequest.email}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Priority:</span>

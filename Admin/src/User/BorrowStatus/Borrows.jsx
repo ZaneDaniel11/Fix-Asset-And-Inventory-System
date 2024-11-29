@@ -35,6 +35,7 @@ export default function BorrowStatus() {
 
         const data = await response.json();
         setItems(Array.isArray(data) ? data : [data]);
+        console.log(data);
       } catch (error) {
         setError(error.message);
       } finally {

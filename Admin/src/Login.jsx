@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -27,7 +28,7 @@ export default function Login() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        alert(errorText || "Login failed");
+        toast.error(`Invalid Email Or Password`);
         return;
       }
 
@@ -40,11 +41,31 @@ export default function Login() {
       localStorage.setItem("userId", data.userId); // Store the userId
       localStorage.setItem("userType", data.userType);
       localStorage.setItem("name", data.name); // Store the name
+      localStorage.setItem("email", data.email);
 
-      navigate("/Dashboard");
+      // Navigate based on the userType
+      switch (data.userType) {
+        case "Member":
+          navigate("/Home");
+          break;
+        case "Inventory_Admin":
+          navigate("/dashboard");
+          break;
+        case "Head_Admin":
+          navigate("/HadminBorrow");
+          break;
+        case "School_Admin":
+          navigate("/SadminBorrow");
+          break;
+        case "Asset_Admin":
+          navigate("/AssetInventory");
+          break;
+        default:
+          toast.error("Unknown user type");
+      }
     } catch (error) {
+      toast.error(`Invalid Email Or Password`);
       console.error("There was an error making the request", error);
-      alert("An unexpected error occurred. Please try again later.");
     }
   };
 
@@ -93,7 +114,7 @@ export default function Login() {
                 </label>
               </div>
               <div className="my-6">
-                <button className="w-full rounded-md bg-MainColor px-3 py-4 text-white focus:bg-gray-600 focus:outline-none">
+                <button className="w-full rounded-md bg-MainColor px-3 py-4 text-white focus:bg-gray-600 focus:outline-none ">
                   Sign in
                 </button>
               </div>

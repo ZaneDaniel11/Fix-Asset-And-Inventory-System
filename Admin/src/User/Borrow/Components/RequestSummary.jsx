@@ -17,6 +17,7 @@ const RequestSummary = ({
   const handleSave = async () => {
     const loggedInUsername = localStorage.getItem("name");
     const borrowerId = localStorage.getItem("userId");
+    const email = localStorage.getItem("email");
 
     if (!borrowerId) {
       alert("User is not logged in. Please log in again.");
@@ -29,6 +30,7 @@ const RequestSummary = ({
       purpose,
       status: "Pending",
       priority,
+      email: email,
       items: selectedProducts.map((product) => ({
         itemName: product.itemName,
         quantity: product.requestedQuantity,

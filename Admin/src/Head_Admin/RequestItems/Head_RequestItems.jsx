@@ -29,6 +29,10 @@ export default function RequestItems() {
           Admin1: item.admin1Approval,
           Admin2: item.admin2Approval,
           Description: item.Description,
+          Cost: item.estimatedCost,
+          Purpose: item.Purpose,
+          SuggestedDealer: item.suggestedDealer,
+          Admin3: item.admin3Approval,
         }));
         setItems(mappedItems);
       })
@@ -332,60 +336,138 @@ export default function RequestItems() {
         )}
         {/* View Item Details Modal */}
         {viewModal && currentItem && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4 shadow-lg">
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white rounded-2xl shadow-2xl w-3/4 max-w-5xl p-8">
               {/* Modal Header */}
-              <div className="flex justify-between items-center border-b pb-3">
-                <h5 className="text-lg font-semibold text-gray-800">
-                  View Item Details
-                </h5>
+              <div className="flex justify-between items-center border-b pb-4">
+                <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <i className="fa-solid fa-file-alt text-blue-600"></i>{" "}
+                  Requested Item Details
+                </h3>
                 <button
-                  type="button"
                   onClick={closeViewModal}
-                  className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                  className="text-gray-500 hover:text-gray-700 transition duration-200"
                 >
-                  <i className="fa-solid fa-xmark text-xl"></i>
+                  <i className="fa-solid fa-times text-2xl"></i>
                 </button>
               </div>
 
-              {/* Modal Content */}
-              <div className="mt-4 space-y-3">
-                <p className="text-gray-700">
-                  <strong className="font-semibold text-gray-800">
-                    Item Name:
-                  </strong>{" "}
-                  {currentItem.name}
-                </p>
-                <p className="text-gray-700">
-                  <strong className="font-semibold text-gray-800">
-                    Requested By:
-                  </strong>{" "}
-                  {currentItem.requestedBy}
-                </p>
-                <p className="text-gray-700">
-                  <strong className="font-semibold text-gray-800">
-                    Requested Date:
-                  </strong>{" "}
-                  {currentItem.requestedDate}
-                </p>
-                <p className="text-gray-700">
-                  <strong className="font-semibold text-gray-800">
-                    Status:
-                  </strong>{" "}
-                  {currentItem.status}
-                </p>
-                <p className="text-gray-700">
-                  <strong className="font-semibold text-gray-800">
-                    Priority:
-                  </strong>{" "}
-                  {currentItem.priority}
-                </p>
-                <p className="text-gray-700">
-                  <strong className="font-semibold text-gray-800">
-                    Description:
-                  </strong>{" "}
-                  {currentItem.Description}
-                </p>
+              {/* Requested Item Details */}
+              <div className="space-y-6 mt-6">
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i className="fa-solid fa-id-card text-blue-500"></i>
+                    <span>
+                      <strong>ID:</strong> {currentItem.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i className="fa-solid fa-user text-blue-500"></i>
+                    <span>
+                      <strong>Requested By:</strong> {currentItem.requestedBy}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i className="fa-solid fa-calendar-day text-blue-500"></i>
+                    <span>
+                      <strong>Requested Date:</strong>{" "}
+                      {currentItem.requestedDate}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i className="fa-solid fa-store text-blue-500"></i>
+                    <span>
+                      <strong>Suggested Dealer:</strong>{" "}
+                      {currentItem.SuggestedDealer}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i className="fa-solid fa-bullseye text-blue-500"></i>
+                    <span>
+                      <strong>Purpose:</strong> {currentItem.Purpose}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i className="fa-solid fa-dollar-sign text-green-500"></i>
+                    <span>
+                      <strong>Estimated Cost:</strong> {currentItem.Cost}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <i
+                      className={`fa ${[currentItem.status]} text-blue-500`}
+                    ></i>
+                    <span>
+                      <strong>Status:</strong> {currentItem.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                <div className="flex items-center gap-2">
+                  <i className="fa-solid fa-user-check text-green-500"></i>
+                  <span>
+                    <strong>Inventory Admin:</strong>{" "}
+                    <span
+                      className={
+                        currentItem.Admin1 === "Approved"
+                          ? "text-green-500"
+                          : currentItem.Admin1 === "Pending"
+                          ? "text-yellow-500"
+                          : "text-red-500"
+                      }
+                    >
+                      {currentItem.Admin1}
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <i className="fa-solid fa-user-check text-green-500"></i>
+                  <span>
+                    <strong>Head Admin:</strong>{" "}
+                    <span
+                      className={
+                        currentItem.Admin2 === "Approved"
+                          ? "text-green-500"
+                          : currentItem.Admin2 === "Pending"
+                          ? "text-yellow-500"
+                          : "text-red-500"
+                      }
+                    >
+                      {currentItem.Admin2}
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <i className="fa-solid fa-user-check text-green-500"></i>
+                  <span>
+                    <strong>School Admin:</strong>{" "}
+                    <span
+                      className={
+                        currentItem.Admin3 === "Approved"
+                          ? "text-green-500"
+                          : currentItem.Admin3 === "Pending"
+                          ? "text-yellow-500"
+                          : "text-red-500"
+                      }
+                    >
+                      {currentItem.Admin3}
+                    </span>
+                  </span>
+                </div>
+              </div>
+
+              <hr className="my-6 border-gray-300" />
+
+              {/* Modal Footer */}
+              <div className="mt-8 flex justify-end">
+                <button
+                  onClick={closeViewModal}
+                  className="px-6 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition duration-200 flex items-center gap-2"
+                >
+                  <i className="fa-solid fa-circle-xmark"></i> Close
+                </button>
               </div>
             </div>
           </div>

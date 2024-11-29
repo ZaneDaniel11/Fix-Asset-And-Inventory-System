@@ -17,6 +17,7 @@
     "@syncfusion/ej2-react-schedule": "^27.1.58",
     "axios": "^1.7.2",
     "boxicons": "^2.1.4",
+    "emailjs-com": "^3.2.0",
     "gapi-script": "^1.2.0",
     "http-proxy-middleware": "^3.0.3",
     "js-base64": "^3.7.7",

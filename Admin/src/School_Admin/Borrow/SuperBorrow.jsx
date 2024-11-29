@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function SupperBorrow() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -147,7 +148,7 @@ export default function SupperBorrow() {
   const closeUpdateModal = () => {
     setUpdateModalOpen(false);
     setCurrentItem(null);
-    setRejectReason(""); // Reset reason
+    setDeclineReason("");
   };
   const filteredItems = items.filter(
     (item) =>
@@ -460,6 +461,12 @@ export default function SupperBorrow() {
                     </span>
                   </div>
                 </div>
+              </div>
+              <div className="flex flex-col items-center bg-gray-50 p-5 rounded-lg shadow-md mt-6">
+                <p className="text-lg text-gray-700 font-medium">President</p>
+                <span className="text-xl font-semibold text-gray-800">
+                  Victor Elliot S. Lepiten
+                </span>
               </div>
             </div>
 
