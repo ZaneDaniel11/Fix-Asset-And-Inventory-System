@@ -133,7 +133,7 @@ export default function RequestItems() {
 
   const filteredItems = items.filter(
     (item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      item.requestedBy.toLowerCase().includes(searchQuery.toLowerCase()) &&
       item.status === "Pending" &&
       item.Admin1 === "Pending"
   );
@@ -150,7 +150,7 @@ export default function RequestItems() {
           <div className="bg-white p-6 shadow-md rounded-lg mb-8 flex justify-between items-center">
             <input
               type="text"
-              placeholder="Search by Item Name"
+              placeholder="Search by Requester Name"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="p-2 border rounded border-black"

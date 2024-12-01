@@ -183,7 +183,7 @@ export default function BorrowedItems() {
       item.RequestedBy.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (returnStatusQuery === "" || item.ReturnStatus === returnStatusQuery) &&
       item.Admin3Approval === "Approved" &&
-      item.ReturnStatus === "Not Returned" // Only include "Not Returned" items
+      item.ReturnStatus === "Returned" // Only include "Not Returned" items
   );
 
   if (loading) {

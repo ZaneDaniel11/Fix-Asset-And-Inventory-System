@@ -225,7 +225,7 @@ const Sidebar = () => {
                 <span className="link_name">User</span>
               </a>
             </li>
-     
+
             {/* Borrowed Dropdown */}
             <li className="text-white">
               <div
@@ -258,7 +258,7 @@ const Sidebar = () => {
                   </a>
                 </li>
                 <li className="pl-8">
-                  <a href="/ReturnBorrowedItems" className="flex items-center">
+                  <a href="/ReturedItems" className="flex items-center">
                     <i className="bx bx-undo text-sm"></i>
                     <span className="link_name">Return Items</span>
                   </a>

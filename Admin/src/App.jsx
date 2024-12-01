@@ -12,6 +12,7 @@ import RequestRepair from "./Inventory_Admin/Request/RequestRepair.jsx";
 import Logs from "./Inventory_Admin/Logs/Log.jsx";
 import Sidebar from "./Components/Sidebar.jsx";
 import BorrowedItems from "./Inventory_Admin/Borrowed/BorrowedItems.jsx";
+import ReturedItems from "./Inventory_Admin/Borrowed/ReturnedItems.jsx";
 import EmailTest from "./Inventory_Admin/Email/email.jsx";
 
 // Asset Admin
@@ -202,6 +203,15 @@ function App() {
             element={
               <ProtectedRoute
                 element={<BorrowedItems />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
+          />
+          <Route
+            path="/ReturedItems"
+            element={
+              <ProtectedRoute
+                element={<ReturedItems />}
                 allowedUsertypes={["Inventory_Admin"]}
               />
             }
