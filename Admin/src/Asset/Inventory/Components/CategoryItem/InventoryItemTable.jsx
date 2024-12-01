@@ -154,391 +154,417 @@ export default function Inventory_table() {
 
   return (
     <div>
-      <div className="limiter">
-        <div className="container-table100">
-          <div className="wrap-table100">
-            <div className="table100">
-              <div className="flex justify-between mb-4">
-                <h2 className="text-2xl mb-4">
-                  Items in {selectedCategory?.categoryName || "All Categories"}
-                </h2>
-                <button
-                  onClick={() => toggleModal("add")}
-                  className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
-                >
-                  <i className="fa-solid fa-plus"></i> Add Item
-                </button>
-              </div>
+      <div className="limiter w-full">
+        <div className="container mx-auto p-6">
+          <div className="bg-gray-200 p-6 shadow-lg rounded-lg mb-8 text-center">
+            <h2 className="text-3xl font-bold text-gray-700 ">
+              Items in {selectedCategory?.categoryName || "All Categories"}
+            </h2>
+          </div>
 
-              {loading ? (
-                <p>Loading...</p>
-              ) : (
-                <table className="min-w-full table-auto bg-white shadow-md rounded-lg overflow-hidden">
-                  <thead className="table100-head">
-                    <tr className="">
-                      <th className="py-3 px-6 text-left">Item ID</th>
-                      <th className="py-3 px-6 text-left">Item Name</th>
-                      <th className="py-3 px-6 text-left">Issued To</th>
-                      <th className="py-3 px-6 text-left">Checked By</th>
-                      <th className="py-3 px-6 text-left">Cost</th>
-                      <th className="py-3 px-6 text-left">Location</th>
-                      <th className="py-3 px-6 text-left">Asset Code</th>
-                      <th className="py-3 px-6 text-left">Remarks</th>
-                      <th className="py-3 px-6 text-left">DatePurchase</th>
-                      <th className="py-3 px-6 text-left">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-600 text-sm">
-                    {filteredItems.length > 0 ? (
-                      filteredItems.map((item) => (
-                        <tr
-                          key={item.assetId}
-                          className="border-b border-gray-200 hover:bg-gray-100"
-                        >
-                          <td className="py-3 px-6">{item.assetId}</td>
-                          <td className="py-3 px-6">{item.assetName}</td>
-                          <td className="py-3 px-6">{item.issuedTo}</td>
-                          <td className="py-3 px-6">{item.checkedBy}</td>
-                          <td className="py-3 px-6">{item.cost}</td>
-                          <td className="py-3 px-6">{item.location}</td>
-                          <td className="py-3 px-6">{item.assetCode}</td>
-                          <td className="py-3 px-6">{item.remarks}</td>
-                          <td className="py-3 px-6">{item.datePurchased}</td>
-                          <td className="py-3 px-6 flex items-center space-x-2">
-                            <button
-                              onClick={() => {
-                                setSelectedItem(item);
-                                toggleModal("update");
-                              }}
-                              className="text-white bg-green-600 hover:bg-green-700 rounded-lg text-sm px-4 py-1"
-                            >
-                              <i className="fa-solid fa-pen"></i>
-                            </button>
-                            <button
-                              onClick={() => {
-                                setSelectedItem(item);
-                                toggleModal("delete");
-                              }}
-                              className="text-white bg-red-600 hover:bg-red-700 rounded-lg text-sm px-4 py-1"
-                            >
-                              <i className="fa-solid fa-trash"></i>
-                            </button>
-                            <button
-                              onClick={() => {
-                                setSelectedItem(item);
-                                fetchDepreciationSchedule(item.assetId); // Fetch depreciation data for selected item
-                                toggleModal("viewDepreciation");
-                              }}
-                              className="text-white bg-blue-500 hover:bg-blue-600 rounded-lg text-sm px-4 py-1"
-                            >
-                              <i className="fa-solid fa-calendar"></i>
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="9" className="text-center py-4">
-                          No items in this category.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              )}
+          <div className="bg-white p-6 shadow-md rounded-lg mb-8 flex justify-between items-center">
+            <button
+              onClick={() => toggleModal("add")}
+              className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-4 py-2"
+            >
+              <i className="fa-solid fa-plus"></i> Add Asset Item
+            </button>
+          </div>
 
-              {modals.add && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                  <div className="bg-white rounded-lg w-11/12 md:w-1/2 p-6 relative">
-                    <span
-                      className="absolute top-2 right-2 text-gray-600 cursor-pointer text-2xl font-bold"
-                      onClick={() => toggleModal("add")}
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <table className="min-w-full table-auto bg-white shadow-md rounded-lg overflow-hidden">
+              <thead className="table100-head">
+                <tr className="">
+                  <th className="py-3 px-6 text-left">Item ID</th>
+                  <th className="py-3 px-6 text-left">Item Name</th>
+                  <th className="py-3 px-6 text-left">Issued To</th>
+                  <th className="py-3 px-6 text-left">Checked By</th>
+                  <th className="py-3 px-6 text-left">Cost</th>
+                  <th className="py-3 px-6 text-left">Location</th>
+                  <th className="py-3 px-6 text-left">Asset Code</th>
+                  <th className="py-3 px-6 text-left">Remarks</th>
+                  <th className="py-3 px-6 text-left">DatePurchase</th>
+                  <th className="py-3 px-6 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-600 text-sm">
+                {filteredItems.length > 0 ? (
+                  filteredItems.map((item) => (
+                    <tr
+                      key={item.assetId}
+                      className="border-b border-gray-200 hover:bg-gray-100"
                     >
-                      &times;
-                    </span>
-                    <h2 className="text-2xl mb-4 font-semibold text-center">
-                      Add New Asset
-                    </h2>
-                    <form onSubmit={handleAddAssetItem} className="space-y-4">
-                      {/* Asset Name and Category ID */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Asset Name
-                          </label>
-                          <input
-                            type="text"
-                            name="AssetName"
-                            value={addItem.AssetName}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                            required
-                          />
-                        </div>
-                      </div>
+                      <td className="py-3 px-6">{item.assetId}</td>
+                      <td className="py-3 px-6">{item.assetName}</td>
+                      <td className="py-3 px-6">{item.issuedTo}</td>
+                      <td className="py-3 px-6">{item.checkedBy}</td>
+                      <td className="py-3 px-6">{item.cost}</td>
+                      <td className="py-3 px-6">{item.location}</td>
+                      <td className="py-3 px-6">{item.assetCode}</td>
+                      <td className="py-3 px-6">{item.remarks}</td>
+                      <td className="py-3 px-6">{item.datePurchased}</td>
+                      <td className="py-3 px-6 flex items-center space-x-2">
+                        <button
+                          onClick={() => {
+                            setSelectedItem(item);
+                            toggleModal("update");
+                          }}
+                          className="text-white bg-green-600 hover:bg-green-700 rounded-lg text-sm px-4 py-1"
+                        >
+                          <i className="fa-solid fa-pen"></i>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedItem(item);
+                            toggleModal("delete");
+                          }}
+                          className="text-white bg-red-600 hover:bg-red-700 rounded-lg text-sm px-4 py-1"
+                        >
+                          <i className="fa-solid fa-trash"></i>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedItem(item);
+                            fetchDepreciationSchedule(item.assetId); // Fetch depreciation data for selected item
+                            toggleModal("viewDepreciation");
+                          }}
+                          className="text-white bg-blue-500 hover:bg-blue-600 rounded-lg text-sm px-4 py-1"
+                        >
+                          <i className="fa-solid fa-calendar"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="9" className="text-center py-4">
+                      No items in this category.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
 
-                      {/* Date Purchased and Date Issued */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Date Purchased
-                          </label>
-                          <input
-                            type="date"
-                            name="DatePurchased"
-                            value={addItem.DatePurchased}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Date Issued
-                          </label>
-                          <input
-                            type="date"
-                            name="DateIssued"
-                            value={addItem.DateIssued}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Issued To and Checked By */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Issued To
-                          </label>
-                          <input
-                            type="text"
-                            name="IssuedTo"
-                            value={addItem.IssuedTo}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Checked By
-                          </label>
-                          <input
-                            type="text"
-                            name="CheckedBy"
-                            value={addItem.CheckedBy}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Cost and Location */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Cost
-                          </label>
-                          <input
-                            type="number"
-                            name="Cost"
-                            value={addItem.Cost}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Location
-                          </label>
-                          <input
-                            type="text"
-                            name="Location"
-                            value={addItem.Location}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Asset Code and Remarks */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Asset Code
-                          </label>
-                          <input
-                            type="text"
-                            name="AssetCode"
-                            value={addItem.AssetCode}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Remarks
-                          </label>
-                          <input
-                            type="text"
-                            name="Remarks"
-                            value={addItem.Remarks}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Depreciation Rate and Depreciation Period */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Depreciation Rate (%)
-                          </label>
-                          <input
-                            type="number"
-                            name="DepreciationRate"
-                            value={addItem.DepreciationRate}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium">
-                            Depreciation Period Type
-                          </label>
-                          <select
-                            name="DepreciationPeriodType"
-                            value={addItem.DepreciationPeriodType}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                          >
-                            <option value="month">Month</option>
-                            <option value="year">Year</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* Depreciation Period Value */}
-                      <div>
-                        <label className="block text-sm font-medium">
-                          Depreciation Period Value
-                        </label>
+          {modals.add && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div className="bg-white rounded-lg w-11/12 md:w-1/2 p-6 relative">
+                <span
+                  className="absolute top-2 right-2 text-gray-600 cursor-pointer text-2xl font-bold"
+                  onClick={() => toggleModal("add")}
+                >
+                  &times;
+                </span>
+                <h2 className="text-2xl mb-4 font-semibold text-center">
+                  Add New Asset
+                </h2>
+                <form onSubmit={handleAddAssetItem} className="space-y-4">
+                  {/* Asset Name and Category ID */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Asset Name
+                      </label>
+                      <div className="border-2 border-black rounded-md">
                         <input
-                          type="number"
-                          name="DepreciationPeriodValue"
-                          value={addItem.DepreciationPeriodValue}
+                          type="text"
+                          name="AssetName"
+                          value={addItem.AssetName}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border-4 border-black rounded-md "
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Date Purchased and Date Issued */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Date Purchased
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="date"
+                          name="DatePurchased"
+                          value={addItem.DatePurchased}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         />
                       </div>
-
-                      {/* Submit Button */}
-                      <button
-                        type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md"
-                      >
-                        Add Asset
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              )}
-
-              {modals.delete && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                  <div className="bg-white rounded-lg w-11/12 md:w-1/3 p-6 relative">
-                    <span
-                      className="absolute top-2 right-2 text-gray-600 cursor-pointer text-2xl font-bold"
-                      onClick={() => toggleModal("delete")}
-                    >
-                      &times;
-                    </span>
-                    <h2 className="text-2xl mb-4 font-semibold text-center">
-                      Delete Item
-                    </h2>
-                    <p className="text-center">
-                      Are you sure you want to delete{" "}
-                      <strong>{selectedItem?.assetName}</strong>?
-                    </p>
-                    <div className="flex justify-center space-x-4 mt-6">
-                      <button
-                        onClick={handleDeleteAssetItem}
-                        className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md"
-                      >
-                        Yes, Delete
-                      </button>
-                      <button
-                        onClick={() => toggleModal("delete")}
-                        className="bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded-md"
-                      >
-                        Cancel
-                      </button>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Date Issued
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="date"
+                          name="DateIssued"
+                          value={addItem.DateIssued}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              {modals.viewDepreciation && (
-                <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
-                  <div className="bg-white rounded-xl shadow-lg w-10/12 md:w-2/3 lg:w-1/3 max-h-[90vh] overflow-y-auto p-8 relative">
-                    <button
-                      className="absolute top-4 right-4 text-gray-700 text-2xl font-bold hover:text-red-500 transition"
-                      onClick={() => toggleModal("viewDepreciation")}
-                    >
-                      &times;
-                    </button>
-                    <h2 className="text-3xl font-semibold text-center mb-6 text-gray-800">
-                      Depreciation Schedule
-                    </h2>
-                    {depreciationData ? (
-                      <div className="space-y-6">
-                        {depreciationData.map((entry, index) => {
-                          const date = new Date(entry.DepreciationDate);
-                          const formattedDate = date.toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            }
-                          );
-                          return (
-                            <div
-                              key={index}
-                              className="p-4 rounded-lg border border-gray-200 shadow-sm"
-                            >
-                              <p className="text-lg">
-                                <span className="font-semibold text-gray-600">
-                                  Date:
-                                </span>{" "}
-                                {formattedDate}
-                              </p>
-                              <p className="text-lg">
-                                <span className="font-semibold text-gray-600">
-                                  Depreciation Amount:
-                                </span>{" "}
-                                {entry.depreciationAmount}
-                              </p>
-                              <p className="text-lg">
-                                <span className="font-semibold text-gray-600">
-                                  Remaining Value:
-                                </span>{" "}
-                                {entry.DepreciationValue}
-                              </p>
-                            </div>
-                          );
-                        })}
+
+                  {/* Issued To and Checked By */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Issued To
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="text"
+                          name="IssuedTo"
+                          value={addItem.IssuedTo}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        />
                       </div>
-                    ) : (
-                      <p className="text-center text-gray-500">
-                        Loading depreciation data...
-                      </p>
-                    )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Checked By
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="text"
+                          name="CheckedBy"
+                          value={addItem.CheckedBy}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+
+                  {/* Cost and Location */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium">Cost</label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="number"
+                          name="Cost"
+                          value={addItem.Cost}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Location
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="text"
+                          name="Location"
+                          value={addItem.Location}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Asset Code and Remarks */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Asset Code
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="text"
+                          name="AssetCode"
+                          value={addItem.AssetCode}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Remarks
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="text"
+                          name="Remarks"
+                          value={addItem.Remarks}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Depreciation Rate and Depreciation Period */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Depreciation Rate (%)
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="number"
+                          name="DepreciationRate"
+                          value={addItem.DepreciationRate}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Depreciation Period Type
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <select
+                          name="DepreciationPeriodType"
+                          value={addItem.DepreciationPeriodType}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="month">Month</option>
+                          <option value="year">Year</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Depreciation Period Value */}
+                  <div>
+                    <label className="block text-sm font-medium">
+                      Depreciation Period Value
+                    </label>
+                    <div className="border-2 border-black rounded-md">
+                      <input
+                        type="number"
+                        name="DepreciationPeriodValue"
+                        value={addItem.DepreciationPeriodValue}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md"
+                  >
+                    Add Asset
+                  </button>
+                </form>
+              </div>
             </div>
-          </div>
+          )}
+
+          {modals.delete && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div className="bg-white rounded-lg w-11/12 md:w-1/3 p-6 relative">
+                <span
+                  className="absolute top-2 right-2 text-gray-600 cursor-pointer text-2xl font-bold"
+                  onClick={() => toggleModal("delete")}
+                >
+                  &times;
+                </span>
+                <h2 className="text-2xl mb-4 font-semibold text-center">
+                  Delete Item
+                </h2>
+                <p className="text-center">
+                  Are you sure you want to delete{" "}
+                  <strong>{selectedItem?.assetName}</strong>?
+                </p>
+                <div className="flex justify-center space-x-4 mt-6">
+                  <button
+                    onClick={handleDeleteAssetItem}
+                    className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md"
+                  >
+                    Yes, Delete
+                  </button>
+                  <button
+                    onClick={() => toggleModal("delete")}
+                    className="bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded-md"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {modals.viewDepreciation && (
+            <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
+              <div className="bg-white rounded-xl shadow-lg w-10/12 md:w-2/3 lg:w-1/3 max-h-[90vh] overflow-y-auto p-8 relative">
+                <button
+                  className="absolute top-4 right-4 text-gray-700 text-2xl font-bold hover:text-red-500 transition"
+                  onClick={() => toggleModal("viewDepreciation")}
+                  aria-label="Close Modal"
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+                <h2 className="text-3xl font-semibold text-center mb-6 text-gray-800 flex items-center justify-center space-x-2">
+                  <i className="fas fa-calculator text-blue-600"></i>
+                  <span>Depreciation Schedule</span>
+                </h2>
+                {depreciationData ? (
+                  <div className="space-y-6">
+                    {depreciationData.map((entry, index) => {
+                      const date = new Date(entry.DepreciationDate);
+                      const formattedDate = date.toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      });
+                      return (
+                        <div
+                          key={index}
+                          className="p-4 rounded-lg border border-gray-200 shadow-sm flex items-center space-x-4 bg-gray-50"
+                        >
+                          <div className="text-blue-500">
+                            <i className="fas fa-calendar-alt text-3xl"></i>
+                          </div>
+                          <div>
+                            <p className="text-lg">
+                              <span className="font-semibold text-gray-600">
+                                Date:
+                              </span>{" "}
+                              {formattedDate}
+                            </p>
+                            <p className="text-lg">
+                              <span className="font-semibold text-gray-600">
+                                Depreciation Amount:
+                              </span>{" "}
+                              {entry.depreciationAmount}
+                            </p>
+                            <p className="text-lg">
+                              <span className="font-semibold text-gray-600">
+                                Remaining Value:
+                              </span>{" "}
+                              {entry.DepreciationValue}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-500">
+                    <i className="fas fa-spinner fa-spin text-xl text-blue-600"></i>
+                    <span className="ml-2">Loading depreciation data...</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

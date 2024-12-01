@@ -98,11 +98,11 @@ export default function Inventory() {
   }, []);
 
   return (
-    <div>
-      <div className="text-center mb-8 w-full ml-5">
-        <h1 className="text-3xl font-bold mb-8">Stocks and Inventory</h1>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold mb-6">Stocks and Inventory</h1>
 
-        <div className="flex items-center justify-center gap-4 mb-8">
+        <div className="flex flex-wrap justify-center gap-7 mb-6">
           <button
             onClick={() =>
               setModalState({

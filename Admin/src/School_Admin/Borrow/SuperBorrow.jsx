@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import emailjs from "emailjs-com";
 
 export default function SupperBorrow() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function SupperBorrow() {
           "http://localhost:5075/api/BorrowRequestApi/ApprovedByBothAdmins"
         );
         const data = await response.json();
+        console.log(data);
 
         // Remove duplicates based on BorrowId
         const uniqueItems = data.reduce((acc, current) => {
@@ -91,19 +93,46 @@ export default function SupperBorrow() {
       );
       setItems(updatedItems);
 
-      closeUpdateModal();
-      closeDeclineModal();
-      setDeclineReason("");
-      toast.success(`Request Updated successfully!`); // Reset decline reason after submission
+      // Email parameters
+      const emailParams = {
+        user_name: currentItem.RequestedBy || "User",
+        user_email: currentItem.Email,
+        request_status: adminApproval || "Pending",
+        from_name: storedUsername || "System Admin",
+      };
+
+      // Select email template based on approval status
+      const templateId =
+        adminApproval === "Declined"
+          ? "template_c5uw6be" // Template for declined requests
+          : "template_7sxyqel"; // Template for approved requests
+
+      if (adminApproval === "Declined") {
+        emailParams.declined_reason = declineReason; // Add declined reason for Declined emails
+      }
+
+      emailjs
+        .send("service_c14cdbr", templateId, emailParams, "AizAF8z_EWHeTDYJi")
+        .then(
+          () => {
+            console.log("Email sent successfully!");
+          },
+          (error) => {
+            console.error("Failed to send email:", error);
+          }
+        );
     } catch (error) {
-      console.error("Error updating approval:", error.message);
-      setError(error.message);
+      console.error("Error updating approval status:", error);
     } finally {
       setIsUpdating(false);
     }
+
+    closeUpdateModal();
+    closeDeclineModal();
+    setDeclineReason("");
+    toast.success(`Request Updated successfully!`); // Reset decline reason after submission
   };
 
-  // Fetch the details of borrowed items for a specific borrow request
   const fetchBorrowItems = async (borrowId) => {
     setBorrowLoading(true);
     try {

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../CSS/print.css";
+import { toast } from "react-toastify";
+import emailjs from "emailjs-com";
 
 export default function RequestItems() {
   const [viewRequestModalOpen, setViewRequestModalOpen] = useState(false);
@@ -14,11 +16,11 @@ export default function RequestItems() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const handleBeforePrint = () => {
-    setIsPrinting(true); // Hide buttons before printing
+    setIsPrinting(true);
   };
   useEffect(() => {
     const handleAfterPrint = () => {
-      setIsPrinting(false); // Show buttons after printing
+      setIsPrinting(false);
     };
 
     window.addEventListener("beforeprint", handleBeforePrint);
@@ -122,8 +124,11 @@ export default function RequestItems() {
           cost: item.estimatedCost,
           description: item.description,
           suggestedDealer: item.suggestedDealer,
+          email: item.email,
         }));
         setItems(mappedItems);
+
+        console.log(mappedItems);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
@@ -192,10 +197,42 @@ export default function RequestItems() {
       );
       setItems(updatedItems);
 
+      // Prepare email parameters
+      const emailParams = {
+        user_name: currentItem.requestedBy || "User",
+        user_email: currentItem.email,
+        request_status: adminApproval || "Pending",
+        from_name: storedUsername || "System Admin",
+      };
+
+      // Choose email template based on approval status
+      const templateId =
+        adminApproval === "Declined"
+          ? "template_c5uw6be" // Template for declined requests
+          : "template_7sxyqel"; // Template for approved requests
+
+      if (adminApproval === "Declined") {
+        emailParams.declined_reason = declineReason; // Add decline reason for declined requests
+      }
+
+      // Send email
+      emailjs
+        .send("service_c14cdbr", templateId, emailParams, "AizAF8z_EWHeTDYJi")
+        .then(
+          () => {
+            console.log("Email sent successfully!");
+          },
+          (error) => {
+            console.error("Failed to send email:", error);
+          }
+        );
+
+      toast.success(`Request updated successfully!`);
       closeUpdateModal();
       closeDeclineModal();
       setDeclineReason("");
-      toast.success(`Request Updated successfully!`); // Reset decline reason after submission
+
+      // Show success notification
     } catch (error) {
       console.error("Error updating approval:", error.message);
       setError(error.message);
@@ -203,10 +240,14 @@ export default function RequestItems() {
       setIsUpdating(false);
     }
   };
+
+  // Function to close the update modal
   const closeUpdateModal = () => {
     setEditModalOpen(false);
     setCurrentItem(null);
   };
+
+  // Function to close the decline modal
 
   return (
     <>
