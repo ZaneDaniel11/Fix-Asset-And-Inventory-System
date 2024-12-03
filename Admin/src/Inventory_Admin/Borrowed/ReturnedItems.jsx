@@ -219,19 +219,13 @@ export default function BorrowedItems() {
                 <th className="border border-gray-300 px-5 py-3">Date</th>
                 <th className="border border-gray-300 px-5 py-3">Purpose</th>
                 <th className="border border-gray-300 px-5 py-3">Status</th>
-                <th className="border border-gray-300 px-5 py-3">
-                  Inventory Admin
-                </th>
-                <th className="border border-gray-300 px-5 py-3">Head Admin</th>
-                <th className="border border-gray-300 px-5 py-3">
-                  School Admin
-                </th>
+                <th className="border border-gray-300 px-5 py-3">Inventory</th>
+                <th className="border border-gray-300 px-5 py-3">Head </th>
+                <th className="border border-gray-300 px-5 py-3">School</th>
                 <th className="border border-gray-300 px-5 py-3">
                   Return Status
                 </th>
-                <th className="border border-gray-300 px-5 py-3">
-                  Claimed Status
-                </th>
+                <th className="border border-gray-300 px-5 py-3">Status</th>
                 <th className="border border-gray-300 px-5 py-3 text-center">
                   Actions
                 </th>
@@ -382,74 +376,163 @@ export default function BorrowedItems() {
 
       {/* View Modal */}
       {viewModalOpen && currentItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
-            {/* Close Button */}
-            <button
-              onClick={closeViewModal}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-800 text-lg focus:outline-none"
-            >
-              ✕
-            </button>
-
-            {/* Modal Title */}
-            <h2 className="text-2xl font-bold text-gray-700 text-center mb-6">
-              Borrowed Items for Request:
-              <span className="block text-blue-600 mt-1">
-                {currentItem.BorrowId}
-              </span>
-            </h2>
-
-            {/* Loading or Empty State */}
-            {borrowLoading ? (
-              <div className="text-center text-gray-500 text-sm">
-                Loading borrowed items...
-              </div>
-            ) : borrowedItems.length === 0 ? (
-              <div className="text-center text-gray-500 text-sm">
-                No borrowed items found
-              </div>
-            ) : (
-              // Borrowed Items List
-              <div className="space-y-4">
-                {borrowedItems.map((borrowItem, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center bg-gray-50 border border-gray-200 rounded-md p-4 hover:shadow-md transition-shadow duration-300"
-                  >
-                    {/* Placeholder for Image Section */}
-                    <div className="flex-shrink-0">
-                      <img
-                        src="https://via.placeholder.com/80"
-                        alt={borrowItem.ItemName}
-                        className="w-16 h-16 object-cover rounded-md"
-                      />
-                    </div>
-
-                    {/* Content Section */}
-                    <div className="ml-4 flex-1">
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {borrowItem.ItemName}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Quantity:{" "}
-                        <span className="font-medium text-gray-800">
-                          {borrowItem.Quantity}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="mt-6 flex justify-center space-x-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-3/4 max-w-5xl p-8 overflow-auto">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center border-b pb-4">
+              <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <i className="fa-solid fa-box-archive text-blue-600"></i> Borrow
+                Item Details
+              </h3>
               <button
                 onClick={closeViewModal}
-                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 text-sm rounded-md focus:outline-none transition"
+                className="text-gray-500 hover:text-gray-700 transition duration-200"
               >
-                Close
+                <i className="fa-solid fa-times text-2xl"></i>
+              </button>
+            </div>
+
+            {/* Borrow Details */}
+            <div className="space-y-6 mt-6">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-id-card text-blue-500"></i>
+                  <span>
+                    <strong>ID:</strong> {currentItem.BorrowId}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-user text-blue-500"></i>
+                  <span>
+                    <strong>Requested By:</strong> {currentItem.RequestedBy}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-calendar-day text-blue-500"></i>
+                  <span>
+                    <strong>Request Date:</strong> {currentItem.ReqBorrowDate}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-bullseye text-blue-500"></i>
+                  <span>
+                    <strong>Purpose:</strong> {currentItem.Purpose}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-info-circle text-blue-500"></i>
+                  <span>
+                    <strong>Status:</strong> {currentItem.Status}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 mt-4">
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-user-check text-green-500"></i>
+                <span>
+                  <strong>Inventory Admin:</strong>{" "}
+                  <span
+                    className={
+                      currentItem.Admin1Approval === "Approved"
+                        ? "text-green-500"
+                        : currentItem.Admin1Approval === "Pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {currentItem.Admin1Approval}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-user-check text-green-500"></i>
+                <span>
+                  <strong>Head Admin:</strong>{" "}
+                  <span
+                    className={
+                      currentItem.Admin2Approval === "Approved"
+                        ? "text-green-500"
+                        : currentItem.Admin2Approval === "Pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {currentItem.Admin2Approval}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-user-check text-green-500"></i>
+                <span>
+                  <strong>School Admin:</strong>{" "}
+                  <span
+                    className={
+                      currentItem.Admin3Approval === "Approved"
+                        ? "text-green-500"
+                        : currentItem.Admin3Approval === "Pending"
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                  >
+                    {currentItem.Admin3Approval}
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            <hr className="my-6 border-gray-300" />
+
+            {/* Borrowed Items Section */}
+            <h4 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+              <i className="fa-solid fa-boxes-stacked text-green-600"></i>{" "}
+              Borrowed Items
+            </h4>
+            <div className="overflow-y-auto max-h-[300px] space-y-4">
+              <ul>
+                {borrowLoading ? (
+                  <div className="text-center text-gray-500 text-lg">
+                    Loading borrowed items...
+                  </div>
+                ) : borrowedItems.length === 0 ? (
+                  <div className="text-center text-gray-500 text-lg">
+                    No borrowed items found
+                  </div>
+                ) : (
+                  borrowedItems.map((item) => (
+                    <div
+                      key={item.ItemId}
+                      className="flex items-center gap-6 border border-gray-200 rounded-lg p-4 bg-gray-50 hover:shadow-lg transition-shadow duration-300 mb-3"
+                    >
+                      {/* Image Section */}
+                      <img
+                        src="https://via.placeholder.com/100"
+                        alt={item.ItemName}
+                        className="w-20 h-20 object-cover rounded-lg"
+                      />
+                      {/* Content Section */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {item.ItemName}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Quantity: <strong>{item.Quantity}</strong>
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </ul>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={closeViewModal}
+                className="px-6 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition duration-200 flex items-center gap-2"
+              >
+                <i className="fa-solid fa-circle-xmark"></i> Close
               </button>
             </div>
           </div>
