@@ -59,20 +59,20 @@ const Sidebar = () => {
             <li>
               <a href="/SadminBorrow" className="flex items-center">
                 <i className="bx bx-cart text-xl"></i>
-                <span className="link_name">Borrow</span>
+                <span className="text-white">Borrow</span>
               </a>
             </li>
             <li>
               <a href="/SadminRequest" className="flex items-center">
                 <i className="bx bx-plus-circle text-xl"></i>
-                <span className="link_name">Request Item</span>
+                <span className="text-white">Request Item</span>
               </a>
             </li>
 
             <li>
               <a href="/SadminLogs" className="flex items-center">
                 <i className="bx bx-log text-xl"></i>
-                <span className="link_name">Logs</span>
+                <span className="text-white">Logs</span>
               </a>
             </li>
           </>
@@ -82,25 +82,25 @@ const Sidebar = () => {
             <li>
               <a href="/HadminBorrow" className="flex items-center">
                 <i className="bx bx-cart text-xl"></i>
-                <span className="link_name">Borrow</span>
+                <span className="text-white">Borrow</span>
               </a>
             </li>
             <li>
               <a href="/HadminRequestItems" className="flex items-center">
                 <i className="bx bx-plus-circle text-xl"></i>
-                <span className="link_name">Request Item</span>
+                <span className="text-white">Request Item</span>
               </a>
             </li>
             <li>
               <a href="/HadminMaintenance" className="flex items-center">
                 <i className="bx bx-wrench text-xl"></i>
-                <span className="link_name">Request Maintenance</span>
+                <span className="text-white">Request Maintenance</span>
               </a>
             </li>
             <li>
               <a href="/HadminLogs" className="flex items-center">
                 <i className="bx bx-log text-xl"></i>
-                <span className="link_name">Logs</span>
+                <span className="text-white">Logs</span>
               </a>
             </li>
           </>
@@ -111,31 +111,31 @@ const Sidebar = () => {
             <li>
               <a href="/Home" className="flex items-center">
                 <i className="bx bx-cart text-xl"></i>
-                <span className="link_name">Borrow</span>
+                <span className="text-white">Borrow</span>
               </a>
             </li>
             <li>
               <a href="/UserBorrowStatus" className="flex items-center">
                 <i className="bx bx-history text-xl"></i>
-                <span className="link_name">Borrow Status</span>
+                <span className="text-white">Borrow Status</span>
               </a>
             </li>
             <li>
               <a href="/UserRequest" className="flex items-center">
                 <i className="bx bx-plus-circle text-xl"></i>
-                <span className="link_name">Request Item</span>
+                <span className="text-white">Request Item</span>
               </a>
             </li>
             <li>
               <a href="/UserRequestMaintenance" className="flex items-center">
                 <i className="bx bx-wrench text-xl"></i>
-                <span className="link_name">Request Maintenance</span>
+                <span className="text-white">Request Maintenance</span>
               </a>
             </li>
             <li>
               <a href="/UserRequestLogs" className="flex items-center">
                 <i className="bx bx-log text-xl"></i>
-                <span className="link_name">Logs</span>
+                <span className="text-white">Logs</span>
               </a>
             </li>
           </>
@@ -147,13 +147,13 @@ const Sidebar = () => {
             <li>
               <a href="/AssetInventory" className="flex items-center">
                 <i className="bx bx-package text-xl"></i>
-                <span className="link_name">Asset Inventory</span>
+                <span className="text-white">Asset Inventory</span>
               </a>
             </li>
             <li>
               <a href="/Schedule" className="flex items-center">
                 <i className="bx bx-calendar text-xl"></i>
-                <span className="link_name">Schedule</span>
+                <span className="text-white">Schedule</span>
               </a>
             </li>
           </>
@@ -164,13 +164,13 @@ const Sidebar = () => {
             <li>
               <a href="/Dashboard" className="flex items-center">
                 <i className="bx bx-home text-xl"></i>
-                <span className="link_name">Dashboard</span>
+                <span className="text-white">Dashboard</span>
               </a>
             </li>
             <li>
               <a href="/inventory" className="flex items-center">
                 <i className="bx bx-box text-xl"></i>
-                <span className="link_name">Inventory</span>
+                <span className="text-white">Inventory</span>
               </a>
             </li>
 
@@ -183,7 +183,7 @@ const Sidebar = () => {
                 <div className="flex items-center">
                   <i className="bx bx-collection text-xl"></i>
                   <span
-                    className={`link_name ${isSidebarClosed ? "hidden" : ""}`}
+                    className={`text-white ${isSidebarClosed ? "hidden" : ""}`}
                   >
                     Request
                   </span>
@@ -202,19 +202,19 @@ const Sidebar = () => {
                 <li className="pl-8">
                   <a href="/BorrowedRequest" className="flex items-center">
                     <i className="bx bx-cart text-sm"></i>
-                    <span className="link_name">Borrow Request</span>
+                    <span className="text-white">Borrow Request</span>
                   </a>
                 </li>
                 <li className="pl-8">
                   <a href="/RequestItem" className="flex items-center">
                     <i className="bx bx-box text-sm"></i>
-                    <span className="link_name">Request Items</span>
+                    <span className="text-white">Request Items</span>
                   </a>
                 </li>
                 <li className="pl-8">
                   <a href="/RequestRepair" className="flex items-center">
                     <i className="bx bx-wrench text-sm"></i>
-                    <span className="link_name">Request Repair</span>
+                    <span className="text-white">Request Repair</span>
                   </a>
                 </li>
               </>
@@ -222,7 +222,7 @@ const Sidebar = () => {
             <li>
               <a href="/Users" className="flex items-center">
                 <i className="bx bx-user text-xl"></i>
-                <span className="link_name">User</span>
+                <span className="text-white">User</span>
               </a>
             </li>
 
@@ -235,7 +235,7 @@ const Sidebar = () => {
                 <div className="flex items-center">
                   <i className="bx bx-archive text-xl"></i>
                   <span
-                    className={`link_name ${isSidebarClosed ? "hidden" : ""}`}
+                    className={`text-white ${isSidebarClosed ? "hidden" : ""}`}
                   >
                     Borrowed
                   </span>
@@ -254,13 +254,13 @@ const Sidebar = () => {
                 <li className="pl-8">
                   <a href="/BorrowedTable" className="flex items-center">
                     <i className="bx bx-book text-sm"></i>
-                    <span className="link_name">Borrowed Items</span>
+                    <span className="text-white">Borrowed Items</span>
                   </a>
                 </li>
                 <li className="pl-8">
                   <a href="/ReturedItems" className="flex items-center">
                     <i className="bx bx-undo text-sm"></i>
-                    <span className="link_name">Return Items</span>
+                    <span className="text-white">Return Items</span>
                   </a>
                 </li>
               </>
@@ -269,7 +269,7 @@ const Sidebar = () => {
             <li>
               <a href="/Logs" className="flex items-center">
                 <i className="bx bx-history text-xl"></i>
-                <span className="link_name">Logs</span>
+                <span className="text-white">Logs</span>
               </a>
             </li>
           </>
