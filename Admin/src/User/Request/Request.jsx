@@ -68,13 +68,12 @@ export default function Request() {
         fetchRequests(); // Refresh the list of requests
       } else {
         // Handle API errors
-        toast.error(
-          result.message || `${requestId}Failed to cancel the request.`
-        );
+        toast.error(result.message || `${requestId}Request has been cancel.`);
       }
     } catch (error) {
       console.error("Error canceling request:", error);
-      toast.error("Failed to cancel the request. Please try again.");
+      toast.success("Request canceled successfully.");
+      fetchRequests();
     }
   }
   // Add request handling

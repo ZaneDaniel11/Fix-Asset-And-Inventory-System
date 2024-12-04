@@ -164,20 +164,20 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
 
                   {/* Out of Stock or Button */}
                   {product.quantity === 0 ? (
-                    <p className="text-red-500 font-bold">Out of Stock</p>
+                    <p className="text-blue-500 font-bold">Out of Stock</p>
                   ) : product.isRequested ? (
                     <button
                       className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded-lg transition duration-300"
                       onClick={() => handleRemoveRequest(product.itemID)}
                     >
-                      Requested
+                      Borrowed
                     </button>
                   ) : (
                     <button
                       className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-300"
                       onClick={() => handleAddProduct(product)}
                     >
-                      Request
+                      Borrow
                     </button>
                   )}
                 </div>

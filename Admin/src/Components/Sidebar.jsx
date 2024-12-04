@@ -49,7 +49,7 @@ const Sidebar = () => {
           className="bx bx-menu text-white cursor-pointer"
           onClick={toggleSidebar}
         ></i>
-        <span className="logo_name text-white ml-3 font-bold">Fix Asset</span>
+        <span className="logo_name text-white ml-3 font-bold">Capstone</span>
       </div>
 
       {/* Navigation Links */}
