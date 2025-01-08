@@ -165,7 +165,8 @@ export default function Users() {
             >
               <option value="">All User Types</option>
               <option value="Inventory_Admin">Inventory Admin</option>
-              <option value="Member">Member</option>
+              <option value="Teacher">Teacher</option>
+              <option value="Department">Department</option>
               <option value="Asset_Admin">Asset Admin</option>
               <option value="School_Admin">School Admin</option>
             </select>
@@ -395,7 +396,8 @@ export default function Users() {
                       required
                     >
                       <option value="">Select User Type</option>
-                      <option value="Member">Member</option>
+                      <option value="Teacher">Teacher</option>
+                      <option value="Department">Department</option>
                       <option value="Inventory_Admin">Inventory Admin</option>
                       <option value="Asset_Admin">Asset Admin</option>
                       <option value="School_Admin">School Admin</option>
@@ -560,7 +562,8 @@ export default function Users() {
                       required
                     >
                       <option value="">Select User Type</option>
-                      <option value="Member">Member</option>
+                      <option value="Teacher">Teacher</option>
+                      <option value="Department">Department</option>
                       <option value="Inventory_Admin">Inventory Admin</option>
                       <option value="School_Admin">School Admin</option>
                       <option value="Head_Admin">Head Admin</option>

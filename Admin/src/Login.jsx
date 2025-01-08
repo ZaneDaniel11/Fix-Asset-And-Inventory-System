@@ -45,7 +45,10 @@ export default function Login() {
 
       // Navigate based on the userType
       switch (data.userType) {
-        case "Member":
+        case "Department":
+          navigate("/Home");
+          break;
+        case "Teacher":
           navigate("/Home");
           break;
         case "Inventory_Admin":

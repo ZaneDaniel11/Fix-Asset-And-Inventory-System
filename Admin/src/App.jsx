@@ -13,7 +13,6 @@ import Logs from "./Inventory_Admin/Logs/Log.jsx";
 import Sidebar from "./Components/Sidebar.jsx";
 import BorrowedItems from "./Inventory_Admin/Borrowed/BorrowedItems.jsx";
 import ReturedItems from "./Inventory_Admin/Borrowed/ReturnedItems.jsx";
-import EmailTest from "./Inventory_Admin/Email/email.jsx";
 
 // Asset Admin
 import AssetInventory from "./Asset/Inventory/AInventory.jsx";
@@ -226,15 +225,6 @@ function App() {
               />
             }
           />
-          <Route
-            path="/email"
-            element={
-              <ProtectedRoute
-                element={<EmailTest />}
-                allowedUsertypes={["Inventory_Admin"]}
-              />
-            }
-          />
 
           {/* Asset Section */}
           <Route
@@ -271,7 +261,7 @@ function App() {
             element={
               <ProtectedRoute
                 element={<UserBorrow />}
-                allowedUsertypes={["Member"]}
+                allowedUsertypes={["Department", "Teacher"]}
               />
             }
           />
@@ -280,7 +270,7 @@ function App() {
             element={
               <ProtectedRoute
                 element={<UserBorrowStatus />}
-                allowedUsertypes={["Member"]}
+                allowedUsertypes={["Department", "Teacher"]}
               />
             }
           />
@@ -289,7 +279,7 @@ function App() {
             element={
               <ProtectedRoute
                 element={<UserRequestItem />}
-                allowedUsertypes={["Member"]}
+                allowedUsertypes={["Department", "Teacher"]}
               />
             }
           />
@@ -298,7 +288,7 @@ function App() {
             element={
               <ProtectedRoute
                 element={<UserRequestMaintenance />}
-                allowedUsertypes={["Member"]}
+                allowedUsertypes={["Department"]}
               />
             }
           />
@@ -307,7 +297,7 @@ function App() {
             element={
               <ProtectedRoute
                 element={<UserRequestLogs />}
-                allowedUsertypes={["Member"]}
+                allowedUsertypes={["Department", "Teacher"]}
               />
             }
           />
