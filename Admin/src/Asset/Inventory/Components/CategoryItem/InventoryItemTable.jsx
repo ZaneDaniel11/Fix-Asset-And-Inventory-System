@@ -1,29 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import QRCode from "qrcode"; // Import QR code library
 
 const API_URL = "http://localhost:5075/api/AssetItemApi/";
 
-const fetchData = async (url, method = "GET", body = null) => {
-  const options = {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
-  if (body) {
-    options.body = JSON.stringify(body);
-  }
-
-  const response = await fetch(url, options);
-  if (!response.ok) {
-    throw new Error("Failed to fetch data");
-  }
-  return await response.json();
-};
-
 export default function Inventory_table() {
   const location = useLocation();
-  const navigate = useNavigate(); // Use navigate to redirect if necessary
+  const navigate = useNavigate();
   const { selectedCategory } = location.state || {};
   const categoryId = selectedCategory?.categoryId;
   const [items, setItems] = useState([]);
@@ -37,12 +20,10 @@ export default function Inventory_table() {
     addQuantity: false,
     viewDepreciation: false,
   });
-  const [depreciationData, setDepreciationData] = useState(null);
-
-  const [selectedItem, setSelectedItem] = useState(null);
-
   const [addItem, setAddItem] = useState({
     AssetName: "",
+    AssetQRCodePath: "",
+    AssetQRCodeBlob: "",
     DatePurchased: "",
     DateIssued: "",
     IssuedTo: "",
@@ -51,14 +32,23 @@ export default function Inventory_table() {
     Location: "",
     AssetCode: "",
     Remarks: "",
+    WarrantyStartDate: "",
+    WarrantyExpirationDate: "",
+    WarrantyVendor: "",
+    WarrantyContact: "",
+    AssetStatus: "",
+    AssetType: "",
+    AssetStype: "",
+    PreventiveMaintenanceSchedule: "",
+    DepreciationRate: "",
+    DepreciationValue: "",
     DepreciationPeriodType: "month",
     DepreciationPeriodValue: "",
-    DepreciationRate: "",
   });
-
   const toggleModal = (type) => {
     setModals((prev) => ({ ...prev, [type]: !prev[type] }));
   };
+
   async function fetchDepreciationSchedule(assetId) {
     try {
       const response = await fetch(
@@ -100,56 +90,59 @@ export default function Inventory_table() {
       setLoading(false);
     }
   };
-
+  const generateQRCode = async (data) => {
+    try {
+      return await QRCode.toDataURL(data);
+    } catch (error) {
+      console.error("Failed to generate QR code", error);
+      return "";
+    }
+  };
+  const generateAssetCode = () => {
+    // Example: Generate a code using a timestamp and category ID
+    return `ASSET-${categoryId}-${Date.now()}`;
+  };
   const handleAddAssetItem = async (e) => {
     e.preventDefault();
 
     try {
-      await fetchData(`${API_URL}InsertAsset`, "POST", {
+      const assetCode = generateAssetCode(); // Generate AssetCode
+      const qrCodeBlob = await generateQRCode(assetCode); // Generate QR code as Base64 string
+
+      const newAsset = {
         categoryID: categoryId,
         assetName: addItem.AssetName,
+        assetQRCodePath: addItem.AssetQRCodePath,
+        assetQRCodeBlob: qrCodeBlob, // Use the generated QR code
         datePurchased: addItem.DatePurchased,
         dateIssued: addItem.DateIssued,
         issuedTo: addItem.IssuedTo,
         checkedBy: addItem.CheckedBy,
         cost: parseFloat(addItem.Cost),
         location: addItem.Location,
-        assetCode: addItem.AssetCode,
+        assetCode: assetCode, // Use the generated AssetCode
         remarks: addItem.Remarks,
+        warrantyStartDate: addItem.WarrantyStartDate,
+        warrantyExpirationDate: addItem.WarrantyExpirationDate,
+        warrantyVendor: addItem.WarrantyVendor,
+        warrantyContact: addItem.WarrantyContact,
+        assetStatus: addItem.AssetStatus,
+        assetType: addItem.AssetType,
+        assetStype: addItem.AssetStype,
+        preventiveMaintenanceSchedule: addItem.PreventiveMaintenanceSchedule,
         depreciationRate: parseFloat(addItem.DepreciationRate),
-        depreciationValue: parseFloat(addItem.Cost),
+        depreciationValue: parseFloat(addItem.DepreciationValue),
         depreciationPeriodType: addItem.DepreciationPeriodType,
         depreciationPeriodValue: parseInt(addItem.DepreciationPeriodValue),
-      });
+      };
+
+      await fetchData(`${API_URL}InsertAsset`, "POST", { newAsset });
 
       toggleModal("add");
-      fetchItems(categoryId); // Refresh the list of items using the correct categoryId
+      fetchItems(categoryId);
     } catch (error) {
       console.error("Failed to add asset item", error);
     }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setAddItem((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleDeleteAssetItem = async () => {
-    try {
-      await fetchData(
-        `${API_URL}DeleteAsset?CategoryID=${categoryId}&AssetCode=${selectedItem.assetCode}`, // Assuming selectedItem.assetCode is correct
-        "DELETE"
-      );
-      toggleModal("delete");
-
-      // Close the delete modal
-      fetchItems(categoryId); // Refresh the items list after deletion
-    } catch (error) {
-      console.error("Failed to delete asset item", error);
-    }
-    console.log(
-      `${API_URL}DeleteAsset?CategoryID=${categoryId}&AssetCode=${selectedItem.assetCode}`
-    );
   };
 
   return (
@@ -175,25 +168,45 @@ export default function Inventory_table() {
             <p>Loading...</p>
           ) : (
             <table className="min-w-full table-auto bg-white shadow-md rounded-lg overflow-hidden">
-              <thead className="table100-head">
-                <tr className="">
-                  <th className="py-3 px-6 text-left">Item ID</th>
-                  <th className="py-3 px-6 text-left">Item Name</th>
-                  <th className="py-3 px-6 text-left">Issued To</th>
-                  <th className="py-3 px-6 text-left">Checked By</th>
-                  <th className="py-3 px-6 text-left">Cost</th>
-                  <th className="py-3 px-6 text-left">Location</th>
-                  <th className="py-3 px-6 text-left">Asset Code</th>
-                  <th className="py-3 px-6 text-left">Remarks</th>
-                  <th className="py-3 px-6 text-left">DatePurchase</th>
-                  <th className="py-3 px-6 text-left">Actions</th>
+              <thead className="table100-head" role="rowgroup">
+                <tr>
+                  <th className="py-3 px-6 text-left" scope="col">
+                    Item ID
+                  </th>
+                  <th className="py-3 px-6 text-left" scope="col">
+                    Item Name
+                  </th>
+                  <th className="py-3 px-6 text-left" scope="col">
+                    Issued To
+                  </th>
+                  <th className="py-3 px-6 text-left" scope="col">
+                    Checked By
+                  </th>
+                  <th className="py-3 px-6 text-left" scope="col">
+                    Cost
+                  </th>
+                  <th className="py-3 px-6 text-left" scope="col">
+                    Location
+                  </th>
+                  <th className="py-3 px-6 text-left" scope="col">
+                    Asset Code
+                  </th>
+                  <th className="py-3 px-6 text-left" scope="col">
+                    Remarks
+                  </th>
+                  <th className="py-3 px-6 text-left" scope="col">
+                    Date Purchased
+                  </th>
+                  <th className="py-3 px-6 text-left" scope="col">
+                    Actions
+                  </th>
                 </tr>
               </thead>
-              <tbody className="text-gray-600 text-sm">
+              <tbody className="text-gray-600 text-sm" role="rowgroup">
                 {filteredItems.length > 0 ? (
                   filteredItems.map((item) => (
                     <tr
-                      key={item.assetId}
+                      key={item.assetId || item.id}
                       className="border-b border-gray-200 hover:bg-gray-100"
                     >
                       <td className="py-3 px-6">{item.assetId}</td>
@@ -211,7 +224,8 @@ export default function Inventory_table() {
                             setSelectedItem(item);
                             toggleModal("update");
                           }}
-                          className="text-white bg-green-600 hover:bg-green-700 rounded-lg text-sm px-4 py-1"
+                          className="text-white bg-green-600 hover:bg-green-700 rounded-lg text-sm px-4 py-1 flex items-center justify-center"
+                          title="Edit Item"
                         >
                           <i className="fa-solid fa-pen"></i>
                         </button>
@@ -220,17 +234,19 @@ export default function Inventory_table() {
                             setSelectedItem(item);
                             toggleModal("delete");
                           }}
-                          className="text-white bg-red-600 hover:bg-red-700 rounded-lg text-sm px-4 py-1"
+                          className="text-white bg-red-600 hover:bg-red-700 rounded-lg text-sm px-4 py-1 flex items-center justify-center"
+                          title="Delete Item"
                         >
                           <i className="fa-solid fa-trash"></i>
                         </button>
                         <button
                           onClick={() => {
                             setSelectedItem(item);
-                            fetchDepreciationSchedule(item.assetId); // Fetch depreciation data for selected item
+                            fetchDepreciationSchedule(item.assetId);
                             toggleModal("viewDepreciation");
                           }}
-                          className="text-white bg-blue-500 hover:bg-blue-600 rounded-lg text-sm px-4 py-1"
+                          className="text-white bg-blue-500 hover:bg-blue-600 rounded-lg text-sm px-4 py-1 flex items-center justify-center"
+                          title="View Depreciation Schedule"
                         >
                           <i className="fa-solid fa-calendar"></i>
                         </button>
@@ -239,7 +255,7 @@ export default function Inventory_table() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="9" className="text-center py-4">
+                    <td colSpan="10" className="text-center py-4">
                       No items in this category.
                     </td>
                   </tr>
@@ -273,7 +289,22 @@ export default function Inventory_table() {
                           name="AssetName"
                           value={addItem.AssetName}
                           onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-4 border-black rounded-md "
+                          className="mt-1 block w-full p-2 border-black rounded-md"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Category ID
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="number"
+                          name="CategoryID"
+                          value={addItem.CategoryID}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border-black rounded-md"
                           required
                         />
                       </div>
@@ -292,7 +323,8 @@ export default function Inventory_table() {
                           name="DatePurchased"
                           value={addItem.DatePurchased}
                           onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          className="mt-1 block w-full p-2 border-black rounded-md"
+                          required
                         />
                       </div>
                     </div>
@@ -306,7 +338,7 @@ export default function Inventory_table() {
                           name="DateIssued"
                           value={addItem.DateIssued}
                           onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          className="mt-1 block w-full p-2 border-black rounded-md"
                         />
                       </div>
                     </div>
@@ -324,7 +356,7 @@ export default function Inventory_table() {
                           name="IssuedTo"
                           value={addItem.IssuedTo}
                           onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          className="mt-1 block w-full p-2 border-black rounded-md"
                         />
                       </div>
                     </div>
@@ -338,7 +370,7 @@ export default function Inventory_table() {
                           name="CheckedBy"
                           value={addItem.CheckedBy}
                           onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          className="mt-1 block w-full p-2 border-black rounded-md"
                         />
                       </div>
                     </div>
@@ -354,7 +386,7 @@ export default function Inventory_table() {
                           name="Cost"
                           value={addItem.Cost}
                           onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          className="mt-1 block w-full p-2 border-black rounded-md"
                         />
                       </div>
                     </div>
@@ -368,7 +400,7 @@ export default function Inventory_table() {
                           name="Location"
                           value={addItem.Location}
                           onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          className="mt-1 block w-full p-2 border-black rounded-md"
                         />
                       </div>
                     </div>
@@ -386,7 +418,7 @@ export default function Inventory_table() {
                           name="AssetCode"
                           value={addItem.AssetCode}
                           onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          className="mt-1 block w-full p-2 border-black rounded-md"
                         />
                       </div>
                     </div>
@@ -400,14 +432,14 @@ export default function Inventory_table() {
                           name="Remarks"
                           value={addItem.Remarks}
                           onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          className="mt-1 block w-full p-2 border-black rounded-md"
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* Depreciation Rate and Depreciation Period */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Depreciation Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm font-medium">
                         Depreciation Rate (%)
@@ -418,7 +450,8 @@ export default function Inventory_table() {
                           name="DepreciationRate"
                           value={addItem.DepreciationRate}
                           onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          className="mt-1 block w-full p-2 border-black rounded-md"
+                          required
                         />
                       </div>
                     </div>
@@ -431,28 +464,27 @@ export default function Inventory_table() {
                           name="DepreciationPeriodType"
                           value={addItem.DepreciationPeriodType}
                           onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                          className="mt-1 block w-full p-2 border-black rounded-md"
                         >
                           <option value="month">Month</option>
                           <option value="year">Year</option>
                         </select>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Depreciation Period Value */}
-                  <div>
-                    <label className="block text-sm font-medium">
-                      Depreciation Period Value
-                    </label>
-                    <div className="border-2 border-black rounded-md">
-                      <input
-                        type="number"
-                        name="DepreciationPeriodValue"
-                        value={addItem.DepreciationPeriodValue}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                      />
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Depreciation Period Value
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="number"
+                          name="DepreciationPeriodValue"
+                          value={addItem.DepreciationPeriodValue}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border-black rounded-md"
+                          required
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -464,104 +496,6 @@ export default function Inventory_table() {
                     Add Asset
                   </button>
                 </form>
-              </div>
-            </div>
-          )}
-
-          {modals.delete && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-              <div className="bg-white rounded-lg w-11/12 md:w-1/3 p-6 relative">
-                <span
-                  className="absolute top-2 right-2 text-gray-600 cursor-pointer text-2xl font-bold"
-                  onClick={() => toggleModal("delete")}
-                >
-                  &times;
-                </span>
-                <h2 className="text-2xl mb-4 font-semibold text-center">
-                  Delete Item
-                </h2>
-                <p className="text-center">
-                  Are you sure you want to delete{" "}
-                  <strong>{selectedItem?.assetName}</strong>?
-                </p>
-                <div className="flex justify-center space-x-4 mt-6">
-                  <button
-                    onClick={handleDeleteAssetItem}
-                    className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md"
-                  >
-                    Yes, Delete
-                  </button>
-                  <button
-                    onClick={() => toggleModal("delete")}
-                    className="bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded-md"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          {modals.viewDepreciation && (
-            <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
-              <div className="bg-white rounded-xl shadow-lg w-10/12 md:w-2/3 lg:w-1/3 max-h-[90vh] overflow-y-auto p-8 relative">
-                <button
-                  className="absolute top-4 right-4 text-gray-700 text-2xl font-bold hover:text-red-500 transition"
-                  onClick={() => toggleModal("viewDepreciation")}
-                  aria-label="Close Modal"
-                >
-                  <i className="fas fa-times"></i>
-                </button>
-                <h2 className="text-3xl font-semibold text-center mb-6 text-gray-800 flex items-center justify-center space-x-2">
-                  <i className="fas fa-calculator text-blue-600"></i>
-                  <span>Depreciation Schedule</span>
-                </h2>
-                {depreciationData ? (
-                  <div className="space-y-6">
-                    {depreciationData.map((entry, index) => {
-                      const date = new Date(entry.DepreciationDate);
-                      const formattedDate = date.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      });
-                      return (
-                        <div
-                          key={index}
-                          className="p-4 rounded-lg border border-gray-200 shadow-sm flex items-center space-x-4 bg-gray-50"
-                        >
-                          <div className="text-blue-500">
-                            <i className="fas fa-calendar-alt text-3xl"></i>
-                          </div>
-                          <div>
-                            <p className="text-lg">
-                              <span className="font-semibold text-gray-600">
-                                Date:
-                              </span>{" "}
-                              {formattedDate}
-                            </p>
-                            <p className="text-lg">
-                              <span className="font-semibold text-gray-600">
-                                Depreciation Amount:
-                              </span>{" "}
-                              {entry.depreciationAmount}
-                            </p>
-                            <p className="text-lg">
-                              <span className="font-semibold text-gray-600">
-                                Remaining Value:
-                              </span>{" "}
-                              {entry.DepreciationValue}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-500">
-                    <i className="fas fa-spinner fa-spin text-xl text-blue-600"></i>
-                    <span className="ml-2">Loading depreciation data...</span>
-                  </p>
-                )}
               </div>
             </div>
           )}
