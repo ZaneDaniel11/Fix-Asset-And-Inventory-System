@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import QRCode from "qrcode"; // Import QR code library
-
+import { fetchData } from "../utilities/ApiUti";
 const API_URL = "http://localhost:5075/api/AssetItemApi/";
 
 export default function Inventory_table() {
@@ -20,6 +20,8 @@ export default function Inventory_table() {
     addQuantity: false,
     viewDepreciation: false,
   });
+  const [selectedItem, setSelectedItem] = useState(null); // State for selected item
+  const [depreciationData, setDepreciationData] = useState(null); // State for depreciation data
   const [addItem, setAddItem] = useState({
     AssetName: "",
     AssetQRCodePath: "",
@@ -59,13 +61,16 @@ export default function Inventory_table() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log(data);
-      setDepreciationData(data); // Use state to store fetched depreciation data
+      setDepreciationData(data);
     } catch (error) {
       console.error("Failed to fetch depreciation schedule:", error);
     }
   }
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setAddItem((prev) => ({ ...prev, [name]: value }));
+  };
   useEffect(() => {
     if (categoryId) {
       fetchItems(categoryId);
@@ -77,19 +82,27 @@ export default function Inventory_table() {
 
   const fetchItems = async (categoryId) => {
     try {
-      const result = await fetchData(
+      const response = await fetch(
         `${API_URL}GetAssetsByCategory?categoryID=${categoryId}`,
-        "GET"
+        {
+          method: "GET",
+        }
       );
-      setItems(result);
-      setFilteredItems(result);
-      console.log(result);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json(); // Parse the JSON response
+      setItems(data);
+      setFilteredItems(data);
       setLoading(false);
     } catch (error) {
       console.error("Failed to fetch items", error);
       setLoading(false);
     }
   };
+
   const generateQRCode = async (data) => {
     try {
       return await QRCode.toDataURL(data);
@@ -98,10 +111,11 @@ export default function Inventory_table() {
       return "";
     }
   };
+
   const generateAssetCode = () => {
-    // Example: Generate a code using a timestamp and category ID
     return `ASSET-${categoryId}-${Date.now()}`;
   };
+
   const handleAddAssetItem = async (e) => {
     e.preventDefault();
 
@@ -286,7 +300,7 @@ export default function Inventory_table() {
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="text"
-                          name="AssetName"
+                          name="AssetName" // Matches backend: AssetName
                           value={addItem.AssetName}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
@@ -301,8 +315,8 @@ export default function Inventory_table() {
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="number"
-                          name="CategoryID"
-                          value={addItem.CategoryID}
+                          name="CategoryID" // Matches backend: CategoryID
+                          value={categoryId}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
                           required
@@ -320,7 +334,7 @@ export default function Inventory_table() {
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="date"
-                          name="DatePurchased"
+                          name="DatePurchased" // Matches backend: DatePurchased
                           value={addItem.DatePurchased}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
@@ -335,7 +349,7 @@ export default function Inventory_table() {
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="date"
-                          name="DateIssued"
+                          name="DateIssued" // Matches backend: DateIssued
                           value={addItem.DateIssued}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
@@ -353,7 +367,7 @@ export default function Inventory_table() {
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="text"
-                          name="IssuedTo"
+                          name="IssuedTo" // Matches backend: IssuedTo
                           value={addItem.IssuedTo}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
@@ -367,7 +381,7 @@ export default function Inventory_table() {
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="text"
-                          name="CheckedBy"
+                          name="CheckedBy" // Matches backend: CheckedBy
                           value={addItem.CheckedBy}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
@@ -376,15 +390,18 @@ export default function Inventory_table() {
                     </div>
                   </div>
 
-                  {/* Cost and Location */}
+                  {/* Asset Cost, Location, and Vendor */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium">Cost</label>
+                      <label className="block text-sm font-medium">
+                        Asset Cost
+                      </label>
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="number"
-                          name="Cost"
-                          value={addItem.Cost}
+                          step="0.01"
+                          name="AssetCost" // Matches backend: AssetCost
+                          value={addItem.AssetCost}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
                         />
@@ -397,8 +414,22 @@ export default function Inventory_table() {
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="text"
-                          name="Location"
-                          value={addItem.Location}
+                          name="AssetLocation" // Matches backend: AssetLocation
+                          value={addItem.AssetLocation}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border-black rounded-md"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Asset Vendor
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="text"
+                          name="AssetVendor" // Matches backend: AssetVendor
+                          value={addItem.AssetVendor}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
                         />
@@ -406,17 +437,17 @@ export default function Inventory_table() {
                     </div>
                   </div>
 
-                  {/* Asset Code and Remarks */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* QR Code, Remarks, and Asset Code */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm font-medium">
-                        Asset Code
+                        Asset QR Code Path
                       </label>
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="text"
-                          name="AssetCode"
-                          value={addItem.AssetCode}
+                          name="AssetQRCodePath" // Matches backend: AssetQRCodePath
+                          value={addItem.AssetQRCodePath}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
                         />
@@ -429,8 +460,54 @@ export default function Inventory_table() {
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="text"
-                          name="Remarks"
+                          name="Remarks" // Matches backend: Remarks
                           value={addItem.Remarks}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border-black rounded-md"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Warranty Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Warranty Vendor
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="text"
+                          name="WarrantyVendor" // Matches backend: WarrantyVendor
+                          value={addItem.WarrantyVendor}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border-black rounded-md"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Warranty Contact
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="text"
+                          name="WarrantyContact" // Matches backend: WarrantyContact
+                          value={addItem.WarrantyContact}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full p-2 border-black rounded-md"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium">
+                        Warranty Start Date
+                      </label>
+                      <div className="border-2 border-black rounded-md">
+                        <input
+                          type="date"
+                          name="WarrantyStartDate" // Matches backend: WarrantyStartDate
+                          value={addItem.WarrantyStartDate}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
                         />
@@ -447,11 +524,11 @@ export default function Inventory_table() {
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="number"
-                          name="DepreciationRate"
+                          step="0.01"
+                          name="DepreciationRate" // Matches backend: DepreciationRate
                           value={addItem.DepreciationRate}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
-                          required
                         />
                       </div>
                     </div>
@@ -461,7 +538,7 @@ export default function Inventory_table() {
                       </label>
                       <div className="border-2 border-black rounded-md">
                         <select
-                          name="DepreciationPeriodType"
+                          name="DepreciationPeriodType" // Matches backend: DepreciationPeriodType
                           value={addItem.DepreciationPeriodType}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
@@ -478,11 +555,10 @@ export default function Inventory_table() {
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="number"
-                          name="DepreciationPeriodValue"
+                          name="DepreciationPeriodValue" // Matches backend: DepreciationPeriodValue
                           value={addItem.DepreciationPeriodValue}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
-                          required
                         />
                       </div>
                     </div>
