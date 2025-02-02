@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import QRCode from "qrcode"; // Import QR code library
+import { QRCodeCanvas } from "qrcode.react";
+import axios from "axios";
+
 // import { fetchData } from "../utilities/ApiUti";
 const API_URL = "http://localhost:5075/api/AssetItemApi/";
 
 export default function Inventory_table() {
   const location = useLocation();
+  const qrRef = useRef(null);
   const navigate = useNavigate();
   const { selectedCategory } = location.state || {};
   const categoryId = selectedCategory?.categoryId;
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [qrData, setQrData] = useState(null);
   const [modals, setModals] = useState({
     add: false,
     update: false,
@@ -25,13 +29,11 @@ export default function Inventory_table() {
   const [addItem, setAddItem] = useState({
     categoryID: "",
     AssetName: "",
-    AssetQRCodePath: "",
-    AssetQRCodeBlob: "",
     DatePurchased: "",
     DateIssued: "",
     IssuedTo: "",
     CheckedBy: "",
-    Cost: "0", // Ensure default number fields are strings or 0
+    Cost: 0, // Ensure default number fields are strings or 0
     Location: "",
     AssetCode: "",
     Remarks: "",
@@ -43,10 +45,10 @@ export default function Inventory_table() {
     AssetType: "",
     AssetStype: "",
     PreventiveMaintenanceSchedule: "",
-    DepreciationRate: "0", // Default numeric values to "0" or 0
-    DepreciationValue: "0",
+    DepreciationRate: 0, // Default numeric values to "0" or 0
+    DepreciationValue: 0,
     DepreciationPeriodType: "month",
-    DepreciationPeriodValue: "0",
+    DepreciationPeriodValue: 0,
   });
 
   const toggleModal = (type) => {
@@ -109,138 +111,112 @@ export default function Inventory_table() {
     }
   };
 
-  const generateQRCode = async (data) => {
-    try {
-      return await QRCode.toDataURL(data);
-    } catch (error) {
-      console.error("Failed to generate QR code", error);
-      return "";
-    }
-  };
-
   const generateAssetCode = () => {
     return `ASSET-${categoryId}-${Date.now()}`;
+  };
+  const convertCanvasToBase64 = () => {
+    const canvas = qrRef.current?.querySelector("canvas");
+    return canvas ? canvas.toDataURL("image/png") : "";
   };
 
   const handleAddAssetItem = async (e) => {
     e.preventDefault();
 
     try {
-      const generatedAssetCoders = generateAssetCode();
-      const qrCodeBlob = await generateQRCode(generatedAssetCoders);
+      const generatedAssetCode = generateAssetCode();
+      setQrData(generatedAssetCode);
 
-      // const formattedData = {
-      //   categoryID: parseInt(addItem.CategoryID, 10) || 0,
-      //   assetName: addItem.AssetName,
-      //   assetQRCodePath: addItem.AssetQRCodePath || "",
-      //   assetQRCodeBlob: qrCodeBlob || "",
-      //   assetPicture: addItem.AssetPicture || "",
-      //   assetCode: assetCode || "",
-      //   assetCost: parseFloat(addItem.AssetCost) || 0,
-      //   assetLocation: addItem.AssetLocation || "",
-      //   assetStatus: addItem.AssetStatus || "Active",
-      //   assetStype: addItem.AssetStype || "Electronics", // FIXED: Matches API format
-      //   assetVendor: addItem.AssetVendor || "",
-      //   checkedBy: addItem.CheckedBy || "",
-      //   issuedTo: addItem.IssuedTo || "",
-      //   dateIssued: addItem.DateIssued
-      //     ? new Date(addItem.DateIssued).toISOString()
-      //     : null,
-      //   datePurchased: addItem.DatePurchased
-      //     ? new Date(addItem.DatePurchased).toISOString()
-      //     : null,
-      //   depreciationPeriodType: addItem.DepreciationPeriodType || "year",
-      //   depreciationPeriodValue:
-      //     parseInt(addItem.DepreciationPeriodValue, 10) || 1,
-      //   depreciationRate: parseFloat(addItem.DepreciationRate) || 0,
-      //   depreciationValue: parseFloat(addItem.DepreciationValue) || 0, // ADDED
-      //   remarks: addItem.Remarks || "",
-      //   warrantyContact: addItem.WarrantyContact || "",
-      //   warrantyExpirationDate: addItem.WarrantyExpirationDate
-      //     ? new Date(addItem.WarrantyExpirationDate).toISOString()
-      //     : null,
-      //   warrantyStartDate: addItem.WarrantyStartDate
-      //     ? new Date(addItem.WarrantyStartDate).toISOString()
-      //     : null,
-      //   warrantyVendor: addItem.WarrantyVendor || "",
-      //   assetPreventiveMaintenace:
-      //     addItem.AssetPreventiveMaintenace || "Quarterly", // ADDED
-      //   notes: addItem.Notes || "For office use", // ADDED
-      //   operationStartDate: addItem.OperationStartDate
-      //     ? new Date(addItem.OperationStartDate).toISOString()
-      //     : null,
-      //   operationEndDate: addItem.OperationEndDate
-      //     ? new Date(addItem.OperationEndDate).toISOString()
-      //     : null,
-      //   disposalDate: addItem.DisposalDate
-      //     ? new Date(addItem.DisposalDate).toISOString()
-      //     : null,
-      // };
-      const formattedData = {
-        categoryID: categoryId,
-        assetName: addItem.AssetName,
-        assetQRCodePath: addItem.AssetQRCodePath || "",
-        assetQRCodeBlob: qrCodeBlob || "",
-        assetPicture: addItem.AssetPicture || "",
-        datePurchased: addItem.DatePurchased
-          ? new Date(addItem.DatePurchased).toISOString()
-          : null,
-        dateIssued: addItem.DateIssued
-          ? new Date(addItem.DateIssued).toISOString()
-          : null,
-        issuedTo: addItem.IssuedTo || "",
-        assetVendor: addItem.AssetVendor || "",
-        checkedBy: addItem.CheckedBy || "",
-        assetCost: parseFloat(addItem.AssetCost) || 0,
-        assetCode: generatedAssetCoders,
-        remarks: addItem.Remarks || "",
-        assetLocation: addItem.AssetLocation || "",
-        warrantyStartDate: addItem.WarrantyStartDate
-          ? new Date(addItem.WarrantyStartDate).toISOString()
-          : null,
-        warrantyExpirationDate: addItem.WarrantyExpirationDate
-          ? new Date(addItem.WarrantyExpirationDate).toISOString()
-          : "2028-01-29T05:52:52.544Z",
-        warrantyVendor: addItem.WarrantyVendor || "",
-        warrantyContact: addItem.WarrantyContact || "",
-        assetStatus: addItem.AssetStatus || "Active",
-        assetStype: addItem.AssetStype || "Electronics",
-        assetPreventiveMaintenace: "Quarterly",
-        notes: "For office use",
-        operationStartDate: "2025-02-01T00:00:00.000Z",
-        operationEndDate: "2025-02-01T00:00:00.000Z",
-        disposalDate: "2025-02-01T00:00:00.000Z",
-        depreciationRate: parseFloat(addItem.DepreciationRate) || 0,
-        depreciationValue: 0,
-        depreciationPeriodType: addItem.DepreciationPeriodType || "year",
-        depreciationPeriodValue:
-          parseInt(addItem.DepreciationPeriodValue, 10) || 1,
-      };
-      console.log(formattedData);
-      fetch("http://localhost:5075/api/AssetItemApi/InsertAsset", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formattedData),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            return response.json().then((error) => {
-              throw new Error(error.title || "Failed to add asset item");
-            });
+      setTimeout(async () => {
+        const qrCodeBase64 = convertCanvasToBase64();
+        const formattedData = {
+          assetQRCodeBase64: qrCodeBase64,
+          categoryID: categoryId,
+          assetName: addItem.AssetName,
+          assetPicture: "images/assets/dell_latitude_5520.png",
+          datePurchased: addItem.DatePurchased
+            ? new Date(addItem.DatePurchased).toISOString()
+            : null,
+          dateIssued: addItem.DateIssued
+            ? new Date(addItem.DateIssued).toISOString()
+            : null,
+          issuedTo: addItem.IssuedTo || "",
+          checkedBy: addItem.CheckedBy || "",
+          assetCost: parseFloat(addItem.Cost) || 0,
+          assetCode: generatedAssetCode,
+          remarks: addItem.Remarks || "",
+          assetLocation: addItem.Location || "",
+          assetVendor: "Dell Technologies",
+          warrantyStartDate: addItem.WarrantyStartDate
+            ? new Date(addItem.WarrantyStartDate).toISOString()
+            : null,
+          warrantyExpirationDate: "2026-05-15T00:00:00.000Z",
+          warrantyVendor: addItem.WarrantyVendor || "",
+          warrantyContact: addItem.WarrantyContact || "",
+          assetStatus: addItem.AssetStatus || "Active",
+          assetStype: addItem.AssetStype || "Electronics",
+          preventiveMaintenanceSchedule: "2025-02-02T13:23:09.541Z",
+          notes: "",
+          operationStartDate: "2023-06-01T14:00:00.000Z",
+          operationEndDate: "2028-06-01T14:00:00.000Z",
+          disposalDate: "2030-06-01T14:00:00.000Z",
+          depreciationRate: parseFloat(addItem.DepreciationRate) || 0,
+          depreciationValue: 0,
+          depreciationPeriodType: addItem.DepreciationPeriodType || "year",
+          depreciationPeriodValue:
+            parseInt(addItem.DepreciationPeriodValue, 10) || 1,
+          assetPreventiveMaintenace: "Quarterly",
+        };
+        // const formattedData = {
+        //   assetQRCodeBase64: qrCodeBase64,
+        //   categoryID: categoryId,
+        //   assetName: addItem.AssetName,
+        //   datePurchased: addItem.DatePurchased
+        //     ? new Date(addItem.DatePurchased).toISOString()
+        //     : null,
+        //   dateIssued: addItem.DateIssued
+        //     ? new Date(addItem.DateIssued).toISOString()
+        //     : null,
+        //   issuedTo: addItem.IssuedTo || "",
+        //   checkedBy: addItem.CheckedBy || "",
+        //   assetCost: parseFloat(addItem.Cost) || 0,
+        //   assetCode: generatedAssetCode,
+        //   remarks: addItem.Remarks || "",
+        //   assetLocation: addItem.Location || "",
+        //   warrantyStartDate: addItem.WarrantyStartDate
+        //     ? new Date(addItem.WarrantyStartDate).toISOString()
+        //     : null,
+        //   warrantyExpirationDate: addItem.WarrantyExpirationDate
+        //     ? new Date(addItem.WarrantyExpirationDate).toISOString()
+        //     : "2028-01-29T05:52:52.544Z",
+        //   warrantyVendor: addItem.WarrantyVendor || "",
+        //   warrantyContact: addItem.WarrantyContact || "",
+        //   assetStatus: addItem.AssetStatus || "Active",
+        //   assetStype: addItem.AssetStype || "Electronics",
+        //   assetPreventiveMaintenace: "Quarterly",
+        //   notes: "For office use",
+        //   depreciationRate: parseFloat(addItem.DepreciationRate) || 0,
+        //   depreciationPeriodType: addItem.DepreciationPeriodType || "year",
+        //   depreciationPeriodValue:
+        //     parseInt(addItem.DepreciationPeriodValue, 10) || 1,
+        // };
+
+        console.log("Sending Data:", formattedData);
+
+        const response = await axios.post(
+          `${API_URL}InsertAsset`,
+          formattedData,
+          {
+            headers: { "Content-Type": "application/json" },
           }
-          return response.json();
-        })
-        .then((data) => console.log("Asset added successfully:", data))
-        .catch((error) => console.error("Failed to add asset item", error));
+        );
 
-      // Success
-      toggleModal("add");
-      fetchItems(categoryId);
+        console.log("Asset added successfully:", response.data);
+
+        toggleModal("add");
+        fetchItems(categoryId);
+      }, 500);
     } catch (error) {
       console.error("Failed to add asset item", error);
-      console.log(formattedData);
     }
   };
 
@@ -275,8 +251,12 @@ export default function Inventory_table() {
                     Item ID
                   </th>
                   <th className="py-3 px-6 text-left" scope="col">
+                    QR Code
+                  </th>
+                  <th className="py-3 px-6 text-left" scope="col">
                     Item Name
                   </th>
+
                   <th className="py-3 px-6 text-left" scope="col">
                     Issued To
                   </th>
@@ -299,6 +279,9 @@ export default function Inventory_table() {
                     Date Purchased
                   </th>
                   <th className="py-3 px-6 text-left" scope="col">
+                    QR Code
+                  </th>
+                  <th className="py-3 px-6 text-left" scope="col">
                     Actions
                   </th>
                 </tr>
@@ -311,6 +294,11 @@ export default function Inventory_table() {
                       className="border-b border-gray-200 hover:bg-gray-100"
                     >
                       <td className="py-3 px-6">{item.assetId}</td>
+                      <td className="py-3 px-6">
+                        <div className="mt-4 flex justify-center" ref={qrRef}>
+                          <QRCodeCanvas value={qrData} size={150} />
+                        </div>
+                      </td>
                       <td className="py-3 px-6">{item.assetName}</td>
                       <td className="py-3 px-6">{item.issuedTo}</td>
                       <td className="py-3 px-6">{item.checkedBy}</td>
@@ -319,6 +307,15 @@ export default function Inventory_table() {
                       <td className="py-3 px-6">{item.assetCode}</td>
                       <td className="py-3 px-6">{item.remarks}</td>
                       <td className="py-3 px-6">{item.datePurchased}</td>
+                      <td className="py-3 px-6">
+                        {item.AssetQRCodePath && (
+                          <img
+                            src={item.AssetQRCodePath}
+                            alt="QR Code"
+                            className="w-12 h-12"
+                          />
+                        )}
+                      </td>
                       <td className="py-3 px-6 flex items-center space-x-2">
                         <button
                           onClick={() => {
@@ -356,7 +353,7 @@ export default function Inventory_table() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="10" className="text-center py-4">
+                    <td colSpan="11" className="text-center py-4">
                       No items in this category.
                     </td>
                   </tr>
