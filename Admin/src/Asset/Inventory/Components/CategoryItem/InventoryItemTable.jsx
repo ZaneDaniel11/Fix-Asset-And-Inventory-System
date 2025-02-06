@@ -166,39 +166,6 @@ export default function Inventory_table() {
             parseInt(addItem.DepreciationPeriodValue, 10) || 1,
           assetPreventiveMaintenace: "Quarterly",
         };
-        // const formattedData = {
-        //   assetQRCodeBase64: qrCodeBase64,
-        //   categoryID: categoryId,
-        //   assetName: addItem.AssetName,
-        //   datePurchased: addItem.DatePurchased
-        //     ? new Date(addItem.DatePurchased).toISOString()
-        //     : null,
-        //   dateIssued: addItem.DateIssued
-        //     ? new Date(addItem.DateIssued).toISOString()
-        //     : null,
-        //   issuedTo: addItem.IssuedTo || "",
-        //   checkedBy: addItem.CheckedBy || "",
-        //   assetCost: parseFloat(addItem.Cost) || 0,
-        //   assetCode: generatedAssetCode,
-        //   remarks: addItem.Remarks || "",
-        //   assetLocation: addItem.Location || "",
-        //   warrantyStartDate: addItem.WarrantyStartDate
-        //     ? new Date(addItem.WarrantyStartDate).toISOString()
-        //     : null,
-        //   warrantyExpirationDate: addItem.WarrantyExpirationDate
-        //     ? new Date(addItem.WarrantyExpirationDate).toISOString()
-        //     : "2028-01-29T05:52:52.544Z",
-        //   warrantyVendor: addItem.WarrantyVendor || "",
-        //   warrantyContact: addItem.WarrantyContact || "",
-        //   assetStatus: addItem.AssetStatus || "Active",
-        //   assetStype: addItem.AssetStype || "Electronics",
-        //   assetPreventiveMaintenace: "Quarterly",
-        //   notes: "For office use",
-        //   depreciationRate: parseFloat(addItem.DepreciationRate) || 0,
-        //   depreciationPeriodType: addItem.DepreciationPeriodType || "year",
-        //   depreciationPeriodValue:
-        //     parseInt(addItem.DepreciationPeriodValue, 10) || 1,
-        // };
 
         console.log("Sending Data:", formattedData);
 
