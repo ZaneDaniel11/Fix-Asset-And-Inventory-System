@@ -45,8 +45,8 @@ export default function Inventory_table() {
     AssetType: "",
     AssetStype: "",
     PreventiveMaintenanceSchedule: "",
-    DepreciationRate: 0, // Default numeric values to "0" or 0
-    DepreciationValue: 0,
+    DepreciationRate: "", // Default numeric values to "0" or 0
+    DepreciationValue: "",
     DepreciationPeriodType: "month",
     DepreciationPeriodValue: 0,
   });
@@ -159,7 +159,7 @@ export default function Inventory_table() {
           operationStartDate: "2023-06-01T14:00:00.000Z",
           operationEndDate: "2028-06-01T14:00:00.000Z",
           disposalDate: "2030-06-01T14:00:00.000Z",
-          depreciationRate: parseFloat(addItem.DepreciationRate) || 0,
+          depreciationRate: 10,
           depreciationValue: 0,
           depreciationPeriodType: addItem.DepreciationPeriodType || "year",
           depreciationPeriodValue:
@@ -575,9 +575,9 @@ export default function Inventory_table() {
                       <div className="border-2 border-black rounded-md">
                         <input
                           type="number"
-                          step="0.01"
                           name="DepreciationRate" // Matches backend: DepreciationRate
-                          value={addItem.DepreciationRate}
+                          // value={addItem.DepreciationRate}
+                          value={10}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
                         />
@@ -590,7 +590,8 @@ export default function Inventory_table() {
                       <div className="border-2 border-black rounded-md">
                         <select
                           name="DepreciationPeriodType" // Matches backend: DepreciationPeriodType
-                          value={addItem.DepreciationPeriodType}
+                          // value={addItem.DepreciationPeriodType}
+                          value={"year"}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
                         >
@@ -607,7 +608,8 @@ export default function Inventory_table() {
                         <input
                           type="number"
                           name="DepreciationPeriodValue" // Matches backend: DepreciationPeriodValue
-                          value={addItem.DepreciationPeriodValue}
+                          // value={addItem.DepreciationPeriodValue}
+                          value={2}
                           onChange={handleInputChange}
                           className="mt-1 block w-full p-2 border-black rounded-md"
                         />
