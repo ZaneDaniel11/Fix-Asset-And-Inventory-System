@@ -101,7 +101,8 @@ export default function Inventory_table() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json(); // Parse the JSON response
+      const data = await response.json();
+      console.log(data);
       setItems(data);
       setFilteredItems(data);
       setLoading(false);
@@ -141,7 +142,7 @@ export default function Inventory_table() {
             : null,
           issuedTo: addItem.IssuedTo || "",
           checkedBy: addItem.CheckedBy || "",
-          assetCost: parseFloat(addItem.Cost) || 0,
+          assetCost: parseFloat(addItem.AssetCost) || 0,
           assetCode: generatedAssetCode,
           remarks: addItem.Remarks || "",
           assetLocation: addItem.Location || "",
@@ -197,8 +198,6 @@ export default function Inventory_table() {
             </h2>
           </div>
 
-          <button onClick={handleAddAssetItem}>testing</button>
-
           <div className="bg-white p-6 shadow-md rounded-lg mb-8 flex justify-between items-center">
             <button
               onClick={() => toggleModal("add")}
@@ -211,106 +210,95 @@ export default function Inventory_table() {
           {loading ? (
             <p>Loading...</p>
           ) : (
-            <table className="min-w-full table-auto bg-white shadow-md rounded-lg overflow-hidden">
-              <thead className="table100-head" role="rowgroup">
+            <table className="w-full border-collapse rounded-lg shadow-md overflow-hidden">
+              <thead className="bg-gray-800 text-white">
                 <tr>
-                  <th className="py-3 px-6 text-left" scope="col">
-                    Item ID
-                  </th>
-                  <th className="py-3 px-6 text-left" scope="col">
-                    QR Code
-                  </th>
-                  <th className="py-3 px-6 text-left" scope="col">
-                    Item Name
-                  </th>
+                  {[
+                    "Item ID",
+                    "QR Code",
+                    "Item Name",
+                    "Issued To",
+                    "Checked By",
+                    "Cost",
+                    "Location",
+                    "Asset Code",
+                    "Remarks",
+                    "Date Purchased",
 
-                  <th className="py-3 px-6 text-left" scope="col">
-                    Issued To
-                  </th>
-                  <th className="py-3 px-6 text-left" scope="col">
-                    Checked By
-                  </th>
-                  <th className="py-3 px-6 text-left" scope="col">
-                    Cost
-                  </th>
-                  <th className="py-3 px-6 text-left" scope="col">
-                    Location
-                  </th>
-                  <th className="py-3 px-6 text-left" scope="col">
-                    Asset Code
-                  </th>
-                  <th className="py-3 px-6 text-left" scope="col">
-                    Remarks
-                  </th>
-                  <th className="py-3 px-6 text-left" scope="col">
-                    Date Purchased
-                  </th>
-                  <th className="py-3 px-6 text-left" scope="col">
-                    QR Code
-                  </th>
-                  <th className="py-3 px-6 text-left" scope="col">
-                    Actions
-                  </th>
+                    "Actions",
+                  ].map((header) => (
+                    <th
+                      key={header}
+                      className="py-3 px-4 text-left border border-gray-700"
+                    >
+                      {header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="text-gray-600 text-sm" role="rowgroup">
+
+              <tbody className="text-gray-800 bg-gray-100">
                 {filteredItems.length > 0 ? (
                   filteredItems.map((item) => (
                     <tr
                       key={item.assetId || item.id}
-                      className="border-b border-gray-200 hover:bg-gray-100"
+                      className="border-b border-gray-300 hover:bg-gray-200 transition-all"
                     >
-                      <td className="py-3 px-6">{item.assetId}</td>
-                      <td className="py-3 px-6">
-                        <div className="mt-4 flex justify-center" ref={qrRef}>
-                          <QRCodeCanvas value={qrData} size={150} />
-                        </div>
-                      </td>
-                      <td className="py-3 px-6">{item.assetName}</td>
-                      <td className="py-3 px-6">{item.issuedTo}</td>
-                      <td className="py-3 px-6">{item.checkedBy}</td>
-                      <td className="py-3 px-6">{item.cost}</td>
-                      <td className="py-3 px-6">{item.location}</td>
-                      <td className="py-3 px-6">{item.assetCode}</td>
-                      <td className="py-3 px-6">{item.remarks}</td>
-                      <td className="py-3 px-6">{item.datePurchased}</td>
-                      <td className="py-3 px-6">
-                        {item.AssetQRCodePath && (
+                      <td className="py-3 px-4 border">{item.assetId}</td>
+
+                      {/* QR Code Display */}
+                      <td className="py-3 px-4 border flex justify-center items-center">
+                        {item.AssetQRCodePath ? (
                           <img
                             src={item.AssetQRCodePath}
                             alt="QR Code"
                             className="w-12 h-12"
                           />
+                        ) : (
+                          <QRCodeCanvas value={qrData} size={50} />
                         )}
                       </td>
-                      <td className="py-3 px-6 flex items-center space-x-2">
+
+                      <td className="py-3 px-4 border">{item.assetName}</td>
+                      <td className="py-3 px-4 border">{item.issuedTo}</td>
+                      <td className="py-3 px-4 border">{item.checkedBy}</td>
+                      <td className="py-3 px-4 border">{item.assetCost}</td>
+                      <td className="py-3 px-4 border">{item.assetLocation}</td>
+                      <td className="py-3 px-4 border">{item.assetCode}</td>
+                      <td className="py-3 px-4 border">{item.remarks}</td>
+                      <td className="py-3 px-4 border">{item.datePurchased}</td>
+
+                      {/* Actions Buttons */}
+                      <td className="py-3 px-4 border flex space-x-2">
                         <button
                           onClick={() => {
                             setSelectedItem(item);
                             toggleModal("update");
                           }}
-                          className="text-white bg-green-600 hover:bg-green-700 rounded-lg text-sm px-4 py-1 flex items-center justify-center"
+                          className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
                           title="Edit Item"
                         >
                           <i className="fa-solid fa-pen"></i>
                         </button>
+
                         <button
                           onClick={() => {
                             setSelectedItem(item);
                             toggleModal("delete");
                           }}
-                          className="text-white bg-red-600 hover:bg-red-700 rounded-lg text-sm px-4 py-1 flex items-center justify-center"
+                          className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
                           title="Delete Item"
                         >
                           <i className="fa-solid fa-trash"></i>
                         </button>
+
                         <button
                           onClick={() => {
                             setSelectedItem(item);
                             fetchDepreciationSchedule(item.assetId);
                             toggleModal("viewDepreciation");
                           }}
-                          className="text-white bg-blue-500 hover:bg-blue-600 rounded-lg text-sm px-4 py-1 flex items-center justify-center"
+                          className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
                           title="View Depreciation Schedule"
                         >
                           <i className="fa-solid fa-calendar"></i>
@@ -320,7 +308,7 @@ export default function Inventory_table() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="11" className="text-center py-4">
+                    <td colSpan="12" className="text-center py-4 text-gray-600">
                       No items in this category.
                     </td>
                   </tr>
@@ -331,296 +319,207 @@ export default function Inventory_table() {
 
           {modals.add && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-              <div className="bg-white rounded-lg w-11/12 md:w-1/2 p-6 relative">
-                <span
-                  className="absolute top-2 right-2 text-gray-600 cursor-pointer text-2xl font-bold"
+              <div className="bg-white rounded-2xl shadow-lg w-11/12 md:w-1/2 p-8 relative">
+                {/* Close Button */}
+                <button
+                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
                   onClick={() => toggleModal("add")}
                 >
                   &times;
-                </span>
-                <h2 className="text-2xl mb-4 font-semibold text-center">
+                </button>
+
+                <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
                   Add New Asset
                 </h2>
-                <form onSubmit={handleAddAssetItem} className="space-y-4">
-                  {/* Asset Name and Category ID */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <form onSubmit={handleAddAssetItem} className="space-y-6">
+                  {/* Asset Name & Category ID */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium">
+                      <label className="text-sm font-medium text-gray-700">
                         Asset Name
                       </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="text"
-                          name="AssetName" // Matches backend: AssetName
-                          value={addItem.AssetName}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                          required
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        name="AssetName"
+                        value={addItem.AssetName}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium">
+                      <label className="text-sm font-medium text-gray-700">
                         Category ID
                       </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="number"
-                          name="CategoryID" // Matches backend: CategoryID
-                          value={categoryId}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                          required
-                        />
-                      </div>
+                      <input
+                        type="number"
+                        name="CategoryID"
+                        value={categoryId}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
                     </div>
                   </div>
 
-                  {/* Date Purchased and Date Issued */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Date Purchased & Issued */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium">
+                      <label className="text-sm font-medium text-gray-700">
                         Date Purchased
                       </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="date"
-                          name="DatePurchased" // Matches backend: DatePurchased
-                          value={addItem.DatePurchased}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                          required
-                        />
-                      </div>
+                      <input
+                        type="date"
+                        name="DatePurchased"
+                        value={addItem.DatePurchased}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium">
+                      <label className="text-sm font-medium text-gray-700">
                         Date Issued
                       </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="date"
-                          name="DateIssued" // Matches backend: DateIssued
-                          value={addItem.DateIssued}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
+                      <input
+                        type="date"
+                        name="DateIssued"
+                        value={addItem.DateIssued}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
                     </div>
                   </div>
 
-                  {/* Issued To and Checked By */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Issued To & Checked By */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium">
+                      <label className="text-sm font-medium text-gray-700">
                         Issued To
                       </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="text"
-                          name="IssuedTo" // Matches backend: IssuedTo
-                          value={addItem.IssuedTo}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        name="IssuedTo"
+                        value={addItem.IssuedTo}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium">
+                      <label className="text-sm font-medium text-gray-700">
                         Checked By
                       </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="text"
-                          name="CheckedBy" // Matches backend: CheckedBy
-                          value={addItem.CheckedBy}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        name="CheckedBy"
+                        value={addItem.CheckedBy}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
                     </div>
                   </div>
 
-                  {/* Asset Cost, Location, and Vendor */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Asset Cost, Location & Vendor */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <label className="block text-sm font-medium">
+                      <label className="text-sm font-medium text-gray-700">
                         Asset Cost
                       </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="number"
-                          step="0.01"
-                          name="AssetCost" // Matches backend: AssetCost
-                          value={addItem.AssetCost}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="AssetCost"
+                        value={addItem.AssetCost}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium">
+                      <label className="text-sm font-medium text-gray-700">
                         Location
                       </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="text"
-                          name="AssetLocation" // Matches backend: AssetLocation
-                          value={addItem.AssetLocation}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        name="AssetLocation"
+                        value={addItem.AssetLocation}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium">
+                      <label className="text-sm font-medium text-gray-700">
                         Asset Vendor
                       </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="text"
-                          name="AssetVendor" // Matches backend: AssetVendor
-                          value={addItem.AssetVendor}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        name="AssetVendor"
+                        value={addItem.AssetVendor}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
                     </div>
                   </div>
 
-                  {/* QR Code, Remarks, and Asset Code */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium">
-                        Asset QR Code Path
-                      </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="text"
-                          name="AssetQRCodePath" // Matches backend: AssetQRCodePath
-                          value={addItem.AssetQRCodePath}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium">
-                        Remarks
-                      </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="text"
-                          name="Remarks" // Matches backend: Remarks
-                          value={addItem.Remarks}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Warranty Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium">
-                        Warranty Vendor
-                      </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="text"
-                          name="WarrantyVendor" // Matches backend: WarrantyVendor
-                          value={addItem.WarrantyVendor}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium">
-                        Warranty Contact
-                      </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="text"
-                          name="WarrantyContact" // Matches backend: WarrantyContact
-                          value={addItem.WarrantyContact}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium">
-                        Warranty Start Date
-                      </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="date"
-                          name="WarrantyStartDate" // Matches backend: WarrantyStartDate
-                          value={addItem.WarrantyStartDate}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
-                    </div>
+                  {/* Remarks */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Remarks
+                    </label>
+                    <textarea
+                      name="Remarks"
+                      value={addItem.Remarks}
+                      onChange={handleInputChange}
+                      className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none"
+                    />
                   </div>
 
                   {/* Depreciation Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <label className="block text-sm font-medium">
+                      <label className="text-sm font-medium text-gray-700">
                         Depreciation Rate (%)
                       </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="number"
-                          name="DepreciationRate" // Matches backend: DepreciationRate
-                          // value={addItem.DepreciationRate}
-                          value={10}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
+                      <input
+                        type="number"
+                        name="DepreciationRate"
+                        value={addItem.DepreciationRate}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium">
+                      <label className="text-sm font-medium text-gray-700">
                         Depreciation Period Type
                       </label>
-                      <div className="border-2 border-black rounded-md">
-                        <select
-                          name="DepreciationPeriodType" // Matches backend: DepreciationPeriodType
-                          // value={addItem.DepreciationPeriodType}
-                          value={"year"}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        >
-                          <option value="month">Month</option>
-                          <option value="year">Year</option>
-                        </select>
-                      </div>
+                      <select
+                        name="DepreciationPeriodType"
+                        value={addItem.DepreciationPeriodType}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="month">Month</option>
+                        <option value="year">Year</option>
+                      </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium">
+                      <label className="text-sm font-medium text-gray-700">
                         Depreciation Period Value
                       </label>
-                      <div className="border-2 border-black rounded-md">
-                        <input
-                          type="number"
-                          name="DepreciationPeriodValue" // Matches backend: DepreciationPeriodValue
-                          // value={addItem.DepreciationPeriodValue}
-                          value={2}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full p-2 border-black rounded-md"
-                        />
-                      </div>
+                      <input
+                        type="number"
+                        name="DepreciationPeriodValue"
+                        value={addItem.DepreciationPeriodValue}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
                     </div>
                   </div>
 
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
                   >
                     Add Asset
                   </button>
