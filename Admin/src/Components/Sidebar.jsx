@@ -137,13 +137,13 @@ const Sidebar = () => {
             <li>
               <a href="/UserRequestLogs" className="flex items-center">
                 <i className="bx bx-log text-xl"></i>
-                <span className="text-white">Logs</span>
+           {/* # */}
               </a>
             </li>
           </>
         )}
 
-        {/* Additional Sections Based on Role */}
+        {/* Additional Sections Based on Role d*/}
         {usertype === "Asset_Admin" && (
           <>
             <li>
@@ -154,7 +154,7 @@ const Sidebar = () => {
               </a>
             </li>
             <li>
-              <a href="/AssetInventory" className="flex items-center">
+              <a href="/AssetTransfer" className="flex items-center">
                 <i className="bx bx-package text-xl"></i>
                 <span className="text-white">Asset Transfeer
 

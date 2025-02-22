@@ -18,6 +18,7 @@ import ReturedItems from "./Inventory_Admin/Borrowed/ReturnedItems.jsx";
 import AssetInventory from "./Asset/Inventory/AInventory.jsx";
 import AssetInvenTable from "./Asset/Inventory/Components/CategoryItem/InventoryItemTable.jsx";
 import Schedule from "./Asset/Schedule/Schedule.jsx";
+import AssetTransfers from "./Asset/AssetTransfer/Asset_Trasnfer.jsx"
 import { ToastContainer } from "react-toastify";
 
 // User Side
@@ -241,6 +242,15 @@ function App() {
             element={
               <ProtectedRoute
                 element={<AssetInvenTable />}
+                allowedUsertypes={["Asset_Admin"]}
+              />
+            }
+          />
+              <Route
+            path="/AssetTransfer"
+            element={
+              <ProtectedRoute
+                element={<AssetTransfers />}
                 allowedUsertypes={["Asset_Admin"]}
               />
             }
