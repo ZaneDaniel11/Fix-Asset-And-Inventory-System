@@ -24,8 +24,11 @@ export default function Inventory_table() {
     addQuantity: false,
     viewDepreciation: false,
   });
+  const [depreciationData, setDepreciationData] = useState(null);
+  const [loadingDepreciation, setLoadingDepreciation] = useState(false);
+
   const [selectedItem, setSelectedItem] = useState(null); // State for selected item
-  const [depreciationData, setDepreciationData] = useState(null); // State for depreciation data
+  // State for depreciation data
   const [addItem, setAddItem] = useState({
     categoryID: "",
     AssetName: "",
@@ -54,22 +57,25 @@ export default function Inventory_table() {
   const toggleModal = (type) => {
     setModals((prev) => ({ ...prev, [type]: !prev[type] }));
   };
-
-  async function fetchDepreciationSchedule(assetId) {
+  const fetchDepreciationSchedule = async (assetId) => {
+    setLoadingDepreciation(true);
     try {
       const response = await fetch(
         `${API_URL}ViewDepreciationSchedule?assetId=${assetId}`
       );
-
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error("Failed to fetch depreciation schedule");
       }
       const data = await response.json();
+      console.log(data);
       setDepreciationData(data);
     } catch (error) {
-      console.error("Failed to fetch depreciation schedule:", error);
+      console.error("Error fetching depreciation schedule:", error);
+      setDepreciationData(null);
+    } finally {
+      setLoadingDepreciation(false);
     }
-  }
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
@@ -118,6 +124,11 @@ export default function Inventory_table() {
   const convertCanvasToBase64 = () => {
     const canvas = qrRef.current?.querySelector("canvas");
     return canvas ? canvas.toDataURL("image/png") : "";
+  };
+
+  const handleViewAsset = (item) => {
+    setSelectedItem(item); // Store selected item
+    toggleModal("view"); // Open the view modal
   };
 
   const handleAddAssetItem = async (e) => {
@@ -224,7 +235,6 @@ export default function Inventory_table() {
                     "Asset Code",
                     "Remarks",
                     "Date Purchased",
-
                     "Actions",
                   ].map((header) => (
                     <th
@@ -269,40 +279,50 @@ export default function Inventory_table() {
                       <td className="py-3 px-4 border">{item.datePurchased}</td>
 
                       {/* Actions Buttons */}
-                      <td className="py-3 px-4 border flex space-x-2">
-                        <button
-                          onClick={() => {
-                            setSelectedItem(item);
-                            toggleModal("update");
-                          }}
-                          className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
-                          title="Edit Item"
-                        >
-                          <i className="fa-solid fa-pen"></i>
-                        </button>
+                      <td className="py-3 px-4 border">
+                        <div className="flex flex-wrap gap-2 justify-center">
+                          <button
+                            onClick={() => handleViewAsset(item)}
+                            className="bg-green-600 hover:bg-green-700 text-white font-medium rounded-md text-sm px-3 py-2 transition-all"
+                            title="View Asset"
+                          >
+                            <i className="fa-solid fa-eye"></i>
+                          </button>
 
-                        <button
-                          onClick={() => {
-                            setSelectedItem(item);
-                            toggleModal("delete");
-                          }}
-                          className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
-                          title="Delete Item"
-                        >
-                          <i className="fa-solid fa-trash"></i>
-                        </button>
+                          <button
+                            onClick={() => {
+                              setSelectedItem(item);
+                              toggleModal("update");
+                            }}
+                            className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-md text-sm px-3 py-2 transition-all"
+                            title="Edit Item"
+                          >
+                            <i className="fa-solid fa-pen"></i>
+                          </button>
 
-                        <button
-                          onClick={() => {
-                            setSelectedItem(item);
-                            fetchDepreciationSchedule(item.assetId);
-                            toggleModal("viewDepreciation");
-                          }}
-                          className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-                          title="View Depreciation Schedule"
-                        >
-                          <i className="fa-solid fa-calendar"></i>
-                        </button>
+                          <button
+                            onClick={() => {
+                              setSelectedItem(item);
+                              toggleModal("delete");
+                            }}
+                            className="bg-red-600 hover:bg-red-700 text-white font-medium rounded-md text-sm px-3 py-2 transition-all"
+                            title="Delete Item"
+                          >
+                            <i className="fa-solid fa-trash"></i>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setSelectedItem(item);
+                              fetchDepreciationSchedule(item.assetId);
+                              toggleModal("viewDepreciation");
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md text-sm px-3 py-2 transition-all"
+                            title="View Depreciation Schedule"
+                          >
+                            <i className="fa-solid fa-calendar"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -524,6 +544,196 @@ export default function Inventory_table() {
                     Add Asset
                   </button>
                 </form>
+              </div>
+            </div>
+          )}
+          {modals.view && selectedItem && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white p-6 rounded-lg shadow-xl w-[400px] relative">
+                {/* QR Code in Upper Left */}
+                <div className="absolute top-4 left-4 p-2 bg-gray-100 rounded-lg shadow">
+                  <QRCodeCanvas value={qrData} size={70} />
+                </div>
+
+                {/* Header */}
+                <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+                  Asset Details
+                </h2>
+
+                {/* Asset Information */}
+                <div className="space-y-3 text-gray-700">
+                  <p>
+                    <strong className="text-gray-900">Asset Name:</strong>{" "}
+                    {selectedItem.assetName}
+                  </p>
+                  <p>
+                    <strong className="text-gray-900">Asset Code:</strong>{" "}
+                    {selectedItem.assetCode}
+                  </p>
+                  <p>
+                    <strong className="text-gray-900">Location:</strong>{" "}
+                    {selectedItem.assetLocation}
+                  </p>
+                  <p>
+                    <strong className="text-gray-900">Cost:</strong> $
+                    {selectedItem.assetCost}
+                  </p>
+                  <p>
+                    <strong className="text-gray-900">Issued To:</strong>{" "}
+                    {selectedItem.issuedTo}
+                  </p>
+                  <p>
+                    <strong className="text-gray-900">Checked By:</strong>{" "}
+                    {selectedItem.checkedBy}
+                  </p>
+                </div>
+
+                {/* Close Button */}
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={() => toggleModal("view")}
+                    className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg transition duration-200"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {modals.view && selectedItem && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+              <div className="bg-white p-6 rounded-2xl shadow-2xl w-[420px] relative">
+                {/* QR Code in Upper Left */}
+                <div className="absolute top-4 left-4 p-2 bg-gray-100 rounded-lg shadow-md">
+                  <QRCodeCanvas value={qrData} size={75} />
+                </div>
+
+                {/* Header */}
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
+                  📌 Asset Details
+                </h2>
+
+                {/* Divider */}
+                <hr className="border-gray-300 mb-4" />
+
+                {/* Asset Information */}
+                <div className="space-y-3 text-gray-700">
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-900">
+                      Asset Name:
+                    </span>
+                    <span>{selectedItem.assetName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-900">
+                      Asset Code:
+                    </span>
+                    <span>{selectedItem.assetCode}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-900">Location:</span>
+                    <span>{selectedItem.assetLocation}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-900">Cost:</span>
+                    <span className="text-green-600 font-semibold">
+                      ${selectedItem.assetCost}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-900">
+                      Issued To:
+                    </span>
+                    <span>{selectedItem.issuedTo}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-gray-900">
+                      Checked By:
+                    </span>
+                    <span>{selectedItem.checkedBy}</span>
+                  </div>
+                </div>
+
+                {/* Close Button */}
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={() => toggleModal("view")}
+                    className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition duration-200 shadow-md"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {modals.viewDepreciation && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div className="bg-white rounded-2xl shadow-lg w-11/12 md:w-1/2 p-8 relative">
+                {/* Close Button */}
+                <button
+                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
+                  onClick={() => toggleModal("viewDepreciation")}
+                >
+                  &times;
+                </button>
+
+                <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">
+                  Depreciation Schedule
+                </h2>
+
+                {loadingDepreciation ? (
+                  <p className="text-center text-gray-600">Loading...</p>
+                ) : depreciationData ? (
+                  <table className="w-full border-collapse rounded-lg shadow-md">
+                    <thead className="bg-gray-800 text-white">
+                      <tr>
+                        <th className="py-3 px-4 border">Date</th>
+                        <th className="py-3 px-4 border">Year</th>
+                        <th className="py-3 px-4 border">
+                          Depreciation Amount
+                        </th>
+                        <th className="py-3 px-4 border">Remaining Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {depreciationData.map((entry, index) => (
+                        <tr
+                          key={index}
+                          className="border-b border-gray-300 hover:bg-gray-200"
+                        >
+                          {/* Format the date */}
+                          <td className="py-3 px-4 border">
+                            {new Date(
+                              entry.DepreciationDate
+                            ).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </td>
+                          <td className="py-3 px-4 border">
+                            {new Date(
+                              entry.DepreciationDate
+                            ).toLocaleDateString("en-US", {
+                              year: "numeric",
+                            })}
+                          </td>
+                          <td className="py-3 px-4 border">
+                            {entry.DepreciationValue}
+                          </td>
+                          <td className="py-3 px-4 border">
+                            {entry.RemainingValue}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="text-center text-gray-600">
+                    No depreciation data available.
+                  </p>
+                )}
               </div>
             </div>
           )}

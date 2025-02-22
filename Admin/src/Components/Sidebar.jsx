@@ -149,7 +149,16 @@ const Sidebar = () => {
             <li>
               <a href="/AssetInventory" className="flex items-center">
                 <i className="bx bx-package text-xl"></i>
+                
                 <span className="text-white">Asset Inventory</span>
+              </a>
+            </li>
+            <li>
+              <a href="/AssetInventory" className="flex items-center">
+                <i className="bx bx-package text-xl"></i>
+                <span className="text-white">Asset Transfeer
+
+                </span>
               </a>
             </li>
             <li>
