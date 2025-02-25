@@ -547,83 +547,38 @@ export default function Inventory_table() {
               </div>
             </div>
           )}
-          {modals.view && selectedItem && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white p-6 rounded-lg shadow-xl w-[400px] relative">
-                {/* QR Code in Upper Left */}
-                <div className="absolute top-4 left-4 p-2 bg-gray-100 rounded-lg shadow">
-                  <QRCodeCanvas value={qrData} size={70} />
-                </div>
 
-                {/* Header */}
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-                  Asset Details
-                </h2>
-
-                {/* Asset Information */}
-                <div className="space-y-3 text-gray-700">
-                  <p>
-                    <strong className="text-gray-900">Asset Name:</strong>{" "}
-                    {selectedItem.assetName}
-                  </p>
-                  <p>
-                    <strong className="text-gray-900">Asset Code:</strong>{" "}
-                    {selectedItem.assetCode}
-                  </p>
-                  <p>
-                    <strong className="text-gray-900">Location:</strong>{" "}
-                    {selectedItem.assetLocation}
-                  </p>
-                  <p>
-                    <strong className="text-gray-900">Cost:</strong> $
-                    {selectedItem.assetCost}
-                  </p>
-                  <p>
-                    <strong className="text-gray-900">Issued To:</strong>{" "}
-                    {selectedItem.issuedTo}
-                  </p>
-                  <p>
-                    <strong className="text-gray-900">Checked By:</strong>{" "}
-                    {selectedItem.checkedBy}
-                  </p>
-                </div>
-
-                {/* Close Button */}
-                <div className="flex justify-center mt-6">
-                  <button
-                    onClick={() => toggleModal("view")}
-                    className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg transition duration-200"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
           {modals.view && selectedItem && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-              <div className="bg-white p-6 rounded-2xl shadow-2xl w-[420px] relative">
-                {/* QR Code in Upper Left */}
-                <div className="absolute top-4 left-4 p-2 bg-gray-100 rounded-lg shadow-md">
-                  <QRCodeCanvas value={qrData} size={75} />
-                </div>
-
+              <div className="bg-white p-8 rounded-2xl shadow-2xl w-[480px] relative">
                 {/* Header */}
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
+                <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
                   📌 Asset Details
                 </h2>
+
+                {/* QR Code & Asset Info Container */}
+                <div className="flex items-center space-x-6 mb-6">
+                  {/* QR Code */}
+                  <div className="p-3 bg-gray-100 rounded-lg shadow-md">
+                    <QRCodeCanvas value={qrData} size={100} />
+                  </div>
+
+                  {/* Asset Name & Cost */}
+                  <div className="space-y-2">
+                    <div className="text-xl font-semibold text-gray-900">
+                      {selectedItem.assetName}
+                    </div>
+                    <div className="text-lg text-green-600 font-bold">
+                      ${selectedItem.assetCost}
+                    </div>
+                  </div>
+                </div>
 
                 {/* Divider */}
                 <hr className="border-gray-300 mb-4" />
 
                 {/* Asset Information */}
-                <div className="space-y-3 text-gray-700">
-                  <div className="flex justify-between">
-                    <span className="font-medium text-gray-900">
-                      Asset Name:
-                    </span>
-                    <span>{selectedItem.assetName}</span>
-                  </div>
+                <div className="space-y-4 text-gray-700 text-lg">
                   <div className="flex justify-between">
                     <span className="font-medium text-gray-900">
                       Asset Code:
@@ -633,12 +588,6 @@ export default function Inventory_table() {
                   <div className="flex justify-between">
                     <span className="font-medium text-gray-900">Location:</span>
                     <span>{selectedItem.assetLocation}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium text-gray-900">Cost:</span>
-                    <span className="text-green-600 font-semibold">
-                      ${selectedItem.assetCost}
-                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-medium text-gray-900">
@@ -658,7 +607,7 @@ export default function Inventory_table() {
                 <div className="flex justify-center mt-6">
                   <button
                     onClick={() => toggleModal("view")}
-                    className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition duration-200 shadow-md"
+                    className="bg-red-500 hover:bg-red-600 text-white text-lg px-6 py-3 rounded-lg transition duration-200 shadow-md"
                   >
                     Close
                   </button>
@@ -666,7 +615,6 @@ export default function Inventory_table() {
               </div>
             </div>
           )}
-
           {modals.viewDepreciation && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
               <div className="bg-white rounded-2xl shadow-lg w-11/12 md:w-1/2 p-8 relative">
