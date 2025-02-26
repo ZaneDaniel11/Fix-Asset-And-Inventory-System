@@ -16,6 +16,10 @@ export default function Inventory_table() {
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [qrData, setQrData] = useState(null);
+  const [transferData, setTransferData] = useState({
+    newIssuedTo: "",
+    newLocation: "",
+  });
   const [modals, setModals] = useState({
     add: false,
     update: false,
@@ -23,6 +27,7 @@ export default function Inventory_table() {
     view: false,
     addQuantity: false,
     viewDepreciation: false,
+    transfer: false,
   });
   const [depreciationData, setDepreciationData] = useState(null);
   const [loadingDepreciation, setLoadingDepreciation] = useState(false);
@@ -129,8 +134,38 @@ export default function Inventory_table() {
   const handleViewAsset = (item) => {
     setSelectedItem(item); // Store selected item
     toggleModal("view"); // Open the view modal
+    console.log(item);
+  };
+  const toggleTransferModal = () => {
+    setModals((prev) => ({
+      ...prev,
+      transfer: !prev.transfer,
+      view: false, // Close the view modal when opening the transfer modal
+    }));
   };
 
+  const handleTransfer = async () => {
+    if (!transferData.newIssuedTo || !transferData.newLocation) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      await axios.post("http://localhost:5075/api/AssetItemApi/TransferAsset", {
+        assetID: selectedItem.assetId,
+        newOwner: transferData.newIssuedTo,
+        newLocation: transferData.newLocation,
+        remarks:selectedItem.remarks,
+      });
+
+      alert("Asset transferred successfully!");
+      setModals((prev) => ({ ...prev, transfer: false })); // Close transfer modal
+      fetchAssets(); // Refresh asset list
+    } catch (error) {
+      console.error("Error transferring asset:", error);
+      alert("Transfer failed.");
+    }
+  };
   const handleAddAssetItem = async (e) => {
     e.preventDefault();
 
@@ -303,6 +338,7 @@ export default function Inventory_table() {
                           <button
                             onClick={() => {
                               setSelectedItem(item);
+                             
                               toggleModal("delete");
                             }}
                             className="bg-red-600 hover:bg-red-700 text-white font-medium rounded-md text-sm px-3 py-2 transition-all"
@@ -548,73 +584,120 @@ export default function Inventory_table() {
             </div>
           )}
 
-          {modals.view && selectedItem && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-              <div className="bg-white p-8 rounded-2xl shadow-2xl w-[480px] relative">
-                {/* Header */}
-                <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-                  📌 Asset Details
-                </h2>
+         
+         {/* Asset Details Modal */}
+         {modals.view && selectedItem && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl w-[480px] relative">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
+              📌 Asset Details
+            </h2>
 
-                {/* QR Code & Asset Info Container */}
-                <div className="flex items-center space-x-6 mb-6">
-                  {/* QR Code */}
-                  <div className="p-3 bg-gray-100 rounded-lg shadow-md">
-                    <QRCodeCanvas value={qrData} size={100} />
-                  </div>
+            <div className="flex items-center space-x-6 mb-6">
+              {/* QR Code */}
+              <div className="p-3 bg-gray-100 rounded-lg shadow-md">
+                <QRCodeCanvas value={selectedItem.assetCode} size={100} />
+              </div>
 
-                  {/* Asset Name & Cost */}
-                  <div className="space-y-2">
-                    <div className="text-xl font-semibold text-gray-900">
-                      {selectedItem.assetName}
-                    </div>
-                    <div className="text-lg text-green-600 font-bold">
-                      ${selectedItem.assetCost}
-                    </div>
-                  </div>
+              <div className="space-y-2">
+                <div className="text-xl font-semibold text-gray-900">
+                  {selectedItem.assetName}
                 </div>
-
-                {/* Divider */}
-                <hr className="border-gray-300 mb-4" />
-
-                {/* Asset Information */}
-                <div className="space-y-4 text-gray-700 text-lg">
-                  <div className="flex justify-between">
-                    <span className="font-medium text-gray-900">
-                      Asset Code:
-                    </span>
-                    <span>{selectedItem.assetCode}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium text-gray-900">Location:</span>
-                    <span>{selectedItem.assetLocation}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium text-gray-900">
-                      Issued To:
-                    </span>
-                    <span>{selectedItem.issuedTo}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium text-gray-900">
-                      Checked By:
-                    </span>
-                    <span>{selectedItem.checkedBy}</span>
-                  </div>
-                </div>
-
-                {/* Close Button */}
-                <div className="flex justify-center mt-6">
-                  <button
-                    onClick={() => toggleModal("view")}
-                    className="bg-red-500 hover:bg-red-600 text-white text-lg px-6 py-3 rounded-lg transition duration-200 shadow-md"
-                  >
-                    Close
-                  </button>
+                <div className="text-lg text-green-600 font-bold">
+                  ${selectedItem.assetCost}
                 </div>
               </div>
             </div>
-          )}
+
+            <hr className="border-gray-300 mb-4" />
+
+            {/* Asset Information */}
+            <div className="space-y-4 text-gray-700 text-lg">
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-900">Asset Code:</span>
+                <span>{selectedItem.assetCode}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-900">Location:</span>
+                <span>{selectedItem.assetLocation}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-900">Issued To:</span>
+                <span>{selectedItem.issuedTo}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-900">Checked By:</span>
+                <span>{selectedItem.checkedBy}</span>
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex justify-between mt-6">
+              <button
+                onClick={() => toggleModal("view")}
+                className="bg-red-500 hover:bg-red-600 text-white text-lg px-6 py-3 rounded-lg transition duration-200 shadow-md"
+              >
+                Close
+              </button>
+              <button
+                onClick={toggleTransferModal}
+                className="bg-blue-500 hover:bg-blue-600 text-white text-lg px-6 py-3 rounded-lg transition duration-200 shadow-md"
+              >
+                Transfer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Transfer Modal */}
+      {modals.transfer && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl w-[400px] relative">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+              🔄 Transfer Asset
+            </h2>
+
+            <label className="block text-lg font-medium text-gray-700 mb-2">
+              New Issued To:
+            </label>
+            <input
+              type="text"
+              className="w-full border border-gray-300 p-2 rounded-lg mb-4"
+              value={transferData.newIssuedTo}
+              onChange={(e) =>
+                setTransferData({ ...transferData, newIssuedTo: e.target.value })
+              }
+            />
+
+            <label className="block text-lg font-medium text-gray-700 mb-2">
+              New Location:
+            </label>
+            <input
+              type="text"
+              className="w-full border border-gray-300 p-2 rounded-lg mb-4"
+              value={transferData.newLocation}
+              onChange={(e) =>
+                setTransferData({ ...transferData, newLocation: e.target.value })
+              }
+            />
+
+            <div className="flex justify-between">
+              <button
+                onClick={toggleTransferModal}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleTransfer}
+                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-200"
+              >
+                Confirm Transfer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
           {modals.viewDepreciation && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
               <div className="bg-white rounded-2xl shadow-lg w-11/12 md:w-1/2 p-8 relative">
