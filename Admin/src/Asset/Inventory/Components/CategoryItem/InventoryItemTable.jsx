@@ -584,71 +584,88 @@ export default function Inventory_table() {
             </div>
           )}
 
-         
-         {/* Asset Details Modal */}
-         {modals.view && selectedItem && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl w-[480px] relative">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-              📌 Asset Details
-            </h2>
+     {/* Asset Details Modal */}
+{modals.view && selectedItem && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+    <div className="bg-white p-8 rounded-2xl shadow-2xl w-[480px] relative">
+      <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
+        📌 Asset Details
+      </h2>
 
-            <div className="flex items-center space-x-6 mb-6">
-              {/* QR Code */}
-              <div className="p-3 bg-gray-100 rounded-lg shadow-md">
-                <QRCodeCanvas value={selectedItem.assetCode} size={100} />
-              </div>
+      <div className="flex items-center space-x-6 mb-6">
+        {/* QR Code */}
+        <div className="p-3 bg-gray-100 rounded-lg shadow-md">
+          <QRCodeCanvas value={selectedItem.assetCode} size={100} />
+        </div>
 
-              <div className="space-y-2">
-                <div className="text-xl font-semibold text-gray-900">
-                  {selectedItem.assetName}
-                </div>
-                <div className="text-lg text-green-600 font-bold">
-                  ${selectedItem.assetCost}
-                </div>
-              </div>
-            </div>
-
-            <hr className="border-gray-300 mb-4" />
-
-            {/* Asset Information */}
-            <div className="space-y-4 text-gray-700 text-lg">
-              <div className="flex justify-between">
-                <span className="font-medium text-gray-900">Asset Code:</span>
-                <span>{selectedItem.assetCode}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium text-gray-900">Location:</span>
-                <span>{selectedItem.assetLocation}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium text-gray-900">Issued To:</span>
-                <span>{selectedItem.issuedTo}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium text-gray-900">Checked By:</span>
-                <span>{selectedItem.checkedBy}</span>
-              </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-between mt-6">
-              <button
-                onClick={() => toggleModal("view")}
-                className="bg-red-500 hover:bg-red-600 text-white text-lg px-6 py-3 rounded-lg transition duration-200 shadow-md"
-              >
-                Close
-              </button>
-              <button
-                onClick={toggleTransferModal}
-                className="bg-blue-500 hover:bg-blue-600 text-white text-lg px-6 py-3 rounded-lg transition duration-200 shadow-md"
-              >
-                Transfer
-              </button>
-            </div>
+        <div className="space-y-2">
+          <div className="text-xl font-semibold text-gray-900">
+            {selectedItem.assetName}
+          </div>
+          <div className="text-lg text-green-600 font-bold">
+            ${selectedItem.assetCost}
           </div>
         </div>
-      )}
+      </div>
+
+      <hr className="border-gray-300 mb-4" />
+
+      {/* Asset Information */}
+      <div className="space-y-4 text-gray-700 text-lg">
+        <div className="flex justify-between">
+          <span className="font-medium text-gray-900">Asset Code:</span>
+          <span>{selectedItem.assetCode}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="font-medium text-gray-900">Location:</span>
+          <span>{selectedItem.assetLocation}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="font-medium text-gray-900">Issued To:</span>
+          <span>{selectedItem.issuedTo}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="font-medium text-gray-900">Checked By:</span>
+          <span>{selectedItem.checkedBy}</span>
+        </div>
+        {/* Asset Status */}
+        <div className="flex justify-between items-center">
+          <span className="font-medium text-gray-900">Status:</span>
+          <span
+            className={`px-3 py-1 text-sm font-semibold rounded-full ${
+              selectedItem.status === "Available"
+                ? "bg-green-200 text-green-800"
+                : selectedItem.status === "In Use"
+                ? "bg-blue-200 text-blue-800"
+                : selectedItem.status === "Maintenance"
+                ? "bg-yellow-200 text-yellow-800"
+                : "bg-red-200 text-red-800"
+            }`}
+          >
+            {selectedItem.status}
+          </span>
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex justify-between mt-6">
+        <button
+          onClick={() => toggleModal("view")}
+          className="bg-red-500 hover:bg-red-600 text-white text-lg px-6 py-3 rounded-lg transition duration-200 shadow-md"
+        >
+          Close
+        </button>
+        <button
+          onClick={toggleTransferModal}
+          className="bg-blue-500 hover:bg-blue-600 text-white text-lg px-6 py-3 rounded-lg transition duration-200 shadow-md"
+        >
+          Transfer
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       {/* Transfer Modal */}
       {modals.transfer && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
