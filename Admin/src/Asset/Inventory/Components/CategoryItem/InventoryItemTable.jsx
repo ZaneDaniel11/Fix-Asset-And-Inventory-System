@@ -337,9 +337,7 @@ export default function Inventory_table() {
 
                           <button
                             onClick={() => {
-                              setSelectedItem(item);
-                             
-                              toggleModal("delete");
+                              setSelectedItem(item)
                             }}
                             className="bg-red-600 hover:bg-red-700 text-white font-medium rounded-md text-sm px-3 py-2 transition-all"
                             title="Delete Item"
@@ -633,16 +631,16 @@ export default function Inventory_table() {
           <span className="font-medium text-gray-900">Status:</span>
           <span
             className={`px-3 py-1 text-sm font-semibold rounded-full ${
-              selectedItem.status === "Available"
+              selectedItem.assetStatus === "Available"
                 ? "bg-green-200 text-green-800"
-                : selectedItem.status === "In Use"
+                : selectedItem.assetStatus === "In Use"
                 ? "bg-blue-200 text-blue-800"
-                : selectedItem.status === "Maintenance"
+                : selectedItem.assetStatus === "Maintenance"
                 ? "bg-yellow-200 text-yellow-800"
                 : "bg-red-200 text-red-800"
             }`}
           >
-            {selectedItem.status}
+            {selectedItem.assetStatus}
           </span>
         </div>
       </div>
