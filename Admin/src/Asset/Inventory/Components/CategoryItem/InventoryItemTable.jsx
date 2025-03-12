@@ -628,7 +628,7 @@ export default function Inventory_table() {
         </div>
         {/* Asset Status */}
         <div className="flex justify-between items-center">
-          <span className="font-medium text-gray-900">Status:</span>
+  <span className="font-medium text-gray-900">Status:</span>
           <span
             className={`px-3 py-1 text-sm font-semibold rounded-full ${
               selectedItem.assetStatus === "Available"
