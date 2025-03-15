@@ -373,7 +373,7 @@ export default function Inventory_table() {
 
           {modals.add && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-              <div className="bg-white rounded-2xl shadow-lg w-11/12 md:w-1/2 p-8 relative">
+              <div className="bg-white rounded-2xl shadow-lg w-11/12 md:w-3/4 lg:w-1/2 max-h-screen overflow-y-auto p-8 relative">
                 {/* Close Button */}
                 <button
                   className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
@@ -569,6 +569,58 @@ export default function Inventory_table() {
                       />
                     </div>
                   </div>
+
+                {/* ASSET WARANTY AREA */}
+        {/* Warranty Details */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="text-sm font-medium text-gray-700">Warranty Start Date</label>
+            <input
+              type="date"
+              name="WarrantyStartDate"
+              value={addItem.WarrantyStartDate}
+              onChange={handleInputChange}
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-700">Warranty Expiration Date</label>
+            <input
+              type="date"
+              name="WarrantyExpirationDate"
+              value={addItem.WarrantyExpirationDate}
+              onChange={handleInputChange}
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="text-sm font-medium text-gray-700">Warranty Vendor</label>
+            <input
+              type="text"
+              name="WarrantyVendor"
+              value={addItem.WarrantyVendor}
+              onChange={handleInputChange}
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-700">Warranty Contact</label>
+            <input
+              type="text"
+              name="WarrantyContact"
+              value={addItem.WarrantyContact}
+              onChange={handleInputChange}
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+        </div>
 
                   {/* Submit Button */}
                   <button
