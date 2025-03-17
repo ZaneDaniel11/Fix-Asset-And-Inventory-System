@@ -35,12 +35,12 @@ const ReportDashboard = () => {
   const [chartType, setChartType] = useState("pie")
   const [activeTab, setActiveTab] = useState("count")
   const [summaryData, setSummaryData] = useState({
+    totalAssets: 0,
     totalValue: 0,
+    averageValue: 0,
     categoriesCount: 0,
     currentDate: new Date().toLocaleDateString(),
   })
-
-  const [totalasset, setTotalAsset] = useState([])
   const [isFiltered, setIsFiltered] = useState(false)
 
   // Color palette for charts
@@ -87,7 +87,7 @@ const ReportDashboard = () => {
       const response = await fetch(url)
       const data = await response.json()
       console.log("Raw API response:", data)
-      setTotalAsset(data)
+
       if (!Array.isArray(data)) {
         console.error("API did not return an array:", data)
         setAssetCategories([])
@@ -97,30 +97,25 @@ const ReportDashboard = () => {
 
       // Process data for charts - ensure proper case mapping
       const processedData = data.map((item, index) => {
-        // Debug each item
-        console.log("Processing item:", item)
-
         return {
           ...item,
           fill: COLORS[index % COLORS.length],
-          Count: item.assetCount || 0,
-          Value: item.currentTotalValue || 0,
-          CategoryName: item.categoryName || `Category ${index + 1}`,
         }
       })
 
       console.log("Processed data for charts:", processedData)
       setAssetCategories(processedData)
 
-      // Calculate summary data
-      
-      const totalValue = processedData.reduce((sum, item) => sum + (item.currentTotalValue || 0), 0)
-
-      setSummaryData({
-        totalValue,
-        categoriesCount: processedData.length,
-        currentDate: new Date().toLocaleDateString(),
-      })
+      // Get summary data from the first item (all items have the same summary data)
+      if (data.length > 0) {
+        setSummaryData({
+          totalAssets: data[0].TotalAssetCount || 0,
+          totalValue: data[0].TotalAssetValue || 0,
+          averageValue: data[0].AverageAssetValue || 0,
+          categoriesCount: processedData.length,
+          currentDate: new Date().toLocaleDateString(),
+        })
+      }
 
       setIsLoading(false)
     } catch (error) {
@@ -131,8 +126,6 @@ const ReportDashboard = () => {
 
   useEffect(() => {
     fetchData(true) // Initial load with default filters
-
-    console.log(totalasset)
   }, [])
 
   // Handle refresh button click
@@ -159,11 +152,10 @@ const ReportDashboard = () => {
         <div className="bg-white p-4 border border-gray-200 shadow-lg rounded-lg">
           <p className="font-semibold text-gray-800">{payload[0].payload.CategoryName}</p>
           <p className="text-sm text-gray-600">
-            <span className="font-medium">Count:</span> {payload[0].payload.assetCount || payload[0].payload.Count}
+            <span className="font-medium">Count:</span> {payload[0].payload.AssetCount}
           </p>
           <p className="text-sm text-gray-600">
-            <span className="font-medium">Value:</span>{" "}
-            {formatCurrency(payload[0].payload.currentTotalValue || payload[0].payload.Value)}
+            <span className="font-medium">Value:</span> {formatCurrency(payload[0].payload.CurrentTotalValue)}
           </p>
         </div>
       )
@@ -225,11 +217,7 @@ const ReportDashboard = () => {
         <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
           <CardHeader className="pb-2">
             <CardDescription className="text-sm font-medium text-emerald-500">Average Value</CardDescription>
-            <CardTitle className="text-3xl font-bold">
-              {summaryData.totalAssets > 0
-                ? formatCurrency(summaryData.totalValue / summaryData.totalAssets)
-                : formatCurrency(0)}
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold">{formatCurrency(summaryData.averageValue)}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-500 text-sm">Average value per asset</p>
@@ -405,8 +393,8 @@ const ReportDashboard = () => {
                         <PieChart>
                           <Pie
                             data={assetCategories}
-                            dataKey="assetCount"
-                            nameKey="categoryName"
+                            dataKey="AssetCount"
+                            nameKey="CategoryName"
                             cx="50%"
                             cy="50%"
                             outerRadius={130}
@@ -426,24 +414,24 @@ const ReportDashboard = () => {
                       {chartType === "bar" && (
                         <BarChart data={assetCategories} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                          <XAxis dataKey="categoryName" />
+                          <XAxis dataKey="CategoryName" />
                           <YAxis />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend />
-                          <Bar dataKey="assetCount" name="Asset Count" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="AssetCount" name="Asset Count" fill="#4f46e5" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       )}
 
                       {chartType === "line" && (
                         <AreaChart data={assetCategories} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                          <XAxis dataKey="categoryName" />
+                          <XAxis dataKey="CategoryName" />
                           <YAxis />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend />
                           <Area
                             type="monotone"
-                            dataKey="assetCount"
+                            dataKey="AssetCount"
                             name="Asset Count"
                             stroke="#4f46e5"
                             fill="#4f46e5"
@@ -460,8 +448,8 @@ const ReportDashboard = () => {
                         <PieChart>
                           <Pie
                             data={assetCategories}
-                            dataKey="currentTotalValue"
-                            nameKey="categoryName"
+                            dataKey="CurrentTotalValue"
+                            nameKey="CategoryName"
                             cx="50%"
                             cy="50%"
                             outerRadius={130}
@@ -481,24 +469,24 @@ const ReportDashboard = () => {
                       {chartType === "bar" && (
                         <BarChart data={assetCategories} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                          <XAxis dataKey="categoryName" />
+                          <XAxis dataKey="CategoryName" />
                           <YAxis tickFormatter={(value) => formatCurrency(value)} />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend />
-                          <Bar dataKey="currentTotalValue" name="Asset Value" fill="#10b981" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="CurrentTotalValue" name="Asset Value" fill="#10b981" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       )}
 
                       {chartType === "line" && (
                         <AreaChart data={assetCategories} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                          <XAxis dataKey="categoryName" />
+                          <XAxis dataKey="CategoryName" />
                           <YAxis tickFormatter={(value) => formatCurrency(value)} />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend />
                           <Area
                             type="monotone"
-                            dataKey="currentTotalValue"
+                            dataKey="CurrentTotalValue"
                             name="Asset Value"
                             stroke="#10b981"
                             fill="#10b981"
