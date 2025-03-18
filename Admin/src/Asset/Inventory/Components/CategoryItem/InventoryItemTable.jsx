@@ -145,18 +145,26 @@ export default function Inventory_table() {
   };
 
   const handleTransfer = async () => {
+    const storedName = localStorage.getItem("name");
     if (!transferData.newIssuedTo || !transferData.newLocation) {
       alert("Please fill in all fields.");
       return;
     }
 
     try {
-      await axios.post("http://localhost:5075/api/AssetItemApi/TransferAsset", {
-        assetID: selectedItem.assetId,
-        newOwner: transferData.newIssuedTo,
-        newLocation: transferData.newLocation,
-        remarks:selectedItem.remarks,
-      });
+      await axios.post("http://localhost:5075/api/AssetItemApi/TransferAsset", 
+        {
+          AssetID: selectedItem.assetId,
+          NewOwner: transferData.newIssuedTo,
+          NewLocation: transferData.newLocation,
+          Remarks: selectedItem.remarks,
+          performedBy:storedName
+        }, 
+        {
+          headers: { "Content-Type": "application/json" }
+        }
+      );
+      
 
       alert("Asset transferred successfully!");
       setModals((prev) => ({ ...prev, transfer: false })); // Close transfer modal
