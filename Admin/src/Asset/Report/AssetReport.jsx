@@ -1,4 +1,7 @@
 import { useState } from "react";
+import DatePicker from "react-date-picker"; // ✅ Fixed import
+import "react-date-picker/dist/DatePicker.css";
+import "react-calendar/dist/Calendar.css";
 import {
   BarChart,
   Bar,
@@ -19,13 +22,10 @@ import {
   SelectContent,
   SelectItem,
 } from "../../Components/ui/select";
-import DatePicker from "react-date-picker";
-import "react-date-picker/dist/DatePicker.css";
-import "react-calendar/dist/Calendar.css";
 
 const ReportDashboard = () => {
   const [reportType, setReportType] = useState("warranty");
-  const [dateRange, setDateRange] = useState(null);
+  const [dateRange, setDateRange] = useState(new Date());
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
 
@@ -45,7 +45,7 @@ const ReportDashboard = () => {
         {/* Report Type Selection */}
         <Select value={reportType} onValueChange={setReportType}>
           <SelectTrigger className="w-full bg-gray-200 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-300 transition">
-            {reportType ? reportType.charAt(0).toUpperCase() + reportType.slice(1) : "Select Report Type"}
+            {reportType.charAt(0).toUpperCase() + reportType.slice(1)}
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="warranty">Asset Warranty</SelectItem>
@@ -57,14 +57,15 @@ const ReportDashboard = () => {
 
         {/* Date Picker (Hidden for Depreciation) */}
         {reportType !== "depreciation" && (
-          <div className="bg-gray-200 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-300 transition">
-            <DatePicker
-              onChange={setDateRange}
-              value={dateRange}
-              format="y-MM-dd"
-              clearIcon={null}
-              calendarIcon={null}
-            />
+          <div className="relative">
+       <DatePicker
+            onChange={setDateRange}
+            value={dateRange}
+            format="y-MM-dd"
+            clearIcon={null}
+            calendarIcon={null}
+            className="border border-gray-300 rounded-lg px-3 py-2 w-40 bg-white shadow-sm"
+         />
           </div>
         )}
 
@@ -101,13 +102,14 @@ const ReportDashboard = () => {
           <ResponsiveContainer width="100%" height="100%">
             {reportType === "warranty" && (
               <PieChart>
-                <Pie
-                  data={mockData}
-                  dataKey="value"
-                  nameKey="name"
-                  fill="#4F46E5"
-                  label
-                />
+              <Pie
+                data={mockData}
+                dataKey="value"
+                fill="#6366F1" 
+                stroke="white" 
+                strokeWidth={2} 
+                label
+                />  
                 <Tooltip />
               </PieChart>
             )}
