@@ -167,6 +167,12 @@ const Sidebar = () => {
                 <span className="text-white">Schedule</span>
               </a>
             </li>
+            <li>
+              <a href="/Reports" className="flex items-center">
+                <i className="bx bx-calendar text-xl"></i>
+                <span className="text-white">Reports</span>
+              </a>
+            </li>
           </>
         )}
 
