@@ -19,6 +19,7 @@ import AssetInventory from "./Asset/Inventory/AInventory.jsx";
 import AssetInvenTable from "./Asset/Inventory/Components/CategoryItem/InventoryItemTable.jsx";
 import Schedule from "./Asset/Schedule/Schedule.jsx";
 import AssetTransfers from "./Asset/AssetTransfer/Asset_Trasnfer.jsx"
+import Reports from "./Asset/Report/AssetReport.jsx";
 import { ToastContainer } from "react-toastify";
 
 // User Side
@@ -233,6 +234,15 @@ function App() {
             element={
               <ProtectedRoute
                 element={<AssetInventory />}
+                allowedUsertypes={["Asset_Admin"]}
+              />
+            }
+          />
+            <Route
+            path="/Reports"
+            element={
+              <ProtectedRoute
+                element={<Reports />}
                 allowedUsertypes={["Asset_Admin"]}
               />
             }
