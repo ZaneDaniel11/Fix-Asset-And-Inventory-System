@@ -1,5 +1,5 @@
-import { useState } from "react";
-import DatePicker from "react-date-picker"; // ✅ Fixed import
+import { useState, useEffect } from "react";
+import DatePicker from "react-date-picker";
 import "react-date-picker/dist/DatePicker.css";
 import "react-calendar/dist/Calendar.css";
 import {
@@ -14,6 +14,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Cell,
 } from "recharts";
 import { Card, CardContent } from "../../Components/ui/card";
 import {
@@ -28,12 +29,24 @@ const ReportDashboard = () => {
   const [dateRange, setDateRange] = useState(new Date());
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
+  const [assetCategories, setAssetCategories] = useState([]);
 
-  const mockData = [
-    { name: "Laptop", value: 30 },
-    { name: "Monitor", value: 20 },
-    { name: "Printer", value: 10 },
-  ];
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
+  useEffect(() => {
+    // Fetch asset category data from API
+    const fetchCategoryData = async () => {
+      try {
+        const response = await fetch("http://localhost:5075/api/AssetItemApi/asset-category-summary");
+        const data = await response.json();
+        setAssetCategories(data);
+      } catch (error) {
+        console.error("Error fetching asset categories:", error);
+      }
+    };
+
+    fetchCategoryData();
+  }, []);
 
   return (
     <div className="p-6 space-y-6 bg-gray-100 min-h-screen">
@@ -58,14 +71,14 @@ const ReportDashboard = () => {
         {/* Date Picker (Hidden for Depreciation) */}
         {reportType !== "depreciation" && (
           <div className="relative">
-       <DatePicker
-            onChange={setDateRange}
-            value={dateRange}
-            format="y-MM-dd"
-            clearIcon={null}
-            calendarIcon={null}
-            className="border border-gray-300 rounded-lg px-3 py-2 w-40 bg-white shadow-sm"
-         />
+            <DatePicker
+              onChange={setDateRange}
+              value={dateRange}
+              format="y-MM-dd"
+              clearIcon={null}
+              calendarIcon={null}
+              className="border border-gray-300 rounded-lg px-3 py-2 w-40 bg-white shadow-sm"
+            />
           </div>
         )}
 
@@ -102,35 +115,42 @@ const ReportDashboard = () => {
           <ResponsiveContainer width="100%" height="100%">
             {reportType === "warranty" && (
               <PieChart>
-              <Pie
-                data={mockData}
-                dataKey="value"
-                fill="#6366F1" 
-                stroke="white" 
-                strokeWidth={2} 
-                label
-                />  
+                <Pie
+                  data={assetCategories}
+                  dataKey="Count"
+                  nameKey="CategoryName"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  fill="#8884d8"
+                  label
+                >
+                  {assetCategories.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
                 <Tooltip />
+                <Legend />
               </PieChart>
             )}
 
             {reportType === "maintenance" && (
-              <LineChart data={mockData}>
-                <XAxis dataKey="name" />
+              <LineChart data={assetCategories}>
+                <XAxis dataKey="CategoryName" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="value" stroke="#10B981" strokeWidth={3} />
+                <Line type="monotone" dataKey="Count" stroke="#10B981" strokeWidth={3} />
               </LineChart>
             )}
 
             {reportType === "depreciation" && (
-              <BarChart data={mockData}>
-                <XAxis dataKey="name" />
+              <BarChart data={assetCategories}>
+                <XAxis dataKey="CategoryName" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="value" fill="#F59E0B" barSize={40} radius={[5, 5, 0, 0]} />
+                <Bar dataKey="Count" fill="#F59E0B" barSize={40} radius={[5, 5, 0, 0]} />
               </BarChart>
             )}
           </ResponsiveContainer>

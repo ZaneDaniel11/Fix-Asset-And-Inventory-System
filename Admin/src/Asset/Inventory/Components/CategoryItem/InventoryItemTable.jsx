@@ -17,6 +17,7 @@ export default function Inventory_table() {
   const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [qrData, setQrData] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [transferData, setTransferData] = useState({
     newIssuedTo: "",
     newLocation: "",
@@ -59,6 +60,7 @@ export default function Inventory_table() {
     DepreciationPeriodType: "month",
     DepreciationPeriodValue: 0,
   });
+  
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -660,98 +662,116 @@ export default function Inventory_table() {
           )}
 
 {modals.view && selectedItem && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md animate-slideIn">
-    <div className="bg-white p-8 rounded-3xl shadow-xl w-[750px] relative">
-      
-      {/* Header */}
-      <div className="flex justify-between items-center border-b pb-4 mb-6">
-        <h2 className="text-3xl font-bold text-gray-900">📌 Asset Overview</h2>
-        <button
-          onClick={() => toggleModal("view")}
-          className="text-gray-500 hover:text-gray-800 transition"
-        >
-          ✖
-        </button>
-      </div>
+   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md animate-slideIn">
+   <div className="bg-white p-8 rounded-3xl shadow-xl w-[750px] relative">
+     
+     {/* Header with "View More" Button */}
+     <div className="flex justify-between items-center border-b pb-4 mb-6">
+       <h2 className="text-3xl font-bold text-gray-900">📌 Asset Overview</h2>
+       <button
+         onClick={() => setIsExpanded(!isExpanded)}
+         className="text-blue-500 hover:text-blue-700 font-semibold"
+       >
+         {isExpanded ? "Hide Details ⬆️" : "View More ⬇️"}
+       </button>
+     </div>
 
-      {/* QR Code & Asset Overview */}
-      <div className="flex items-center space-x-6 mb-6">
-        {/* QR Code */}
-        <div className="p-4 bg-gray-100 rounded-xl shadow-md">
-          <QRCodeCanvas value={selectedItem.assetCode} size={130} />
-        </div>
+     {/* Basic Details & QR Code */}
+     <div className="flex items-center space-x-6 mb-6">
+       {/* QR Code */}
+       <div className="p-4 bg-gray-100 rounded-xl shadow-md">
+         <QRCodeCanvas value={selectedItem.assetCode} size={130} />
+       </div>
 
-        {/* Asset Information */}
-        <div className="space-y-2">
-          <h3 className="text-2xl font-semibold text-gray-900">{selectedItem.category}</h3>
-          <p className="text-lg text-green-600 font-bold">
-            💰 Cost: <span className="text-gray-800">${selectedItem.assetCost}</span>
-          </p>
-          <p className="text-lg text-blue-600 font-bold">
-            📉 Current Value ({formatDate(new Date())}):  
-            <span className="text-gray-800"> ${calculateCurrentValue(selectedItem.assetCost, selectedItem.depreciationRate, selectedItem.datePurchased)}</span>
-          </p>
-        </div>
-      </div>
+       {/* Essential Asset Information */}
+       <div className="space-y-2">
+         <h3 className="text-2xl font-semibold text-gray-900">{selectedItem.assetName}</h3>
+         <p className="text-lg text-green-600 font-bold">
+           💰 Cost: <span className="text-gray-800">${selectedItem.assetCost}</span>
+         </p>
+         <p className="text-lg text-blue-600 font-bold">
+           📉 Current Value ({formatDate(new Date())}):  
+           <span className="text-gray-800"> ${calculateCurrentValue(selectedItem.assetCost, selectedItem.depreciationRate, selectedItem.datePurchased)}</span>
+         </p>
+       </div>
+     </div>
 
-      {/* Details Grid */}
-      <div className="grid grid-cols-2 gap-6 text-gray-700 text-lg mb-6">
-        {[
-          ["ID", selectedItem.assetId],
-          ["Asset Code", selectedItem.assetCode],
-          ["Issued To", selectedItem.issuedTo],
-          ["Location", selectedItem.assetLocation],
-          ["Checked By", selectedItem.checkedBy],
-          ["Disposal Date", formatDate(selectedItem.disposalDate)],
-        ].map(([label, value]) => (
-          <div key={label} className="flex justify-between">
-            <span className="font-medium text-gray-900">{label}:</span>
-            <span>{value || "N/A"}</span>
-          </div>
-        ))}
-      </div>
+     {/* Expanded Section (Collapsible) */}
+     {isExpanded && (
+       <div className="grid grid-cols-2 gap-6 text-gray-700 text-lg mb-6 animate-fadeIn">
+         {[
+           ["Asset Code", selectedItem.assetCode],
+           ["Issued To", selectedItem.issuedTo],
+           ["Vendor", selectedItem.assetVendor],
+           ["Checked By", selectedItem.checkedBy],
+           ["Location", selectedItem.assetLocation],
+           ["Remarks", selectedItem.remarks],
+           ["Warranty Start", formatDate(selectedItem.warrantyStartDate)],
+           ["Warranty Expiry", formatDate(selectedItem.warrantyExpirationDate)],
+           ["Warranty Vendor", selectedItem.warrantyVendor],
+           ["Warranty Contact", selectedItem.warrantyContact],
+           ["Asset Type", selectedItem.assetStype],
+           ["Preventive Maintenance", selectedItem.assetPreventiveMaintenace],
+           ["Notes", selectedItem.notes],
+           ["Operation Start", formatDate(selectedItem.operationStartDate)],
+           ["Operation End", formatDate(selectedItem.operationEndDate)],
+           ["Disposal Date", formatDate(selectedItem.disposalDate)],
+           ["Depreciation Rate", selectedItem.depreciationRate ? `${selectedItem.depreciationRate}%` : "N/A"],
+           ["Depreciation Period", selectedItem.depreciationPeriodValue || "N/A"],
+         ].map(([label, value]) => (
+           <div key={label} className="flex justify-between">
+             <span className="font-medium text-gray-900">{label}:</span>
+             <span>{value || "N/A"}</span>
+           </div>
+         ))}
+       </div>
+     )}
 
-      {/* Status Badge */}
-      <div className="mt-4 flex justify-between items-center">
-        <span className="font-medium text-gray-900">Status:</span>
-        <span
-          className={`px-5 py-2 text-md font-semibold rounded-full shadow-sm transition ${
-            selectedItem.assetStatus === "Available"
-              ? "bg-green-200 text-green-800"
-              : selectedItem.assetStatus === "In Use"
-              ? "bg-blue-200 text-blue-800"
-              : selectedItem.assetStatus === "Maintenance"
-              ? "bg-yellow-200 text-yellow-800"
-              : "bg-red-200 text-red-800"
-          }`}
-        >
-          {selectedItem.assetStatus}
-        </span>
-      </div>
+     {/* Status Badge */}
+     <div className="mt-4 flex justify-between items-center">
+       <span className="font-medium text-gray-900">Status:</span>
+       <span
+         className={`px-5 py-2 text-md font-semibold rounded-full shadow-sm transition ${
+           selectedItem.assetStatus === "Active"
+             ? "bg-green-200 text-green-800"
+             : selectedItem.assetStatus === "In Use"
+             ? "bg-blue-200 text-blue-800"
+             : selectedItem.assetStatus === "Maintenance"
+             ? "bg-yellow-200 text-yellow-800"
+             : "bg-red-200 text-red-800"
+         }`}
+       >
+         {selectedItem.assetStatus}
+       </span>
+     </div>
 
-      {/* Buttons */}
-      <div className="flex justify-between mt-8">
-        <button
-          onClick={() => toggleModal("view")}
-          className="bg-red-500 hover:bg-red-600 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
-        >
-          Close
-        </button>
-        <button
-          onClick={toggleTransferModal}
-          className="bg-blue-500 hover:bg-blue-600 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
-        >
-          Transfer
-        </button>
-        <button
-          onClick={() => viewHistorical(selectedItem.assetId)}
-          className="bg-gray-800 hover:bg-gray-900 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
-        >
-          View History
-        </button>
-      </div>
+     {/* Buttons */}
+     <div className="flex justify-between mt-8">
+  <button
+    onClick={() => toggleModal("view")}
+    className="bg-red-500 hover:bg-red-600 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
+  >
+    Close
+  </button>
+
+    <div className="flex space-x-4">
+      <button
+        onClick={() => toggleModal("transfer")}
+        className="bg-yellow-500 hover:bg-yellow-600 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
+      >
+        Transfer Asset
+      </button>
+
+      <button
+        // onClick={viewHistorical}
+        className="bg-gray-800 hover:bg-gray-900 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
+      >
+        View History
+      </button>
     </div>
-  </div>
+    </div>
+   </div>
+ </div>
 )}
 
       {/* Transfer Modal */}
