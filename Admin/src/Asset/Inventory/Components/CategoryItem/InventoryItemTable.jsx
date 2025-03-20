@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
 import axios from "axios";
+import { format } from "date-fns"; 
 
 // import { fetchData } from "../utilities/ApiUti";
 const API_URL = "http://localhost:5075/api/AssetItemApi/";
@@ -59,6 +60,22 @@ export default function Inventory_table() {
     DepreciationPeriodValue: 0,
   });
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return format(new Date(dateString), "MMMM dd, yyyy"); // e.g., July 23, 2205
+  };
+  
+  // Function to calculate current asset value
+  const calculateCurrentValue = (cost, rate, purchaseDate) => {
+    if (!cost || !rate || !purchaseDate) return cost;
+  
+    const purchase = new Date(purchaseDate);
+    const today = new Date();
+    const yearsElapsed = (today - purchase) / (1000 * 60 * 60 * 24 * 365);
+  
+    let depreciationAmount = (rate / 100) * cost * yearsElapsed;
+    return Math.max(1, (cost - depreciationAmount).toFixed(2)); // Prevent negative values
+  };
   const toggleModal = (type) => {
     setModals((prev) => ({ ...prev, [type]: !prev[type] }));
   };
@@ -642,68 +659,63 @@ export default function Inventory_table() {
             </div>
           )}
 
-{/* Asset Details Modal */}
 {modals.view && selectedItem && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-    <div className="bg-white p-8 rounded-2xl shadow-2xl w-[800px] relative">
-      <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-        📌 Asset Details
-      </h2>
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md animate-slideIn">
+    <div className="bg-white p-8 rounded-3xl shadow-xl w-[750px] relative">
+      
+      {/* Header */}
+      <div className="flex justify-between items-center border-b pb-4 mb-6">
+        <h2 className="text-3xl font-bold text-gray-900">📌 Asset Overview</h2>
+        <button
+          onClick={() => toggleModal("view")}
+          className="text-gray-500 hover:text-gray-800 transition"
+        >
+          ✖
+        </button>
+      </div>
 
+      {/* QR Code & Asset Overview */}
       <div className="flex items-center space-x-6 mb-6">
         {/* QR Code */}
-        <div className="p-3 bg-gray-100 rounded-lg shadow-md">
-          <QRCodeCanvas value={selectedItem.assetCode} size={120} />
+        <div className="p-4 bg-gray-100 rounded-xl shadow-md">
+          <QRCodeCanvas value={selectedItem.assetCode} size={130} />
         </div>
 
+        {/* Asset Information */}
         <div className="space-y-2">
-          <div className="text-2xl font-semibold text-gray-900">
-            {selectedItem.assetName}
-          </div>
-          <div className="text-lg text-green-600 font-bold">
-            💰 Cost: ${selectedItem.assetCost}
-          </div>
-          <div className="text-lg text-blue-600 font-bold">
-            📉 Current Value: ${selectedItem.currentValue}
-          </div>
+          <h3 className="text-2xl font-semibold text-gray-900">{selectedItem.category}</h3>
+          <p className="text-lg text-green-600 font-bold">
+            💰 Cost: <span className="text-gray-800">${selectedItem.assetCost}</span>
+          </p>
+          <p className="text-lg text-blue-600 font-bold">
+            📉 Current Value ({formatDate(new Date())}):  
+            <span className="text-gray-800"> ${calculateCurrentValue(selectedItem.assetCost, selectedItem.depreciationRate, selectedItem.datePurchased)}</span>
+          </p>
         </div>
       </div>
 
-      <hr className="border-gray-300 mb-4" />
-
-      {/* Asset Information */}
-      <div className="grid grid-cols-2 gap-6 text-gray-700 text-lg">
-        <div className="flex justify-between">
-          <span className="font-medium text-gray-900">Asset Code:</span>
-          <span>{selectedItem.assetCode}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-medium text-gray-900">Location:</span>
-          <span>{selectedItem.assetLocation}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-medium text-gray-900">Issued To:</span>
-          <span>{selectedItem.issuedTo}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-medium text-gray-900">Checked By:</span>
-          <span>{selectedItem.checkedBy}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-medium text-gray-900">Warranty Expiry:</span>
-          <span>{selectedItem.warrantyEndDate}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-medium text-gray-900">End of Disposal:</span>
-          <span>{selectedItem.endOfDisposalDate}</span>
-        </div>
+      {/* Details Grid */}
+      <div className="grid grid-cols-2 gap-6 text-gray-700 text-lg mb-6">
+        {[
+          ["ID", selectedItem.assetId],
+          ["Asset Code", selectedItem.assetCode],
+          ["Issued To", selectedItem.issuedTo],
+          ["Location", selectedItem.assetLocation],
+          ["Checked By", selectedItem.checkedBy],
+          ["Disposal Date", formatDate(selectedItem.disposalDate)],
+        ].map(([label, value]) => (
+          <div key={label} className="flex justify-between">
+            <span className="font-medium text-gray-900">{label}:</span>
+            <span>{value || "N/A"}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Asset Status */}
-      <div className="flex justify-between items-center mt-6">
+      {/* Status Badge */}
+      <div className="mt-4 flex justify-between items-center">
         <span className="font-medium text-gray-900">Status:</span>
         <span
-          className={`px-3 py-1 text-sm font-semibold rounded-full ${
+          className={`px-5 py-2 text-md font-semibold rounded-full shadow-sm transition ${
             selectedItem.assetStatus === "Available"
               ? "bg-green-200 text-green-800"
               : selectedItem.assetStatus === "In Use"
@@ -718,18 +730,24 @@ export default function Inventory_table() {
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-between mt-6">
+      <div className="flex justify-between mt-8">
         <button
           onClick={() => toggleModal("view")}
-          className="bg-red-500 hover:bg-red-600 text-white text-lg px-6 py-3 rounded-lg transition duration-200 shadow-md"
+          className="bg-red-500 hover:bg-red-600 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
         >
           Close
         </button>
         <button
           onClick={toggleTransferModal}
-          className="bg-blue-500 hover:bg-blue-600 text-white text-lg px-6 py-3 rounded-lg transition duration-200 shadow-md"
+          className="bg-blue-500 hover:bg-blue-600 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
         >
           Transfer
+        </button>
+        <button
+          onClick={() => viewHistorical(selectedItem.assetId)}
+          className="bg-gray-800 hover:bg-gray-900 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
+        >
+          View History
         </button>
       </div>
     </div>
