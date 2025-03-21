@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
 import axios from "axios";
-import { format } from "date-fns"; 
+import { format } from "date-fns";
 
 // import { fetchData } from "../utilities/ApiUti";
 const API_URL = "http://localhost:5075/api/AssetItemApi/";
@@ -18,6 +18,7 @@ export default function Inventory_table() {
   const [loading, setLoading] = useState(true);
   const [qrData, setQrData] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [historyData, setHistoryData] = useState([]);
   const [transferData, setTransferData] = useState({
     newIssuedTo: "",
     newLocation: "",
@@ -30,6 +31,7 @@ export default function Inventory_table() {
     addQuantity: false,
     viewDepreciation: false,
     transfer: false,
+    viewHistory: false,
   });
   const [depreciationData, setDepreciationData] = useState(null);
   const [loadingDepreciation, setLoadingDepreciation] = useState(false);
@@ -60,21 +62,20 @@ export default function Inventory_table() {
     DepreciationPeriodType: "month",
     DepreciationPeriodValue: 0,
   });
-  
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return format(new Date(dateString), "MMMM dd, yyyy"); // e.g., July 23, 2205
   };
-  
+
   // Function to calculate current asset value
   const calculateCurrentValue = (cost, rate, purchaseDate) => {
     if (!cost || !rate || !purchaseDate) return cost;
-  
+
     const purchase = new Date(purchaseDate);
     const today = new Date();
     const yearsElapsed = (today - purchase) / (1000 * 60 * 60 * 24 * 365);
-  
+
     let depreciationAmount = (rate / 100) * cost * yearsElapsed;
     return Math.max(1, (cost - depreciationAmount).toFixed(2)); // Prevent negative values
   };
@@ -100,6 +101,25 @@ export default function Inventory_table() {
       setLoadingDepreciation(false);
     }
   };
+
+  const openHistoryModal = async (assetID) => {
+    console.log(`🔍 Fetching history for asset ID: ${assetID}`);
+
+    try {
+        const response = await fetch(`http://localhost:5075/api/AssetHistoryApi/viewHistorical?assetID=${assetID}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("✅ History Data:", data);
+        setHistoryData(data); // Assuming you have state for this
+        toggleModal("viewHistory"); // Open modal
+    } catch (error) {
+        console.error("❌ Error fetching history:", error);
+    }
+};
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
@@ -171,19 +191,19 @@ export default function Inventory_table() {
     }
 
     try {
-      await axios.post("http://localhost:5075/api/AssetItemApi/TransferAsset", 
+      await axios.post(
+        "http://localhost:5075/api/AssetItemApi/TransferAsset",
         {
           AssetID: selectedItem.assetId,
           NewOwner: transferData.newIssuedTo,
           NewLocation: transferData.newLocation,
           Remarks: selectedItem.remarks,
-          performedBy:storedName
-        }, 
+          performedBy: storedName,
+        },
         {
-          headers: { "Content-Type": "application/json" }
+          headers: { "Content-Type": "application/json" },
         }
       );
-      
 
       alert("Asset transferred successfully!");
       setModals((prev) => ({ ...prev, transfer: false })); // Close transfer modal
@@ -364,7 +384,7 @@ export default function Inventory_table() {
 
                           <button
                             onClick={() => {
-                              setSelectedItem(item)
+                              setSelectedItem(item);
                             }}
                             className="bg-red-600 hover:bg-red-700 text-white font-medium rounded-md text-sm px-3 py-2 transition-all"
                             title="Delete Item"
@@ -597,57 +617,65 @@ export default function Inventory_table() {
                     </div>
                   </div>
 
-                {/* ASSET WARANTY AREA */}
-        {/* Warranty Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="text-sm font-medium text-gray-700">Warranty Start Date</label>
-            <input
-              type="date"
-              name="WarrantyStartDate"
-              value={addItem.WarrantyStartDate}
-              onChange={handleInputChange}
-              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-gray-700">Warranty Expiration Date</label>
-            <input
-              type="date"
-              name="WarrantyExpirationDate"
-              value={addItem.WarrantyExpirationDate}
-              onChange={handleInputChange}
-              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-        </div>
+                  {/* ASSET WARANTY AREA */}
+                  {/* Warranty Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Warranty Start Date
+                      </label>
+                      <input
+                        type="date"
+                        name="WarrantyStartDate"
+                        value={addItem.WarrantyStartDate}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Warranty Expiration Date
+                      </label>
+                      <input
+                        type="date"
+                        name="WarrantyExpirationDate"
+                        value={addItem.WarrantyExpirationDate}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                  </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="text-sm font-medium text-gray-700">Warranty Vendor</label>
-            <input
-              type="text"
-              name="WarrantyVendor"
-              value={addItem.WarrantyVendor}
-              onChange={handleInputChange}
-              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-gray-700">Warranty Contact</label>
-            <input
-              type="text"
-              name="WarrantyContact"
-              value={addItem.WarrantyContact}
-              onChange={handleInputChange}
-              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-        </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Warranty Vendor
+                      </label>
+                      <input
+                        type="text"
+                        name="WarrantyVendor"
+                        value={addItem.WarrantyVendor}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Warranty Contact
+                      </label>
+                      <input
+                        type="text"
+                        name="WarrantyContact"
+                        value={addItem.WarrantyContact}
+                        onChange={handleInputChange}
+                        className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                  </div>
 
                   {/* Submit Button */}
                   <button
@@ -661,168 +689,282 @@ export default function Inventory_table() {
             </div>
           )}
 
-{modals.view && selectedItem && (
-   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md animate-slideIn">
-   <div className="bg-white p-8 rounded-3xl shadow-xl w-[750px] relative">
-     
-     {/* Header with "View More" Button */}
-     <div className="flex justify-between items-center border-b pb-4 mb-6">
-       <h2 className="text-3xl font-bold text-gray-900">📌 Asset Overview</h2>
-       <button
-         onClick={() => setIsExpanded(!isExpanded)}
-         className="text-blue-500 hover:text-blue-700 font-semibold"
-       >
-         {isExpanded ? "Hide Details ⬆️" : "View More ⬇️"}
-       </button>
-     </div>
+          {modals.view && selectedItem && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md animate-slideIn">
+              <div className="bg-white p-8 rounded-3xl shadow-xl w-[750px] relative">
+                {/* Header with "View More" Button */}
+                <div className="flex justify-between items-center border-b pb-4 mb-6">
+                  <h2 className="text-3xl font-bold text-gray-900">
+                    📌 Asset Overview
+                  </h2>
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="text-blue-500 hover:text-blue-700 font-semibold"
+                  >
+                    {isExpanded ? "Hide Details ⬆️" : "View More ⬇️"}
+                  </button>
+                </div>
 
-     {/* Basic Details & QR Code */}
-     <div className="flex items-center space-x-6 mb-6">
-       {/* QR Code */}
-       <div className="p-4 bg-gray-100 rounded-xl shadow-md">
-         <QRCodeCanvas value={selectedItem.assetCode} size={130} />
-       </div>
+                {/* Basic Details & QR Code */}
+                <div className="flex items-center space-x-6 mb-6">
+                  {/* QR Code */}
+                  <div className="p-4 bg-gray-100 rounded-xl shadow-md">
+                    <QRCodeCanvas value={selectedItem.assetCode} size={130} />
+                  </div>
 
-       {/* Essential Asset Information */}
-       <div className="space-y-2">
-         <h3 className="text-2xl font-semibold text-gray-900">{selectedItem.assetName}</h3>
-         <p className="text-lg text-green-600 font-bold">
-           💰 Cost: <span className="text-gray-800">${selectedItem.assetCost}</span>
-         </p>
-         <p className="text-lg text-blue-600 font-bold">
-           📉 Current Value ({formatDate(new Date())}):  
-           <span className="text-gray-800"> ${calculateCurrentValue(selectedItem.assetCost, selectedItem.depreciationRate, selectedItem.datePurchased)}</span>
-         </p>
-       </div>
-     </div>
+                  {/* Essential Asset Information */}
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-semibold text-gray-900">
+                      {selectedItem.assetName}
+                    </h3>
+                    <p className="text-lg text-green-600 font-bold">
+                      💰 Cost:{" "}
+                      <span className="text-gray-800">
+                        ${selectedItem.assetCost}
+                      </span>
+                    </p>
+                    <p className="text-lg text-blue-600 font-bold">
+                      📉 Current Value ({formatDate(new Date())}):
+                      <span className="text-gray-800">
+                        {" "}
+                        $
+                        {calculateCurrentValue(
+                          selectedItem.assetCost,
+                          selectedItem.depreciationRate,
+                          selectedItem.datePurchased
+                        )}
+                      </span>
+                    </p>
+                  </div>
+                </div>
 
-     {/* Expanded Section (Collapsible) */}
-     {isExpanded && (
-       <div className="grid grid-cols-2 gap-6 text-gray-700 text-lg mb-6 animate-fadeIn">
-         {[
-           ["Asset Code", selectedItem.assetCode],
-           ["Issued To", selectedItem.issuedTo],
-           ["Vendor", selectedItem.assetVendor],
-           ["Checked By", selectedItem.checkedBy],
-           ["Location", selectedItem.assetLocation],
-           ["Remarks", selectedItem.remarks],
-           ["Warranty Start", formatDate(selectedItem.warrantyStartDate)],
-           ["Warranty Expiry", formatDate(selectedItem.warrantyExpirationDate)],
-           ["Warranty Vendor", selectedItem.warrantyVendor],
-           ["Warranty Contact", selectedItem.warrantyContact],
-           ["Asset Type", selectedItem.assetStype],
-           ["Preventive Maintenance", selectedItem.assetPreventiveMaintenace],
-           ["Notes", selectedItem.notes],
-           ["Operation Start", formatDate(selectedItem.operationStartDate)],
-           ["Operation End", formatDate(selectedItem.operationEndDate)],
-           ["Disposal Date", formatDate(selectedItem.disposalDate)],
-           ["Depreciation Rate", selectedItem.depreciationRate ? `${selectedItem.depreciationRate}%` : "N/A"],
-           ["Depreciation Period", selectedItem.depreciationPeriodValue || "N/A"],
-         ].map(([label, value]) => (
-           <div key={label} className="flex justify-between">
-             <span className="font-medium text-gray-900">{label}:</span>
-             <span>{value || "N/A"}</span>
-           </div>
-         ))}
-       </div>
-     )}
+                {/* Expanded Section (Collapsible) */}
+                {isExpanded && (
+                  <div className="grid grid-cols-2 gap-6 text-gray-700 text-lg mb-6 animate-fadeIn">
+                    {[
+                      ["Asset Code", selectedItem.assetCode],
+                      ["Issued To", selectedItem.issuedTo],
+                      ["Vendor", selectedItem.assetVendor],
+                      ["Checked By", selectedItem.checkedBy],
+                      ["Location", selectedItem.assetLocation],
+                      ["Remarks", selectedItem.remarks],
+                      [
+                        "Warranty Start",
+                        formatDate(selectedItem.warrantyStartDate),
+                      ],
+                      [
+                        "Warranty Expiry",
+                        formatDate(selectedItem.warrantyExpirationDate),
+                      ],
+                      ["Warranty Vendor", selectedItem.warrantyVendor],
+                      ["Warranty Contact", selectedItem.warrantyContact],
+                      ["Asset Type", selectedItem.assetStype],
+                      [
+                        "Preventive Maintenance",
+                        selectedItem.assetPreventiveMaintenace,
+                      ],
+                      ["Notes", selectedItem.notes],
+                      [
+                        "Operation Start",
+                        formatDate(selectedItem.operationStartDate),
+                      ],
+                      [
+                        "Operation End",
+                        formatDate(selectedItem.operationEndDate),
+                      ],
+                      ["Disposal Date", formatDate(selectedItem.disposalDate)],
+                      [
+                        "Depreciation Rate",
+                        selectedItem.depreciationRate
+                          ? `${selectedItem.depreciationRate}%`
+                          : "N/A",
+                      ],
+                      [
+                        "Depreciation Period",
+                        selectedItem.depreciationPeriodValue || "N/A",
+                      ],
+                    ].map(([label, value]) => (
+                      <div key={label} className="flex justify-between">
+                        <span className="font-medium text-gray-900">
+                          {label}:
+                        </span>
+                        <span>{value || "N/A"}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-     {/* Status Badge */}
-     <div className="mt-4 flex justify-between items-center">
-       <span className="font-medium text-gray-900">Status:</span>
-       <span
-         className={`px-5 py-2 text-md font-semibold rounded-full shadow-sm transition ${
-           selectedItem.assetStatus === "Active"
-             ? "bg-green-200 text-green-800"
-             : selectedItem.assetStatus === "In Use"
-             ? "bg-blue-200 text-blue-800"
-             : selectedItem.assetStatus === "Maintenance"
-             ? "bg-yellow-200 text-yellow-800"
-             : "bg-red-200 text-red-800"
-         }`}
-       >
-         {selectedItem.assetStatus}
-       </span>
-     </div>
+                {/* Status Badge */}
+                <div className="mt-4 flex justify-between items-center">
+                  <span className="font-medium text-gray-900">Status:</span>
+                  <span
+                    className={`px-5 py-2 text-md font-semibold rounded-full shadow-sm transition ${
+                      selectedItem.assetStatus === "Active"
+                        ? "bg-green-200 text-green-800"
+                        : selectedItem.assetStatus === "In Use"
+                        ? "bg-blue-200 text-blue-800"
+                        : selectedItem.assetStatus === "Maintenance"
+                        ? "bg-yellow-200 text-yellow-800"
+                        : "bg-red-200 text-red-800"
+                    }`}
+                  >
+                    {selectedItem.assetStatus}
+                  </span>
+                </div>
 
-     {/* Buttons */}
-     <div className="flex justify-between mt-8">
-  <button
-    onClick={() => toggleModal("view")}
-    className="bg-red-500 hover:bg-red-600 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
-  >
-    Close
-  </button>
+                {/* Buttons */}
+                <div className="flex justify-between mt-8">
+                  <button
+                    onClick={() => toggleModal("view")}
+                    className="bg-red-500 hover:bg-red-600 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
+                  >
+                    Close
+                  </button>
 
-    <div className="flex space-x-4">
-      <button
-        onClick={() => toggleModal("transfer")}
-        className="bg-yellow-500 hover:bg-yellow-600 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
-      >
-        Transfer Asset
-      </button>
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => toggleModal("transfer")}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
+                    >
+                      Transfer Asset
+                    </button>
+                    <button onClick={() => {
+                        console.log("🔍 Selected Item:", selectedItem);
+                        if (selectedItem?.assetId) {
+                            openHistoryModal(selectedItem.assetId);
+                        } else {
+                            console.error("🚨 Asset ID is missing from selectedItem!");
+                        }
+                    }}>
+                        View History
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-      <button
-        // onClick={viewHistorical}
-        className="bg-gray-800 hover:bg-gray-900 text-white text-lg px-6 py-3 rounded-lg transition shadow-md"
-      >
-        View History
-      </button>
+{modals.viewHistory && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg w-[600px] max-w-full">
+      <h2 className="text-2xl font-bold text-gray-800">Asset History</h2>
+
+      {/* Table Container */}
+      <div className="mt-4 max-h-96 overflow-y-auto border rounded-lg">
+        <table className="w-full border-collapse">
+          <thead className="bg-gray-200 text-left">
+            <tr>
+              <th className="p-2">Date</th>
+              <th className="p-2">Action</th>
+              <th className="p-2">Performed By</th>
+              <th className="p-2">Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {historyData.length > 0 ? (
+              historyData.map((entry) => (
+                <tr
+                  key={entry.historyID} // ✅ FIXED: `historyID` instead of `HistoryID`
+                  className="border-t hover:bg-gray-50"
+                >
+                  <td className="p-2">
+                    {new Date(entry.actionDate).toLocaleDateString()} 
+                    {/* ✅ FIXED: `actionDate` instead of `ActionDate` */}
+                  </td>
+                  <td className="p-2 font-semibold text-blue-600">
+                    {entry.actionType} 
+                    {/* ✅ FIXED: `actionType` instead of `ActionType` */}
+                  </td>
+                  <td className="p-2">{entry.performedBy} 
+                    {/* ✅ FIXED: `performedBy` instead of `PerformedBy` */}
+                  </td>
+                  <td className="p-2">{entry.remarks || "N/A"} 
+                    {/* ✅ FIXED: `remarks` instead of `Remarks` */}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="p-4 text-center text-gray-500">
+                  No history available.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Close Button */}
+      <div className="mt-4 flex justify-end">
+        <button
+          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+          onClick={() => setModals({ ...modals, viewHistory: false })}
+        >
+          Close
+        </button>
+      </div>
     </div>
-    </div>
-   </div>
- </div>
+  </div>
 )}
 
-      {/* Transfer Modal */}
-      {modals.transfer && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl w-[400px] relative">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-              🔄 Transfer Asset
-            </h2>
+              
+          {/* Transfer Modal */}
+          {modals.transfer && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+              <div className="bg-white p-8 rounded-2xl shadow-2xl w-[400px] relative">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+                  🔄 Transfer Asset
+                </h2>
 
-            <label className="block text-lg font-medium text-gray-700 mb-2">
-              New Issued To:
-            </label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 p-2 rounded-lg mb-4"
-              value={transferData.newIssuedTo}
-              onChange={(e) =>
-                setTransferData({ ...transferData, newIssuedTo: e.target.value })
-              }
-            />
+                <label className="block text-lg font-medium text-gray-700 mb-2">
+                  New Issued To:
+                </label>
+                <input
+                  type="text"
+                  className="w-full border border-gray-300 p-2 rounded-lg mb-4"
+                  value={transferData.newIssuedTo}
+                  onChange={(e) =>
+                    setTransferData({
+                      ...transferData,
+                      newIssuedTo: e.target.value,
+                    })
+                  }
+                />
 
-            <label className="block text-lg font-medium text-gray-700 mb-2">
-              New Location:
-            </label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 p-2 rounded-lg mb-4"
-              value={transferData.newLocation}
-              onChange={(e) =>
-                setTransferData({ ...transferData, newLocation: e.target.value })
-              }
-            />
+                <label className="block text-lg font-medium text-gray-700 mb-2">
+                  New Location:
+                </label>
+                <input
+                  type="text"
+                  className="w-full border border-gray-300 p-2 rounded-lg mb-4"
+                  value={transferData.newLocation}
+                  onChange={(e) =>
+                    setTransferData({
+                      ...transferData,
+                      newLocation: e.target.value,
+                    })
+                  }
+                />
 
-            <div className="flex justify-between">
-              <button
-                onClick={toggleTransferModal}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleTransfer}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-200"
-              >
-                Confirm Transfer
-              </button>
+                <div className="flex justify-between">
+                  <button
+                    onClick={toggleTransferModal}
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleTransfer}
+                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-200"
+                  >
+                    Confirm Transfer
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
+
+
           {modals.viewDepreciation && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
               <div className="bg-white rounded-2xl shadow-lg w-11/12 md:w-1/2 p-8 relative">
