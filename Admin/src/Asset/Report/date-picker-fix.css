@@ -1,0 +1,72 @@
+
+/* Fix for DatePicker styling issues */
+.react-date-picker {
+    width: 100%;
+  }
+  
+  .react-date-picker__wrapper {
+    border: none !important;
+    padding: 0 !important;
+  }
+  
+  .react-date-picker__inputGroup {
+    padding: 0;
+    min-width: 100%;
+  }
+  
+  .react-date-picker__inputGroup__input {
+    font-size: 14px;
+    color: #374151;
+  }
+  
+  .react-date-picker__inputGroup__input:focus-visible {
+    outline: none;
+  }
+  
+  .react-date-picker__inputGroup__divider {
+    color: #6b7280;
+  }
+  
+  .react-calendar {
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    max-width: 350px;
+    max-height: 300px !important;
+    font-family: inherit;
+  }
+  
+  .react-calendar__tile--active {
+    background: #4f46e5 !important;
+    color: white;
+  }
+  
+  .react-calendar__tile--now {
+    background: #e0e7ff;
+  }
+  
+  .react-calendar__tile:hover {
+    background: #e0e7ff;
+  }
+  
+  .react-calendar__navigation button:enabled:hover,
+  .react-calendar__navigation button:enabled:focus {
+    background-color: #f3f4f6;
+  }
+  
+  .react-calendar__month-view__days__day--weekend {
+    color: #ef4444;
+  }
+  
+  .react-calendar__month-view__days__day--neighboringMonth {
+    color: #9ca3af;
+  }
+  
+  /* Fix for mobile view */
+  @media (max-width: 640px) {
+    .react-calendar {
+      max-width: 280px;
+    }
+  }
+  
+  

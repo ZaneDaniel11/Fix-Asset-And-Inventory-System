@@ -1,9 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import DatePicker from "react-date-picker"
 import "react-date-picker/dist/DatePicker.css"
 import "react-calendar/dist/Calendar.css"
+
+// Custom styles to fix DatePicker issues
+import "./date-picker-fix.css"
+
 import {
   BarChart,
   Bar,
@@ -25,6 +29,12 @@ import { Button } from "../../Components/ui/button"
 import { CalendarIcon, BarChart3, PieChartIcon, LineChartIcon, RefreshCw } from "lucide-react"
 
 const ReportDashboard = () => {
+  // Debug ref to track date changes
+  const debugRef = useRef({
+    lastStartDate: null,
+    lastEndDate: null,
+  })
+
   const [reportType, setReportType] = useState("depreciation")
   const [startDate, setStartDate] = useState(new Date("2024-01-01"))
   const [endDate, setEndDate] = useState(new Date("2030-01-01"))
@@ -70,6 +80,48 @@ const ReportDashboard = () => {
     return date.toISOString().split("T")[0]
   }
 
+  // Custom date change handlers with validation and debugging
+  const handleStartDateChange = (date) => {
+    console.log("Start date changed to:", date)
+
+    // Validate date
+    if (!date) {
+      console.warn("Invalid start date, using default")
+      date = new Date("2024-01-01")
+    }
+
+    // Update debug ref
+    debugRef.current.lastStartDate = date
+
+    // Update state
+    setStartDate(date)
+
+    // If end date is before start date, update end date
+    if (endDate < date) {
+      const newEndDate = new Date(date)
+      newEndDate.setMonth(date.getMonth() + 1)
+      setEndDate(newEndDate)
+      debugRef.current.lastEndDate = newEndDate
+      console.log("Automatically adjusted end date to:", newEndDate)
+    }
+  }
+
+  const handleEndDateChange = (date) => {
+    console.log("End date changed to:", date)
+
+    // Validate date
+    if (!date) {
+      console.warn("Invalid end date, using default")
+      date = new Date("2030-01-01")
+    }
+
+    // Update debug ref
+    debugRef.current.lastEndDate = date
+
+    // Update state
+    setEndDate(date)
+  }
+
   // Fetch data from API with optional date filters
   const fetchData = async (withFilters = false) => {
     setIsLoading(true)
@@ -80,11 +132,20 @@ const ReportDashboard = () => {
 
       // Add date filters if requested
       if (withFilters && startDate && endDate) {
-        url = `${url}?startDate=${formatDateForApi(startDate)}&endDate=${formatDateForApi(endDate)}`
+        const formattedStartDate = formatDateForApi(startDate)
+        const formattedEndDate = formatDateForApi(endDate)
+        url = `${url}?startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+        console.log(`Applying date filters: ${formattedStartDate} to ${formattedEndDate}`)
+        console.log("Current date objects:", { startDate, endDate })
       }
 
       console.log("Fetching data from:", url)
       const response = await fetch(url)
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`)
+      }
+
       const data = await response.json()
       console.log("Raw API response:", data)
 
@@ -109,9 +170,11 @@ const ReportDashboard = () => {
       // Get summary data from the first item (all items have the same summary data)
       if (data.length > 0) {
         setSummaryData({
-          totalAssets: data[0].TotalAssetCount || 0,
-          totalValue: data[0].TotalAssetValue || 0,
-          averageValue: data[0].AverageAssetValue || 0,
+          totalAssets: data.reduce((sum, item) => sum + (item.AssetCount || 0), 0),
+          totalValue: data.reduce((sum, item) => sum + (item.CurrentTotalValue || 0), 0),
+          averageValue:
+            data.reduce((sum, item) => sum + (item.CurrentTotalValue || 0), 0) /
+            data.reduce((sum, item) => sum + (item.AssetCount || 0), 0),
           categoriesCount: processedData.length,
           currentDate: new Date().toLocaleDateString(),
         })
@@ -120,6 +183,14 @@ const ReportDashboard = () => {
       setIsLoading(false)
     } catch (error) {
       console.error("Error fetching asset categories:", error)
+      setAssetCategories([])
+      setSummaryData({
+        totalAssets: 0,
+        totalValue: 0,
+        averageValue: 0,
+        categoriesCount: 0,
+        currentDate: new Date().toLocaleDateString(),
+      })
       setIsLoading(false)
     }
   }
@@ -135,14 +206,48 @@ const ReportDashboard = () => {
 
   // Handle apply filters button click
   const handleApplyFilters = () => {
-    fetchData(true)
+    console.log("Applying filters with dates:", {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+    })
+
+    // Double-check that we're using the latest dates
+    if (debugRef.current.lastStartDate) {
+      setStartDate(debugRef.current.lastStartDate)
+    }
+
+    if (debugRef.current.lastEndDate) {
+      setEndDate(debugRef.current.lastEndDate)
+    }
+
+    // Use setTimeout to ensure state updates before fetching
+    setTimeout(() => {
+      fetchData(true)
+    }, 50)
   }
 
-  // Handle reset filters button click
+  // Replace the handleResetFilters function with this improved version
   const handleResetFilters = () => {
-    setStartDate(new Date("2024-01-01"))
-    setEndDate(new Date("2030-01-01"))
-    fetchData(false)
+    const today = new Date()
+    const firstDayOfYear = new Date(today.getFullYear(), 0, 1) // January 1st of current year
+
+    console.log("Resetting filters to:", {
+      startDate: firstDayOfYear.toISOString(),
+      endDate: today.toISOString(),
+    })
+
+    // Update debug ref
+    debugRef.current.lastStartDate = firstDayOfYear
+    debugRef.current.lastEndDate = today
+
+    // Update state
+    setStartDate(firstDayOfYear)
+    setEndDate(today)
+
+    // Use setTimeout to ensure state updates before fetching
+    setTimeout(() => {
+      fetchData(true)
+    }, 50)
   }
 
   // Custom tooltip for charts
@@ -261,15 +366,22 @@ const ReportDashboard = () => {
             {/* Start Date Picker */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Start Date</label>
-              <div className="relative flex items-center">
-                <CalendarIcon className="absolute left-3 h-4 w-4 text-gray-500" />
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                  <CalendarIcon className="h-4 w-4 text-gray-500" />
+                </div>
                 <DatePicker
-                  onChange={setStartDate}
+                  onChange={handleStartDateChange}
                   value={startDate}
                   format="y-MM-dd"
                   clearIcon={null}
                   calendarIcon={null}
-                  className="pl-10 border border-gray-300 rounded-md py-2 w-full bg-white"
+                  className="w-full"
+                  calendarClassName="shadow-lg border border-gray-200 rounded-lg"
+                  inputClassName="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  dayPlaceholder="DD"
+                  monthPlaceholder="MM"
+                  yearPlaceholder="YYYY"
                 />
               </div>
             </div>
@@ -277,15 +389,22 @@ const ReportDashboard = () => {
             {/* End Date Picker */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">End Date</label>
-              <div className="relative flex items-center">
-                <CalendarIcon className="absolute left-3 h-4 w-4 text-gray-500" />
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                  <CalendarIcon className="h-4 w-4 text-gray-500" />
+                </div>
                 <DatePicker
-                  onChange={setEndDate}
+                  onChange={handleEndDateChange}
                   value={endDate}
                   format="y-MM-dd"
                   clearIcon={null}
                   calendarIcon={null}
-                  className="pl-10 border border-gray-300 rounded-md py-2 w-full bg-white"
+                  className="w-full"
+                  calendarClassName="shadow-lg border border-gray-200 rounded-lg"
+                  inputClassName="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  dayPlaceholder="DD"
+                  monthPlaceholder="MM"
+                  yearPlaceholder="YYYY"
                   minDate={startDate}
                 />
               </div>
