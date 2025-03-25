@@ -29,6 +29,10 @@ import { Button } from "../../Components/ui/button"
 import { CalendarIcon, BarChart3, PieChartIcon, LineChartIcon, RefreshCw } from "lucide-react"
 
 const ReportDashboard = () => {
+  // Get current date for default values
+  const today = new Date()
+  const firstDayOfCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+
   // Debug ref to track date changes
   const debugRef = useRef({
     lastStartDate: null,
@@ -36,8 +40,8 @@ const ReportDashboard = () => {
   })
 
   const [reportType, setReportType] = useState("depreciation")
-  const [startDate, setStartDate] = useState(new Date("2024-01-01"))
-  const [endDate, setEndDate] = useState(new Date("2030-01-01"))
+  const [startDate, setStartDate] = useState(firstDayOfCurrentMonth) // First day of current month
+  const [endDate, setEndDate] = useState(today) // Current date
   const [category, setCategory] = useState("")
   const [location, setLocation] = useState("")
   const [assetCategories, setAssetCategories] = useState([])
@@ -49,7 +53,7 @@ const ReportDashboard = () => {
     totalValue: 0,
     averageValue: 0,
     categoriesCount: 0,
-    currentDate: new Date().toLocaleDateString(),
+    currentDate: today.toLocaleDateString(),
   })
   const [isFiltered, setIsFiltered] = useState(false)
 
@@ -65,11 +69,11 @@ const ReportDashboard = () => {
     "#84cc16", // Lime
   ]
 
-  // Format currency
+  // Format currency in Philippine Pesos
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-PH", {
       style: "currency",
-      currency: "USD",
+      currency: "PHP",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value)
@@ -86,8 +90,8 @@ const ReportDashboard = () => {
 
     // Validate date
     if (!date) {
-      console.warn("Invalid start date, using default")
-      date = new Date("2024-01-01")
+      console.warn("Invalid start date, using first day of current month")
+      date = new Date(today.getFullYear(), today.getMonth(), 1)
     }
 
     // Update debug ref
@@ -111,8 +115,8 @@ const ReportDashboard = () => {
 
     // Validate date
     if (!date) {
-      console.warn("Invalid end date, using default")
-      date = new Date("2030-01-01")
+      console.warn("Invalid end date, using current date")
+      date = new Date()
     }
 
     // Update debug ref
@@ -228,21 +232,21 @@ const ReportDashboard = () => {
 
   // Replace the handleResetFilters function with this improved version
   const handleResetFilters = () => {
-    const today = new Date()
-    const firstDayOfYear = new Date(today.getFullYear(), 0, 1) // January 1st of current year
+    const currentDate = new Date()
+    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
 
     console.log("Resetting filters to:", {
-      startDate: firstDayOfYear.toISOString(),
-      endDate: today.toISOString(),
+      startDate: firstDayOfMonth.toISOString(),
+      endDate: currentDate.toISOString(),
     })
 
     // Update debug ref
-    debugRef.current.lastStartDate = firstDayOfYear
-    debugRef.current.lastEndDate = today
+    debugRef.current.lastStartDate = firstDayOfMonth
+    debugRef.current.lastEndDate = currentDate
 
     // Update state
-    setStartDate(firstDayOfYear)
-    setEndDate(today)
+    setStartDate(firstDayOfMonth)
+    setEndDate(currentDate)
 
     // Use setTimeout to ensure state updates before fetching
     setTimeout(() => {
