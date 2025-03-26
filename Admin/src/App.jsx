@@ -20,7 +20,7 @@ import AssetInvenTable from "./Asset/Inventory/Components/CategoryItem/Inventory
 import Schedule from "./Asset/Schedule/Schedule.jsx";
 import AssetTransfers from "./Asset/AssetTransfer/Asset_Trasnfer.jsx"
 import Reports from "./Asset/Report/AssetReport.jsx";
-
+import Disposed from "./Asset/Disposed/Disposed-assets-dashboard.jsx"
 import { ToastContainer } from "react-toastify";
 
 // User Side
@@ -230,6 +230,15 @@ function App() {
           />
 
           {/* Asset Section */}
+          <Route
+            path="/Disposed"
+            element={
+              <ProtectedRoute
+                element={<Disposed />}
+                allowedUsertypes={["Asset_Admin"]}
+              />
+            }
+          />
           <Route
             path="/AssetInventory"
             element={
