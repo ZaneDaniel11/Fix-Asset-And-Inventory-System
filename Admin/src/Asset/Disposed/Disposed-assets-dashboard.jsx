@@ -1,20 +1,20 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
+import { Button } from "../../components/ui/button"
+import { Input } from "../../components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
+import { Badge } from "../../components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 import { AlertCircle, Calendar, FileText, Filter, RefreshCw, Search, Trash2 } from "lucide-react"
 import DatePicker from "react-date-picker"
 import "react-date-picker/dist/DatePicker.css"
 import "react-calendar/dist/Calendar.css"
 
 // Custom CSS for DatePicker
-import "../styles/date-picker-fix.css"
+import "./date-picker-fix.css"
 
 const DisposedAssetsDashboard = () => {
   // Get current date and first day of current month
