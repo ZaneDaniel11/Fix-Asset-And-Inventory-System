@@ -39,6 +39,7 @@ export default function InventoryTable() {
   const [transferData, setTransferData] = useState({
     newIssuedTo: "",
     newLocation: "",
+    categoryId:"",
   })
   const [modals, setModals] = useState({
     add: false,
@@ -247,55 +248,51 @@ export default function InventoryTable() {
   }
 
   // Handle asset transfer
-  const handleTransfer = async () => {
-    const storedName = localStorage.getItem("name");
-  
-    if (!transferData.newIssuedTo || !transferData.newLocation) {
-      alert("Please fill in all fields.");
-      return;
-    }
-  
-    // Prepare transfer data
-    const transferPayload = {
+// Handle asset transfer
+const handleTransfer = async () => {
+  const storedName = localStorage.getItem("name");
+
+
+  // Prepare transfer data
+  const transferPayload = {
       AssetID: selectedItem.assetId,
       AssetCode: selectedItem.assetCode, 
       AssetName: selectedItem.assetName, 
-      AssetCategoryID: selectedItem.categoryId, 
+      categoryID: transferData.categoryId,  // ✅ Ensure this is correct
       NewOwner: transferData.newIssuedTo,
       NewLocation: transferData.newLocation,
       Remarks: transferData.remarks || "", 
       PerformedBy: storedName, 
-    };
-  
-    try {
+  };
+
+  console.log(transferPayload);
+  try {
       console.log("📤 Sending Transfer Request:", transferPayload); // ✅ Log request payload
-  
+
       const response = await axios.post(
-        "http://localhost:5075/api/AssetItemApi/TransferAsset",
-        transferPayload,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
+          "http://localhost:5075/api/AssetItemApi/TransferAsset",
+          transferPayload,
+          {
+              headers: { "Content-Type": "application/json" },
+          }
       );
-  
+
       console.log("✅ Transfer Response:", response.data); // ✅ Log successful response
-  
+
       alert(response.data.Message || "Asset transferred successfully!");
       setModals((prev) => ({ ...prev, transfer: false }));
       fetchItems(categoryId);
-    } catch (error) {
+  } catch (error) {
       console.error("❌ Error transferring asset:", error);
-  
-      if (error.response) {
-        console.error("📩 Server Response:", error.response.data); // ✅ Log error response
-        alert(`Transfer failed: ${error.response.data}`);
-      } else {
-        alert("Transfer failed. Please try again.");
-      }
-    }
-  };
-  
 
+      if (error.response) {
+          console.error("📩 Server Response:", error.response.data); // ✅ Log error response
+          alert(`Transfer failed: ${error.response.data}`);
+      } else {
+          alert("Transfer failed. Please try again.");
+      }
+  }
+};
   
   // Handle delete asset
   const handleDeleteAsset = async () => {
@@ -1039,72 +1036,112 @@ export default function InventoryTable() {
             </div>
           </div>
         )}
-        {/* Transfer Modal */}
-        {modals.transfer && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden">
-              <div className="bg-gradient-to-r from-yellow-500 to-amber-500 px-6 py-4 sticky top-0 z-10">
-                <h2 className="text-xl font-bold text-white">Transfer Asset</h2>
-              </div>
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-                <div className="mb-6">
-                  <p className="text-sm text-gray-500 mb-2">Asset</p>
-                  <p className="font-medium text-gray-900">{selectedItem?.assetName}</p>
-                </div>
+  {/* Transfer Modal */}
+{modals.transfer && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden">
+      <div className="bg-gradient-to-r from-yellow-500 to-amber-500 px-6 py-4 sticky top-0 z-10">
+        <h2 className="text-xl font-bold text-white">Transfer Asset</h2>
+      </div>
+      <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+        <div className="mb-6">
+          <p className="text-sm text-gray-500 mb-2">Asset</p>
+          <p className="font-medium text-gray-900">{selectedItem?.assetName}</p>
+        </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">New Owner</label>
-                    <input
-                      type="text"
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      value={transferData.newIssuedTo}
-                      onChange={(e) =>
-                        setTransferData({
-                          ...transferData,
-                          newIssuedTo: e.target.value,
-                        })
-                      }
-                      placeholder="Enter new owner name"
-                    />
-                  </div>
+        {/* Display Category ID */}
+        <div className="mb-4 bg-gray-50 p-3 rounded-lg">
+          <p className="text-sm text-gray-500 mb-1">Category ID</p>
+          <p className="font-medium text-gray-900">{categoryId}</p>
+        </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">New Location</label>
-                    <input
-                      type="text"
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      value={transferData.newLocation}
-                      onChange={(e) =>
-                        setTransferData({
-                          ...transferData,
-                          newLocation: e.target.value,
-                        })
-                      }
-                      placeholder="Enter new location"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                  <button
-                    onClick={toggleTransferModal}
-                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleTransfer}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  >
-                    Confirm Transfer
-                  </button>
-                </div>
-              </div>
-            </div>
+        <div className="space-y-4">
+          {/* Hidden input to store categoryId */}
+          <input
+            type="hidden"
+            value={categoryId}
+            onChange={(e) =>
+              setTransferData({
+                ...transferData,
+                categoryId: e.target.value,
+              })
+            }
+          />
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">New Owner</label>
+            <input
+              type="text"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              value={transferData.newIssuedTo}
+              onChange={(e) =>
+                setTransferData({
+                  ...transferData,
+                  newIssuedTo: e.target.value,
+                })
+              }
+              placeholder="Enter new owner name"
+            />
           </div>
-        )}
-        {/* View History Modal */}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">New Location</label>
+            <input
+              type="text"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              value={transferData.newLocation}
+              onChange={(e) =>
+                setTransferData({
+                  ...transferData,
+                  newLocation: e.target.value,
+                })
+              }
+              placeholder="Enter new location"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+            <textarea
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              value={transferData.remarks || ""}
+              onChange={(e) =>
+                setTransferData({
+                  ...transferData,
+                  remarks: e.target.value,
+                })
+              }
+              placeholder="Enter any remarks about this transfer"
+              rows={3}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+          <button
+            onClick={toggleTransferModal}
+            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              // Set the categoryId before calling handleTransfer
+              setTransferData(prev => ({
+                ...prev,
+                categoryId: categoryId
+              }));
+              handleTransfer();
+            }}
+            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          >
+            Confirm Transfer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}        {/* View History Modal */}
         {modals.viewHistory && (
           <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
