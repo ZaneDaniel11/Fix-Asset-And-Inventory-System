@@ -173,6 +173,12 @@ const Sidebar = () => {
                 <span className="text-white">Reports</span>
               </a>
             </li>
+            <li>
+              <a href="/Disposed" className="flex items-center">
+                <i className="bx bx-calendar text-xl"></i>
+                <span className="text-white">Disosed</span>
+              </a>
+            </li>
           </>
         )}
 
