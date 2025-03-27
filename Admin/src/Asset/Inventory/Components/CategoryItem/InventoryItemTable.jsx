@@ -255,38 +255,47 @@ export default function InventoryTable() {
       return;
     }
   
+    // Prepare transfer data
+    const transferPayload = {
+      AssetID: selectedItem.assetId,
+      AssetCode: selectedItem.assetCode, 
+      AssetName: selectedItem.assetName, 
+      AssetCategoryID: selectedItem.categoryId, 
+      NewOwner: transferData.newIssuedTo,
+      NewLocation: transferData.newLocation,
+      Remarks: transferData.remarks || "", 
+      PerformedBy: storedName, 
+    };
+  
     try {
+      console.log("📤 Sending Transfer Request:", transferPayload); // ✅ Log request payload
+  
       const response = await axios.post(
         "http://localhost:5075/api/AssetItemApi/TransferAsset",
-        {
-          AssetID: selectedItem.assetId,
-          AssetCode: selectedItem.assetCode, 
-          AssetName: selectedItem.assetName, 
-          NewOwner: transferData.newIssuedTo,
-          NewLocation: transferData.newLocation,
-          Remarks: transferData.remarks || "", 
-          PerformedBy: storedName, 
-        },
+        transferPayload,
         {
           headers: { "Content-Type": "application/json" },
         }
       );
   
+      console.log("✅ Transfer Response:", response.data); // ✅ Log successful response
+  
       alert(response.data.Message || "Asset transferred successfully!");
       setModals((prev) => ({ ...prev, transfer: false }));
       fetchItems(categoryId);
     } catch (error) {
-      console.error("Error transferring asset:", error);
+      console.error("❌ Error transferring asset:", error);
   
       if (error.response) {
+        console.error("📩 Server Response:", error.response.data); // ✅ Log error response
         alert(`Transfer failed: ${error.response.data}`);
       } else {
         alert("Transfer failed. Please try again.");
       }
-    } finally {
-      
     }
   };
+  
+
   
   // Handle delete asset
   const handleDeleteAsset = async () => {
