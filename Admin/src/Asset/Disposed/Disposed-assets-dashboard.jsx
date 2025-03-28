@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { Badge } from "../../components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
-import { AlertCircle, Calendar, FileText, Filter, RefreshCw, Search, Trash2 } from "lucide-react"
+import { Calendar, FileText, Filter, Search, Trash2, RefreshCw, AlertCircle } from "lucide-react"
 import DatePicker from "react-date-picker"
 import "react-date-picker/dist/DatePicker.css"
 import "react-calendar/dist/Calendar.css"
@@ -142,8 +142,8 @@ const DisposedAssetsDashboard = () => {
   // Fetch notifications
   const fetchNotifications = async () => {
     try {
-      // Example API endpoint - replace with your actual endpoint
-      const response = await fetch(`http://localhost:5075/api/AssetItemApi/notifications`)
+      // Use the new API endpoint
+      const response = await fetch(`http://localhost:5075/api/AssetNotificationApi/ViewAllNotifications`)
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
@@ -152,13 +152,11 @@ const DisposedAssetsDashboard = () => {
       const data = await response.json()
       console.log("Notifications data:", data)
 
-      // For demo purposes, generate sample data if API is not implemented yet
-      const sampleData = generateSampleNotifications()
-      setNotifications(data.length ? data : sampleData)
+      // Update notifications state with the API response
+      setNotifications(data)
     } catch (error) {
       console.error("Error fetching notifications:", error)
-      // Fallback to sample data
-      setNotifications(generateSampleNotifications())
+     
     }
   }
 
@@ -293,65 +291,32 @@ const DisposedAssetsDashboard = () => {
     ]
   }
 
-  // Generate sample notifications for demo
-  const generateSampleNotifications = () => {
-    return [
-      {
-        id: 1,
-        type: "warranty",
-        assetId: 1,
-        assetName: "Dell PowerEdge R740 Server",
-        assetTag: "SV-2022-001",
-        message: "Warranty expires in 15 days",
-        date: new Date().toISOString(),
-        priority: "high",
-        read: false,
-      },
-      {
-        id: 2,
-        type: "warranty",
-        assetId: 4,
-        assetName: "Cisco Catalyst 9300 Switch",
-        assetTag: "NW-2022-003",
-        message: "Warranty expires in 25 days",
-        date: new Date().toISOString(),
-        priority: "medium",
-        read: false,
-      },
-      {
-        id: 3,
-        type: "depreciation",
-        assetId: 7,
-        assetName: "HP ProBook 450 G7",
-        assetTag: "LT-2021-012",
-        message: "Asset value depreciated below 20% of original value",
-        date: new Date().toISOString(),
-        priority: "low",
-        read: false,
-      },
-      {
-        id: 4,
-        type: "warranty",
-        assetId: 3,
-        assetName: "Lenovo ThinkPad X1 Carbon",
-        assetTag: "LT-2023-005",
-        message: "Warranty expired 10 days ago",
-        date: new Date().toISOString(),
-        priority: "high",
-        read: false,
-      },
-      {
-        id: 5,
-        type: "depreciation",
-        assetId: 9,
-        assetName: "Brother MFC-L8900CDW Printer",
-        assetTag: "PR-2020-005",
-        message: "Asset value depreciated below 10% of original value",
-        date: new Date().toISOString(),
-        priority: "medium",
-        read: true,
-      },
-    ]
+  // Add this function to get the appropriate icon based on notification type
+  const getNotificationTypeIcon = (type) => {
+    switch (type.toLowerCase()) {
+      case "warranty":
+        return <Calendar className="h-5 w-5" />
+      case "transfer":
+        return <RefreshCw className="h-5 w-5" />
+      case "depreciation":
+        return <AlertCircle className="h-5 w-5" />
+      default:
+        return <AlertCircle className="h-5 w-5" />
+    }
+  }
+
+  // Add this function to get the appropriate color based on notification type
+  const getNotificationTypeColor = (type) => {
+    switch (type.toLowerCase()) {
+      case "warranty":
+        return "text-amber-500"
+      case "transfer":
+        return "text-green-500"
+      case "depreciation":
+        return "text-blue-500"
+      default:
+        return "text-gray-500"
+    }
   }
 
   // Filter disposed assets based on search and disposal reason
@@ -425,6 +390,13 @@ const DisposedAssetsDashboard = () => {
     }
   }
 
+  // Navigate to all notifications
+  const handleViewAllNotifications = () => {
+    // You can implement navigation to a dedicated notifications page
+    console.log("Navigate to all notifications")
+    // Example: navigate("/notifications")
+  }
+
   // Initial data fetch
   useEffect(() => {
     fetchDisposedAssets()
@@ -439,80 +411,62 @@ const DisposedAssetsDashboard = () => {
           <h1 className="text-3xl font-extrabold text-gray-800">Asset Lifecycle Management</h1>
           <p className="text-gray-500 mt-1">Track disposed assets and warranty expirations</p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <Button onClick={() => fetchNotifications()} variant="outline" className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </Button>
-        </div>
       </div>
 
-      {/* Notifications Card */}
-      <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-xl">Recent Notifications</CardTitle>
-            <Badge variant="outline">{notifications.filter((n) => !n.read).length} New</Badge>
-          </div>
+      {/* Notifications Component */}
+      <Card className="shadow-md bg-white">
+        <CardHeader className="flex items-center justify-between">
+          <CardTitle>Notifications</CardTitle>
+          <Badge variant="outline">{notifications.filter((n) => !n.Read).length} New</Badge>
         </CardHeader>
         <CardContent>
-          {notifications.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">No notifications available</p>
-          ) : (
-            <div className="space-y-3 max-h-[300px] overflow-y-auto">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`p-3 rounded-lg border ${
-                    notification.read ? "bg-gray-50" : "bg-blue-50 border-blue-200"
-                  } ${
-                    notification.priority === "high"
-                      ? "border-l-4 border-l-red-500"
-                      : notification.priority === "medium"
-                        ? "border-l-4 border-l-amber-500"
-                        : "border-l-4 border-l-green-500"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`mt-1 ${notification.type === "warranty" ? "text-amber-500" : "text-blue-500"}`}>
-                      {notification.type === "warranty" ? (
-                        <Calendar className="h-5 w-5" />
-                      ) : (
-                        <AlertCircle className="h-5 w-5" />
-                      )}
+          <div className="space-y-3 max-h-[300px] overflow-y-auto">
+            {notifications.map((notification) => (
+              <div
+                key={notification.Id}
+                className={`p-3 rounded-lg border ${notification.Read ? "bg-gray-50" : "bg-blue-50 border-blue-200"} ${
+                  notification.Priority.toLowerCase() === "high"
+                    ? "border-l-4 border-l-red-500"
+                    : notification.Priority.toLowerCase() === "medium"
+                      ? "border-l-4 border-l-amber-500"
+                      : "border-l-4 border-l-green-500"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`mt-1 ${getNotificationTypeColor(notification.Type)}`}>
+                    {getNotificationTypeIcon(notification.Type)}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between">
+                      <h4 className="font-medium text-gray-900">{notification.AssetName}</h4>
+                      <span className="text-xs text-gray-500">{formatDate(notification.Date)}</span>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between">
-                        <h4 className="font-medium text-gray-900">{notification.assetName}</h4>
-                        <span className="text-xs text-gray-500">
-                          {new Date(notification.date).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="outline" className="text-xs">
-                          {notification.assetTag}
-                        </Badge>
-                        <Badge
-                          variant={
-                            notification.priority === "high"
-                              ? "destructive"
-                              : notification.priority === "medium"
-                                ? "warning"
-                                : "outline"
-                          }
-                          className="text-xs"
-                        >
-                          {notification.priority.charAt(0).toUpperCase() + notification.priority.slice(1)}
-                        </Badge>
-                      </div>
+                    <p className="text-sm text-gray-600 mt-1">{notification.Message}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="outline" className="text-xs">
+                        {notification.AssetCode}
+                      </Badge>
+                      <Badge
+                        variant={
+                          notification.Priority.toLowerCase() === "high"
+                            ? "destructive"
+                            : notification.Priority.toLowerCase() === "medium"
+                              ? "warning"
+                              : "outline"
+                        }
+                        className="text-xs"
+                      >
+                        {notification.Priority}
+                      </Badge>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ))}
+          </div>
+          <Button variant="link" className="w-full justify-start mt-4">
+            View All Notifications
+          </Button>
         </CardContent>
       </Card>
 
