@@ -1,3 +1,4 @@
+"use client"
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
@@ -32,6 +33,10 @@ const DisposedAssetsDashboard = () => {
   const [disposedAssets, setDisposedAssets] = useState([])
   const [warrantyAssets, setWarrantyAssets] = useState([])
   const [notifications, setNotifications] = useState([])
+
+  // Add a new state variable for selected category
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [categories, setCategories] = useState([])
 
   // Format currency to Pesos
   const formatCurrency = (value) => {
@@ -156,7 +161,36 @@ const DisposedAssetsDashboard = () => {
       setNotifications(data)
     } catch (error) {
       console.error("Error fetching notifications:", error)
-     
+      // Fallback to sample data if API fails
+      setNotifications(generateSampleNotifications())
+    }
+  }
+
+  // Add a function to fetch categories
+  const fetchCategories = async () => {
+    try {
+      // Try to fetch categories from API
+      const response = await fetch(`http://localhost:5075/api/AssetItemApi/GetCategories`)
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      console.log("Categories data:", data)
+      setCategories(data)
+    } catch (error) {
+      console.error("Error fetching categories:", error)
+      // Fallback to sample categories
+      setCategories([
+        { CategoryId: 1, CategoryName: "Electronics" },
+        { CategoryId: 2, CategoryName: "Furniture" },
+        { CategoryId: 3, CategoryName: "Vehicles" },
+        { CategoryId: 4, CategoryName: "Office Equipment" },
+        { CategoryId: 5, CategoryName: "IT Hardware" },
+        { CategoryId: 6, CategoryName: "Software" },
+        { CategoryId: 7, CategoryName: "Networking" },
+      ])
     }
   }
 
@@ -291,6 +325,45 @@ const DisposedAssetsDashboard = () => {
     ]
   }
 
+  // Generate sample notifications for demo
+  const generateSampleNotifications = () => {
+    return [
+      {
+        Id: 1,
+        AssetName: "Dell Laptop",
+        AssetCode: "LT-123",
+        Date: new Date().toISOString(),
+        Message: "Warranty expiring soon",
+        Priority: "High",
+        Type: "Warranty",
+        Read: false,
+        CategoryId: 5,
+      },
+      {
+        Id: 2,
+        AssetName: "HP Printer",
+        AssetCode: "PR-456",
+        Date: new Date().toISOString(),
+        Message: "Asset transferred to new department",
+        Priority: "Medium",
+        Type: "Transfer",
+        Read: true,
+        CategoryId: 4,
+      },
+      {
+        Id: 3,
+        AssetName: "Cisco Router",
+        AssetCode: "RT-789",
+        Date: new Date().toISOString(),
+        Message: "Depreciation threshold reached",
+        Priority: "Low",
+        Type: "Depreciation",
+        Read: false,
+        CategoryId: 7,
+      },
+    ]
+  }
+
   // Add this function to get the appropriate icon based on notification type
   const getNotificationTypeIcon = (type) => {
     switch (type.toLowerCase()) {
@@ -397,12 +470,20 @@ const DisposedAssetsDashboard = () => {
     // Example: navigate("/notifications")
   }
 
-  // Initial data fetch
+  // Modify the useEffect to fetch categories
   useEffect(() => {
     fetchDisposedAssets()
     fetchWarrantyAssets()
     fetchNotifications()
+    fetchCategories() // Add this line
   }, [])
+
+  // Add a function to filter notifications by category
+  const filteredNotifications = notifications.filter((notification) => {
+    return (
+      selectedCategory === "all" || (notification.CategoryId && notification.CategoryId.toString() === selectedCategory)
+    )
+  })
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
@@ -415,54 +496,86 @@ const DisposedAssetsDashboard = () => {
 
       {/* Notifications Component */}
       <Card className="shadow-md bg-white">
-        <CardHeader className="flex items-center justify-between">
-          <CardTitle>Notifications</CardTitle>
-          <Badge variant="outline">{notifications.filter((n) => !n.Read).length} New</Badge>
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <CardTitle>Notifications</CardTitle>
+            <Badge variant="outline" className="mt-1">
+              {notifications.filter((n) => !n.Read).length} New
+            </Badge>
+          </div>
+          <div className="w-full sm:w-64">
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full bg-white border border-gray-300 rounded-md">
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.CategoryId} value={category.CategoryId.toString()}>
+                    {category.CategoryName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-3 max-h-[300px] overflow-y-auto">
-            {notifications.map((notification) => (
-              <div
-                key={notification.Id}
-                className={`p-3 rounded-lg border ${notification.Read ? "bg-gray-50" : "bg-blue-50 border-blue-200"} ${
-                  notification.Priority.toLowerCase() === "high"
-                    ? "border-l-4 border-l-red-500"
-                    : notification.Priority.toLowerCase() === "medium"
-                      ? "border-l-4 border-l-amber-500"
-                      : "border-l-4 border-l-green-500"
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={`mt-1 ${getNotificationTypeColor(notification.Type)}`}>
-                    {getNotificationTypeIcon(notification.Type)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between">
-                      <h4 className="font-medium text-gray-900">{notification.AssetName}</h4>
-                      <span className="text-xs text-gray-500">{formatDate(notification.Date)}</span>
+            {filteredNotifications.length === 0 ? (
+              <p className="text-center py-4 text-gray-500">No notifications available for this category</p>
+            ) : (
+              filteredNotifications.map((notification) => (
+                <div
+                  key={notification.Id}
+                  className={`p-3 rounded-lg border ${
+                    notification.Read ? "bg-gray-50" : "bg-blue-50 border-blue-200"
+                  } ${
+                    notification.Priority.toLowerCase() === "high"
+                      ? "border-l-4 border-l-red-500"
+                      : notification.Priority.toLowerCase() === "medium"
+                        ? "border-l-4 border-l-amber-500"
+                        : "border-l-4 border-l-green-500"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`mt-1 ${getNotificationTypeColor(notification.Type)}`}>
+                      {getNotificationTypeIcon(notification.Type)}
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">{notification.Message}</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Badge variant="outline" className="text-xs">
-                        {notification.AssetCode}
-                      </Badge>
-                      <Badge
-                        variant={
-                          notification.Priority.toLowerCase() === "high"
-                            ? "destructive"
-                            : notification.Priority.toLowerCase() === "medium"
-                              ? "warning"
-                              : "outline"
-                        }
-                        className="text-xs"
-                      >
-                        {notification.Priority}
-                      </Badge>
+                    <div className="flex-1">
+                      <div className="flex justify-between">
+                        <h4 className="font-medium text-gray-900">{notification.AssetName}</h4>
+                        <span className="text-xs text-gray-500">{formatDate(notification.Date)}</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{notification.Message}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant="outline" className="text-xs">
+                          {notification.AssetCode}
+                        </Badge>
+                        <Badge
+                          variant={
+                            notification.Priority.toLowerCase() === "high"
+                              ? "destructive"
+                              : notification.Priority.toLowerCase() === "medium"
+                                ? "warning"
+                                : "outline"
+                          }
+                          className="text-xs"
+                        >
+                          {notification.Priority}
+                        </Badge>
+                        {notification.CategoryId &&
+                          categories.find((c) => c.CategoryId?.toString() === notification.CategoryId?.toString()) && (
+                            <Badge variant="secondary" className="text-xs">
+                              {categories.find((c) => c.CategoryId?.toString() === notification.CategoryId?.toString())
+                                ?.CategoryName || "Unknown"}
+                            </Badge>
+                          )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
           <Button variant="link" className="w-full justify-start mt-4">
             View All Notifications
