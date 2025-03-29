@@ -13,6 +13,7 @@ import Logs from "./Inventory_Admin/Inventory_Logs/Inventory_Logs.jsx";
 import Sidebar from "./Components/Sidebar.jsx";
 import BorrowedItems from "./Inventory_Admin/Borrowed/BorrowedItems.jsx";
 import ReturedItems from "./Inventory_Admin/Borrowed/ReturnedItems.jsx";
+import Approved from "./Inventory_Admin/Approved/Approved.jsx"
 
 // Asset Admin
 import AssetInventory from "./Asset/Inventory/AInventory.jsx";
@@ -223,6 +224,16 @@ function App() {
             element={
               <ProtectedRoute
                 element={<Logs />}
+                allowedUsertypes={["Inventory_Admin"]}
+              />
+            }
+          />
+
+              <Route
+            path="/Approved"
+            element={
+              <ProtectedRoute
+                element={<Approved />}
                 allowedUsertypes={["Inventory_Admin"]}
               />
             }
