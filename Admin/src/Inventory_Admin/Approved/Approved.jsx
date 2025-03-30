@@ -35,16 +35,30 @@ export default function Approved() {
     }
   }, [])
 
-  // Update the print style in the handlePrint function to make it more professional
+  // Updated print function to remove unwanted elements
   const handlePrint = () => {
     const printContent = document.getElementById("printContent")
-    const printWindow = window.open("", "_blank")
+    const printWindow = window.open("", "", "height=600,width=800")
+
+    // Updated style to remove headers, footers, and unwanted text
     const style = `
     <style>
       @page {
         size: A4;
         margin: 1.5cm;
       }
+      
+      /* Hide all headers and footers */
+      @page {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      
+      html {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      
       body {
         font-family: 'Arial', sans-serif;
         margin: 0;
@@ -52,6 +66,17 @@ export default function Approved() {
         color: #333;
         line-height: 1.5;
       }
+      
+      /* Hide URL, page numbers, date */
+      @media print {
+        @page { margin: 0; }
+        body { margin: 1.6cm; }
+        
+        .print-header h1 {
+          margin-top: 0;
+        }
+      }
+      
       .print-header {
         text-align: center;
         margin-bottom: 20px;
@@ -200,41 +225,68 @@ export default function Approved() {
         font-size: 16px;
         color: #111827;
       }
+      
+      /* Hide the title/header text */
+      .hide-in-print {
+        display: none !important;
+      }
     </style>
   `
+    // Remove the title and set empty title to avoid "about:blank"
     printWindow.document.write(`
     <html>
       <head>
-        <title>Request Details</title>
+        <title></title>
         ${style}
       </head>
       <body>
         <div class="print-header">
           <h1>PROPERTY CUSTODIAN DEPARTMENT</h1>
-          <p>Request Approval Document</p>
+          <p>Approval Document</p>
         </div>
-        ${printContent.innerHTML}
+        
+        <!-- Clone and modify the content to remove unwanted elements -->
+        <div>${printContent.innerHTML.replace(/<h5[^>]*>.*?<\/h5>/g, "")}</div>
+        
         <div class="signature-section">
           <div class="signature-box">
             <div class="signature-line"></div>
-             <p class="signature-name">Property Custodian Head</p>
-            <p class="signature-name">Jingle Boy Lepiten</p>
+            <p class="signature-name">Requester's Signature</p>
             <p class="signature-title">Date: ${new Date().toLocaleDateString()}</p>
           </div>
           <div class="signature-box">
             <div class="signature-line"></div>
-            <p class="signature-name">School President</p>
-            <p class="signature-name">Victor Elliot Lepiten</p>
+            <p class="signature-name">Received by</p>
             <p class="signature-title">Date: ${new Date().toLocaleDateString()}</p>
           </div>
         </div>
+        
+        <script>
+          // Execute immediately to hide any remaining unwanted elements
+          document.addEventListener('DOMContentLoaded', function() {
+            // Remove any elements with "Request Details" text
+            const elements = document.querySelectorAll('*');
+            for (let el of elements) {
+              if (el.innerText && el.innerText.includes('Request Details')) {
+                el.classList.add('hide-in-print');
+              }
+            }
+            
+            // Auto print and close to avoid seeing "about:blank"
+            setTimeout(function() {
+              window.print();
+              window.close();
+            }, 250);
+          });
+        </script>
       </body>
     </html>
   `)
+
     printWindow.document.close()
+
+    // Focus needed for some browsers
     printWindow.focus()
-    printWindow.print()
-    printWindow.close()
   }
 
   // Fetch approved borrow requests (initial load)
@@ -689,7 +741,7 @@ export default function Approved() {
                 {/* Print Styles */}
 
                 {/* Header */}
-                <div className="flex justify-between items-center mb-6 border-b pb-4">
+                <div className="flex justify-between items-center mb-6 border-b pb-4 hide-in-print">
                   <h5 className="text-3xl font-bold text-gray-800 flex items-center">
                     <i className="fa-solid fa-eye mr-3 text-blue-500"></i>
                     Request Details
@@ -878,12 +930,25 @@ export default function Approved() {
                     </div>
                   </div>
 
-             
+                  {/* Officials Section */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    <div className="flex flex-col items-center bg-gray-50 p-5 rounded-lg shadow-md">
+                      <i className="fa-solid fa-user-tie text-3xl mb-3 text-blue-600"></i>
+                      <p className="text-lg text-gray-700 font-medium">President</p>
+                      <span className="text-xl font-semibold text-gray-800">Victor Elliot Lepiten</span>
+                    </div>
+
+                    <div className="flex flex-col items-center bg-gray-50 p-5 rounded-lg shadow-md">
+                      <i className="fa-solid fa-user-shield text-3xl mb-3 text-purple-600"></i>
+                      <p className="text-lg text-gray-700 font-medium">Property Custodian Head</p>
+                      <span className="text-xl font-semibold text-gray-800">Jingle Boy Lepiten</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Print and Close Buttons */}
                 {!isPrinting && (
-                  <div className="flex justify-between mt-8">
+                  <div className="flex justify-between mt-8 no-print">
                     <button
                       type="button"
                       onClick={handlePrint}
@@ -910,14 +975,14 @@ export default function Approved() {
                 {/* Close Button */}
                 <button
                   onClick={() => setViewBorrowModalOpen(false)}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-2xl no-print"
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-2xl no-print hide-in-print"
                 >
                   ✕
                 </button>
-
                 {/* Modal Title */}
-                <h2 className="text-3xl font-bold text-gray-700 text-center mb-8">Borrow Request Details</h2>
-
+                <h2 className="text-3xl font-bold text-gray-700 text-center mb-8 hide-in-print">
+                  Borrow Request Details
+                </h2>
                 {/* Borrow Request Details */}
                 <div className="space-y-6 mt-6">
                   <div className="grid grid-cols-2 gap-x-8 gap-y-4">
@@ -953,9 +1018,7 @@ export default function Approved() {
                     </div>
                   </div>
                 </div>
-
                 <hr className="my-6 border-gray-300" />
-
                 {/* Approval Status */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                   <div className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow-sm border-l-4 border-green-500">
@@ -1029,14 +1092,25 @@ export default function Approved() {
                   </div>
                 </div>
 
+                {/* Officials Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                  <div className="flex flex-col items-center bg-gray-50 p-5 rounded-lg shadow-md">
+                    <i className="fa-solid fa-user-tie text-3xl mb-3 text-blue-600"></i>
+                    <p className="text-lg text-gray-700 font-medium">President</p>
+                    <span className="text-xl font-semibold text-gray-800">Victor Elliot Lepiten</span>
+                  </div>
 
+                  <div className="flex flex-col items-center bg-gray-50 p-5 rounded-lg shadow-md">
+                    <i className="fa-solid fa-user-shield text-3xl mb-3 text-purple-600"></i>
+                    <p className="text-lg text-gray-700 font-medium">Property Custodian Head</p>
+                    <span className="text-xl font-semibold text-gray-800">Jingle Boy Lepiten</span>
+                  </div>
+                </div>
                 <hr className="my-6 border-gray-300" />
-
                 {/* Borrowed Items Section */}
                 <h4 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
                   <i className="fa-solid fa-boxes-stacked text-green-600"></i> Borrowed Items
                 </h4>
-
                 {borrowLoading ? (
                   <div className="text-center text-gray-500 text-lg">Loading borrowed items...</div>
                 ) : borrowedItems.length === 0 ? (
@@ -1055,9 +1129,8 @@ export default function Approved() {
                     ))}
                   </div>
                 )}
-
                 {/* Print Button */}
-                <div className="flex justify-center mt-8">
+                <div className="flex justify-center mt-8 no-print">
                   <button
                     onClick={handlePrint}
                     className="bg-green-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-600 text-lg no-print"
