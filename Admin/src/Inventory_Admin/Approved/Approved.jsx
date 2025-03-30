@@ -1,122 +1,267 @@
-import React, { useState, useEffect } from "react";
-import "../CSS/print.css";
+"use client"
+
+import { useState, useEffect } from "react"
+import "../CSS/print.css"
 
 export default function Approved() {
-  const [viewRequestModalOpen, setViewRequestModalOpen] = useState(false);
-  const [viewBorrowModalOpen, setViewBorrowModalOpen] = useState(false);
-  const [currentItem, setCurrentItem] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [requestItems, setRequestItems] = useState([]);
-  const [borrowRequests, setBorrowRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [borrowedItems, setBorrowedItems] = useState([]);
-  const [borrowLoading, setBorrowLoading] = useState(false);
-  const [selectedTable, setSelectedTable] = useState("requestItems");
-  const [isPrinting, setIsPrinting] = useState(false);
+  const [viewRequestModalOpen, setViewRequestModalOpen] = useState(false)
+  const [viewBorrowModalOpen, setViewBorrowModalOpen] = useState(false)
+  const [currentItem, setCurrentItem] = useState(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [requestItems, setRequestItems] = useState([])
+  const [borrowRequests, setBorrowRequests] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [borrowedItems, setBorrowedItems] = useState([])
+  const [borrowLoading, setBorrowLoading] = useState(false)
+  const [selectedTable, setSelectedTable] = useState("requestItems")
+  const [isPrinting, setIsPrinting] = useState(false)
+
   const handleBeforePrint = () => {
-    setIsPrinting(true); // Hide buttons before printing
-  };
+    setIsPrinting(true) // Hide buttons before printing
+  }
+
   useEffect(() => {
     const handleAfterPrint = () => {
-      setIsPrinting(false); // Show buttons after printing
-    };
+      setIsPrinting(false) // Show buttons after printing
+    }
 
-    window.addEventListener("beforeprint", handleBeforePrint);
-    window.addEventListener("afterprint", handleAfterPrint);
+    window.addEventListener("beforeprint", handleBeforePrint)
+    window.addEventListener("afterprint", handleAfterPrint)
 
     return () => {
-      window.removeEventListener("beforeprint", handleBeforePrint);
-      window.removeEventListener("afterprint", handleAfterPrint);
-    };
-  }, []);
+      window.removeEventListener("beforeprint", handleBeforePrint)
+      window.removeEventListener("afterprint", handleAfterPrint)
+    }
+  }, [])
 
+  // Update the print style in the handlePrint function to make it more professional
   const handlePrint = () => {
-    const printContent = document.getElementById("printContent");
-    const printWindow = window.open("", "_blank");
+    const printContent = document.getElementById("printContent")
+    const printWindow = window.open("", "_blank")
     const style = `
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 20px;
-        }
-        .details {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 1rem;
-        }
-        .approval-status .admin-row {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1rem;
-        }
-        .approval-status .admin-row div {
-          text-align: center;
-          padding: 10px;
-          border: 1px solid #ccc;
-          border-radius: 8px;
-        }
-        .no-print {
-          display: none;
-        }
-        .text-gray-600 {
-          color: #6b7280;
-        }
-        .text-gray-800 {
-          color: #374151;
-        }
-        .font-semibold {
-          font-weight: 600;
-        }
-        .rounded-lg {
-          border-radius: 0.5rem;
-        }
-        .text-xl {
-          font-size: 1.25rem;
-        }
-      </style>
-    `;
+    <style>
+      @page {
+        size: A4;
+        margin: 1.5cm;
+      }
+      body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        color: #333;
+        line-height: 1.5;
+      }
+      .print-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #2563eb;
+      }
+      .print-header h1 {
+        margin: 0;
+        color: #1e40af;
+        font-size: 24px;
+      }
+      .print-header p {
+        margin: 5px 0 0;
+        color: #6b7280;
+        font-size: 14px;
+      }
+      .details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 20px;
+      }
+      .details > div {
+        padding: 10px;
+        background-color: #f9fafb;
+        border-radius: 8px;
+        border-left: 3px solid #3b82f6;
+      }
+      .details p {
+        margin: 5px 0;
+      }
+      .details .label {
+        font-weight: bold;
+        color: #4b5563;
+        font-size: 14px;
+      }
+      .details .value {
+        font-size: 16px;
+        color: #111827;
+      }
+      .approval-status {
+        margin-top: 30px;
+      }
+      .approval-status h2 {
+        font-size: 18px;
+        color: #1f2937;
+        margin-bottom: 15px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .admin-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 20px;
+      }
+      .admin-row div, .custodian-row {
+        text-align: center;
+        padding: 15px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background-color: #f9fafb;
+      }
+      .admin-row .status-icon {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      .admin-row .admin-title {
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 5px;
+      }
+      .admin-row .admin-status {
+        font-weight: bold;
+        font-size: 16px;
+      }
+      .signature-section {
+        margin-top: 40px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+      }
+      .signature-box {
+        text-align: center;
+      }
+      .signature-line {
+        margin: 50px auto 10px;
+        width: 80%;
+        border-bottom: 1px solid #000;
+      }
+      .signature-name {
+        font-weight: bold;
+        margin: 0;
+      }
+      .signature-title {
+        margin: 5px 0 0;
+        font-style: italic;
+        color: #6b7280;
+      }
+      .borrowed-items {
+        margin-top: 20px;
+      }
+      .borrowed-items h3 {
+        font-size: 18px;
+        color: #1f2937;
+        margin-bottom: 15px;
+      }
+      .borrowed-items-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .borrowed-item {
+        padding: 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background-color: #f9fafb;
+      }
+      .no-print {
+        display: none;
+      }
+      .approved { color: #10b981; }
+      .pending { color: #f59e0b; }
+      .rejected { color: #ef4444; }
+      
+      .officials-section {
+        margin-top: 30px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+      }
+      .official-box {
+        text-align: center;
+        padding: 15px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background-color: #f9fafb;
+      }
+      .official-title {
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 5px;
+      }
+      .official-name {
+        font-weight: bold;
+        font-size: 16px;
+        color: #111827;
+      }
+    </style>
+  `
     printWindow.document.write(`
-      <html>
-        <head>
-          <title>Print Request Details</title>
-          ${style}
-        </head>
-        <body>
-          ${printContent.innerHTML}
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-  };
+    <html>
+      <head>
+        <title>Request Details</title>
+        ${style}
+      </head>
+      <body>
+        <div class="print-header">
+          <h1>PROPERTY CUSTODIAN DEPARTMENT</h1>
+          <p>Request Approval Document</p>
+        </div>
+        ${printContent.innerHTML}
+        <div class="signature-section">
+          <div class="signature-box">
+            <div class="signature-line"></div>
+             <p class="signature-name">Property Custodian Head</p>
+            <p class="signature-name">Jingle Boy Lepiten</p>
+            <p class="signature-title">Date: ${new Date().toLocaleDateString()}</p>
+          </div>
+          <div class="signature-box">
+            <div class="signature-line"></div>
+            <p class="signature-name">School President</p>
+            <p class="signature-name">Victor Elliot Lepiten</p>
+            <p class="signature-title">Date: ${new Date().toLocaleDateString()}</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `)
+    printWindow.document.close()
+    printWindow.focus()
+    printWindow.print()
+    printWindow.close()
+  }
 
   // Fetch approved borrow requests (initial load)
   useEffect(() => {
     const fetchApprovedBorrowRequests = async () => {
       try {
         const response = await fetch(
-          "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByAdmin1"
-        );
-        const data = await response.json();
-        setBorrowRequests(data);
+          "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByAdmin1",
+        )
+        const data = await response.json()
+        setBorrowRequests(data)
       } catch (error) {
-        setError(error.message);
+        setError(error.message)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchApprovedBorrowRequests();
-  }, []);
+    fetchApprovedBorrowRequests()
+  }, [])
 
   const fetchRequestItems = async () => {
     try {
-      setLoading(true);
-      fetch("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests")
+      setLoading(true)
+      fetch(
+        "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests",
+      )
         .then((response) => response.json())
         .then((data) => {
           const mappedItems = data.map((item) => ({
@@ -132,22 +277,24 @@ export default function Approved() {
             cost: item.estimatedCost,
             description: item.description,
             suggestedDealer: item.suggestedDealer,
-          }));
-          setRequestItems(mappedItems);
-          console.log(mappedItems);
+          }))
+          setRequestItems(mappedItems)
+          console.log(mappedItems)
         })
-        .catch((error) => console.error("Error fetching data:", error));
+        .catch((error) => console.error("Error fetching data:", error))
     } catch (error) {
-      setError(error.message);
+      setError(error.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const fetchBorrowRequests = async () => {
     try {
-      setLoading(true);
-      fetch("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/AllRequests")
+      setLoading(true)
+      fetch(
+        "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/AllRequests",
+      )
         .then((response) => response.json())
         .then((data) => {
           const mappedItems = data.map((item) => ({
@@ -159,69 +306,69 @@ export default function Approved() {
             Admin1Approval: item.Admin1Approval,
             Admin2Approval: item.Admin2Approval,
             Admin3Approval: item.Admin3Approval,
-          }));
-          setBorrowRequests(mappedItems);
+          }))
+          setBorrowRequests(mappedItems)
         })
-        .catch((error) => console.error("Error fetching data:", error));
+        .catch((error) => console.error("Error fetching data:", error))
     } catch (error) {
-      setError(error.message);
+      setError(error.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const openViewRequestModal = (item) => {
-    setCurrentItem(item);
-    setViewRequestModalOpen(true);
-  };
+    setCurrentItem(item)
+    setViewRequestModalOpen(true)
+  }
 
   const openViewBorrowModal = async (item) => {
-    setCurrentItem(item);
-    setViewBorrowModalOpen(true);
-    setBorrowLoading(true);
+    setCurrentItem(item)
+    setViewBorrowModalOpen(true)
+    setBorrowLoading(true)
 
     try {
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`
-      );
-      const data = await response.json();
-      setBorrowedItems(data);
+        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`,
+      )
+      const data = await response.json()
+      setBorrowedItems(data)
     } catch (error) {
-      console.error("Error fetching borrowed items:", error);
+      console.error("Error fetching borrowed items:", error)
     } finally {
-      setBorrowLoading(false);
+      setBorrowLoading(false)
     }
-  };
+  }
 
   const handleTableChange = (table) => {
-    setSelectedTable(table);
+    setSelectedTable(table)
     if (table === "requestItems") {
-      fetchRequestItems();
+      fetchRequestItems()
     } else if (table === "borrowRequests") {
-      fetchBorrowRequests();
+      fetchBorrowRequests()
     }
-  };
+  }
 
   const filteredItems = requestItems.filter(
     (item) =>
       item.requestedBy.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (item.Admin3 === "Approved" || item.Admin3 === "Declined") &&
-      item.Admin2 === "Approved"
-  );
+      item.Admin2 === "Approved",
+  )
 
   const filteredItems1 = borrowRequests.filter(
     (item) =>
       item.RequestedBy.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (item.Admin3Approval === "Approved" ||
-        item.Admin3Approval === "Declined") &&
-      item.Admin2Approval === "Approved"
-  );
+      (item.Admin3Approval === "Approved" || item.Admin3Approval === "Declined") &&
+      item.Admin2Approval === "Approved",
+  )
+
   if (loading) {
-    return <div>Loading data...</div>;
+    return <div>Loading data...</div>
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div>Error: {error}</div>
   }
 
   return (
@@ -246,9 +393,7 @@ export default function Approved() {
             <button
               onClick={() => handleTableChange("requestItems")}
               className={`px-4 py-2 font-bold ${
-                selectedTable === "requestItems"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-300"
+                selectedTable === "requestItems" ? "bg-blue-500 text-white" : "bg-gray-300"
               }`}
             >
               Request Item
@@ -257,9 +402,7 @@ export default function Approved() {
             <button
               onClick={() => handleTableChange("borrowRequests")}
               className={`px-4 py-2 font-bold ${
-                selectedTable === "borrowRequests"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-300"
+                selectedTable === "borrowRequests" ? "bg-blue-500 text-white" : "bg-gray-300"
               } ml-4`}
             >
               Borrow Request
@@ -271,63 +414,37 @@ export default function Approved() {
               <table className="min-w-full border-collapse border border-gray-200 bg-white">
                 <thead className="bg-gray-200">
                   <tr className="font-semibold text-md text-zinc-50">
-                    <th className="border border-gray-300 px-5 py-3">
-                      Request ID
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Request ID</th>
 
-                    <th className="border border-gray-300 px-5 py-3">
-                      Item Name
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Requested By
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Requested Date
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Item Name</th>
+                    <th className="border border-gray-300 px-5 py-3">Requested By</th>
+                    <th className="border border-gray-300 px-5 py-3">Requested Date</th>
                     <th className="border border-gray-300 px-5 py-3">Status</th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Priority
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Inventory Admin
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Head Admin
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      School Admin
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3 text-center">
-                      Actions
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Priority</th>
+                    <th className="border border-gray-300 px-5 py-3">Inventory Admin</th>
+                    <th className="border border-gray-300 px-5 py-3">Head Admin</th>
+                    <th className="border border-gray-300 px-5 py-3">School Admin</th>
+                    <th className="border border-gray-300 px-5 py-3 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredItems.map((item) => {
                     return (
                       <tr key={item.id} className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-5 py-3">
-                          {item.id}
-                        </td>
+                        <td className="border border-gray-300 px-5 py-3">{item.id}</td>
 
-                        <td className="border border-gray-300 px-5 py-3">
-                          {item.name}
-                        </td>
-                        <td className="border border-gray-300 px-5 py-3">
-                          {item.requestedBy}
-                        </td>
-                        <td className="border border-gray-300 px-5 py-3">
-                          {item.requestedDate}
-                        </td>
+                        <td className="border border-gray-300 px-5 py-3">{item.name}</td>
+                        <td className="border border-gray-300 px-5 py-3">{item.requestedBy}</td>
+                        <td className="border border-gray-300 px-5 py-3">{item.requestedDate}</td>
                         <td
                           className={`border border-gray-300 px-5 py-3 font-medium ${
                             item.status === "Pending"
                               ? "text-yellow-600"
                               : item.status === "Rejected"
-                              ? "text-red-600"
-                              : item.status === "In Progress"
-                              ? "text-blue-600"
-                              : "text-green-600"
+                                ? "text-red-600"
+                                : item.status === "In Progress"
+                                  ? "text-blue-600"
+                                  : "text-green-600"
                           }`}
                         >
                           <i
@@ -335,8 +452,8 @@ export default function Approved() {
                               item.status === "Approved"
                                 ? "fa-check-circle"
                                 : item.status === "Rejected"
-                                ? "fa-times-circle"
-                                : "fa-hourglass-half"
+                                  ? "fa-times-circle"
+                                  : "fa-hourglass-half"
                             }`}
                           ></i>
                           {item.status}
@@ -346,8 +463,8 @@ export default function Approved() {
                             item.priority === "High"
                               ? "text-red-600"
                               : item.priority === "Medium"
-                              ? "text-yellow-600"
-                              : "text-green-600"
+                                ? "text-yellow-600"
+                                : "text-green-600"
                           }`}
                         >
                           {item.priority}
@@ -357,10 +474,10 @@ export default function Approved() {
                             item.Admin1 === "Pending"
                               ? "text-yellow-600"
                               : item.Admin1 === "Rejected"
-                              ? "text-red-600"
-                              : item.Admin1 === "In Progress"
-                              ? "text-blue-600"
-                              : "text-green-600"
+                                ? "text-red-600"
+                                : item.Admin1 === "In Progress"
+                                  ? "text-blue-600"
+                                  : "text-green-600"
                           }`}
                         >
                           <i
@@ -368,8 +485,8 @@ export default function Approved() {
                               item.Admin1 === "Approved"
                                 ? "fa-check-circle"
                                 : item.Admin1 === "Rejected"
-                                ? "fa-times-circle"
-                                : "fa-hourglass-half"
+                                  ? "fa-times-circle"
+                                  : "fa-hourglass-half"
                             }`}
                           ></i>
                           {item.Admin1}
@@ -379,10 +496,10 @@ export default function Approved() {
                             item.Admin2 === "Pending"
                               ? "text-yellow-600"
                               : item.Admin2 === "Rejected"
-                              ? "text-red-600"
-                              : item.Admin2 === "In Progress"
-                              ? "text-blue-600"
-                              : "text-green-600"
+                                ? "text-red-600"
+                                : item.Admin2 === "In Progress"
+                                  ? "text-blue-600"
+                                  : "text-green-600"
                           }`}
                         >
                           <i
@@ -390,8 +507,8 @@ export default function Approved() {
                               item.Admin2 === "Approved"
                                 ? "fa-check-circle"
                                 : item.Admin2 === "Rejected"
-                                ? "fa-times-circle"
-                                : "fa-hourglass-half"
+                                  ? "fa-times-circle"
+                                  : "fa-hourglass-half"
                             }`}
                           ></i>
 
@@ -402,10 +519,10 @@ export default function Approved() {
                             item.Admin3 === "Pending"
                               ? "text-yellow-600"
                               : item.Admin3 === "Declined"
-                              ? "text-red-600"
-                              : item.Admin3 === "In Progress"
-                              ? "text-blue-600"
-                              : "text-green-600"
+                                ? "text-red-600"
+                                : item.Admin3 === "In Progress"
+                                  ? "text-blue-600"
+                                  : "text-green-600"
                           }`}
                         >
                           <i
@@ -413,8 +530,8 @@ export default function Approved() {
                               item.Admin3 === "Approved"
                                 ? "fa-check-circle"
                                 : item.Admin3 === "Declined"
-                                ? "fa-times-circle"
-                                : "fa-hourglass-half"
+                                  ? "fa-times-circle"
+                                  : "fa-hourglass-half"
                             }`}
                           ></i>
                           {item.Admin3}
@@ -428,7 +545,7 @@ export default function Approved() {
                           </button>
                         </td>
                       </tr>
-                    );
+                    )
                   })}
                 </tbody>
               </table>
@@ -438,58 +555,34 @@ export default function Approved() {
               <table className="min-w-full border-collapse border border-gray-200 bg-white">
                 <thead className="bg-gray-200">
                   <tr className="font-semibold text-md text-zinc-50">
-                    <th className="border border-gray-300 px-5 py-3">
-                      Borrow ID
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Requested By
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Borrow Date
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Purpose
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Borrow ID</th>
+                    <th className="border border-gray-300 px-5 py-3">Requested By</th>
+                    <th className="border border-gray-300 px-5 py-3">Borrow Date</th>
+                    <th className="border border-gray-300 px-5 py-3">Purpose</th>
                     <th className="border border-gray-300 px-5 py-3">Status</th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Inventory Admin
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Head Admin
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      School Admin
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3 text-center">
-                      Actions
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Inventory Admin</th>
+                    <th className="border border-gray-300 px-5 py-3">Head Admin</th>
+                    <th className="border border-gray-300 px-5 py-3">School Admin</th>
+                    <th className="border border-gray-300 px-5 py-3 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredItems1.map((item) => {
                     return (
                       <tr key={item.BorrowId} className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-5 py-3">
-                          {item.BorrowId}
-                        </td>
-                        <td className="border border-gray-300 px-5 py-3">
-                          {item.RequestedBy}
-                        </td>
-                        <td className="border border-gray-300 px-5 py-3">
-                          {item.ReqBorrowDate}
-                        </td>
-                        <td className="border border-gray-300 px-5 py-3">
-                          {item.Purpose}
-                        </td>
+                        <td className="border border-gray-300 px-5 py-3">{item.BorrowId}</td>
+                        <td className="border border-gray-300 px-5 py-3">{item.RequestedBy}</td>
+                        <td className="border border-gray-300 px-5 py-3">{item.ReqBorrowDate}</td>
+                        <td className="border border-gray-300 px-5 py-3">{item.Purpose}</td>
                         <td
                           className={`border border-gray-300 px-5 py-3 font-medium ${
                             item.Status === "Pending"
                               ? "text-yellow-600"
                               : item.Status === "Rejected"
-                              ? "text-red-600"
-                              : item.Status === "In Progress"
-                              ? "text-blue-600"
-                              : "text-green-600"
+                                ? "text-red-600"
+                                : item.Status === "In Progress"
+                                  ? "text-blue-600"
+                                  : "text-green-600"
                           }`}
                         >
                           <i
@@ -497,8 +590,8 @@ export default function Approved() {
                               item.Status === "Approved"
                                 ? "fa-check-circle"
                                 : item.Status === "Rejected"
-                                ? "fa-times-circle"
-                                : "fa-hourglass-half"
+                                  ? "fa-times-circle"
+                                  : "fa-hourglass-half"
                             }`}
                           ></i>
                           {item.Status}
@@ -508,10 +601,10 @@ export default function Approved() {
                             item.Admin1Approval === "Pending"
                               ? "text-yellow-600"
                               : item.Admin1Approval === "Rejected"
-                              ? "text-red-600"
-                              : item.Admin1Approval === "In Progress"
-                              ? "text-blue-600"
-                              : "text-green-600"
+                                ? "text-red-600"
+                                : item.Admin1Approval === "In Progress"
+                                  ? "text-blue-600"
+                                  : "text-green-600"
                           }`}
                         >
                           <i
@@ -519,8 +612,8 @@ export default function Approved() {
                               item.Admin1Approval === "Approved"
                                 ? "fa-check-circle"
                                 : item.Admin1Approval === "Rejected"
-                                ? "fa-times-circle"
-                                : "fa-hourglass-half"
+                                  ? "fa-times-circle"
+                                  : "fa-hourglass-half"
                             }`}
                           ></i>
                           {item.Admin1Approval}
@@ -530,10 +623,10 @@ export default function Approved() {
                             item.Admin2Approval === "Pending"
                               ? "text-yellow-600"
                               : item.Admin2Approval === "Rejected"
-                              ? "text-red-600"
-                              : item.Admin2Approval === "In Progress"
-                              ? "text-blue-600"
-                              : "text-green-600"
+                                ? "text-red-600"
+                                : item.Admin2Approval === "In Progress"
+                                  ? "text-blue-600"
+                                  : "text-green-600"
                           }`}
                         >
                           <i
@@ -541,8 +634,8 @@ export default function Approved() {
                               item.Admin2Approval === "Approved"
                                 ? "fa-check-circle"
                                 : item.Admin2Approval === "Rejected"
-                                ? "fa-times-circle"
-                                : "fa-hourglass-half"
+                                  ? "fa-times-circle"
+                                  : "fa-hourglass-half"
                             }`}
                           ></i>
                           {item.Admin2Approval}
@@ -552,10 +645,10 @@ export default function Approved() {
                             item.Admin3Approval === "Pending"
                               ? "text-yellow-600"
                               : item.Admin3Approval === "Declined"
-                              ? "text-red-600"
-                              : item.Admin3Approval === "In Progress"
-                              ? "text-blue-600"
-                              : "text-green-600"
+                                ? "text-red-600"
+                                : item.Admin3Approval === "In Progress"
+                                  ? "text-blue-600"
+                                  : "text-green-600"
                           }`}
                         >
                           <i
@@ -563,8 +656,8 @@ export default function Approved() {
                               item.Admin3Approval === "Approved"
                                 ? "fa-check-circle"
                                 : item.Admin3Approval === "Declined"
-                                ? "fa-times-circle"
-                                : "fa-hourglass-half"
+                                  ? "fa-times-circle"
+                                  : "fa-hourglass-half"
                             }`}
                           ></i>
                           {item.Admin3Approval}
@@ -581,7 +674,7 @@ export default function Approved() {
                           </div>
                         </td>
                       </tr>
-                    );
+                    )
                   })}
                 </tbody>
               </table>
@@ -631,27 +724,21 @@ export default function Approved() {
                       <i className="fa-solid fa-user-tag mr-2 text-yellow-500"></i>
                       Suggested Dealer
                     </p>
-                    <p className="text-xl text-gray-800">
-                      {currentItem.suggestedDealer}
-                    </p>
+                    <p className="text-xl text-gray-800">{currentItem.suggestedDealer}</p>
                   </div>
                   <div>
                     <p className="text-lg font-semibold text-gray-600 flex items-center">
                       <i className="fa-solid fa-file-alt mr-2 text-gray-500"></i>
                       Item Description
                     </p>
-                    <p className="text-xl text-gray-800">
-                      {currentItem.description}
-                    </p>
+                    <p className="text-xl text-gray-800">{currentItem.description}</p>
                   </div>
                   <div>
                     <p className="text-lg font-semibold text-gray-600 flex items-center">
                       <i className="fa-solid fa-user mr-2 text-purple-500"></i>
                       Requested By
                     </p>
-                    <p className="text-xl text-gray-800">
-                      {currentItem.requestedBy}
-                    </p>
+                    <p className="text-xl text-gray-800">{currentItem.requestedBy}</p>
                   </div>
                   <div>
                     <p className="text-lg font-semibold text-gray-600 flex items-center">
@@ -659,17 +746,14 @@ export default function Approved() {
                       Requested Date
                     </p>
                     <p className="text-xl text-gray-800">
-                      {new Date(currentItem.requestedDate).toLocaleString(
-                        "en-US",
-                        {
-                          month: "long",
-                          day: "numeric",
-                          year: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                        }
-                      )}
+                      {new Date(currentItem.requestedDate).toLocaleString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
                     </p>
                   </div>
                   <div>
@@ -682,8 +766,8 @@ export default function Approved() {
                         currentItem.priority === "High"
                           ? "text-red-600"
                           : currentItem.priority === "Medium"
-                          ? "text-yellow-600"
-                          : "text-green-600"
+                            ? "text-yellow-600"
+                            : "text-green-600"
                       }`}
                     >
                       {currentItem.priority}
@@ -699,8 +783,8 @@ export default function Approved() {
                         currentItem.status === "Approved"
                           ? "text-green-600"
                           : currentItem.status === "In Progress"
-                          ? "text-yellow-600"
-                          : "text-red-600"
+                            ? "text-yellow-600"
+                            : "text-red-600"
                       }`}
                     >
                       <i
@@ -708,8 +792,8 @@ export default function Approved() {
                           currentItem.status === "Approved"
                             ? "fa-solid fa-check-circle"
                             : currentItem.status === "In Progress"
-                            ? "fa-solid fa-spinner fa-spin"
-                            : "fa-solid fa-times-circle"
+                              ? "fa-solid fa-spinner fa-spin"
+                              : "fa-solid fa-times-circle"
                         }`}
                       ></i>
                       {currentItem.status}
@@ -718,10 +802,8 @@ export default function Approved() {
                 </div>
 
                 {/* Approval Status */}
-                <div class="approval-status">
-                  <h6 className="text-lg font-bold text-gray-600 mb-4">
-                    Approval Status
-                  </h6>
+                <div className="approval-status">
+                  <h6 className="text-lg font-bold text-gray-600 mb-4">Approval Status</h6>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 admin-row">
                     <div className="flex flex-col items-center bg-gray-50 p-5 rounded-lg shadow-md">
                       <i
@@ -729,20 +811,18 @@ export default function Approved() {
                           currentItem.Admin1 === "Approved"
                             ? "fa-solid fa-check-circle text-green-600"
                             : currentItem.Admin1 === "Rejected"
-                            ? "fa-solid fa-times-circle text-red-600"
-                            : "fa-solid fa-hourglass-half text-yellow-600"
+                              ? "fa-solid fa-times-circle text-red-600"
+                              : "fa-solid fa-hourglass-half text-yellow-600"
                         }`}
                       ></i>
-                      <p className="text-lg text-gray-700 font-medium">
-                        Inventory Admin
-                      </p>
+                      <p className="text-lg text-gray-700 font-medium">Inventory Admin</p>
                       <span
                         className={`text-xl font-semibold ${
                           currentItem.Admin1 === "Approved"
                             ? "text-green-600"
                             : currentItem.Admin1 === "Rejected"
-                            ? "text-red-600"
-                            : "text-yellow-600"
+                              ? "text-red-600"
+                              : "text-yellow-600"
                         }`}
                       >
                         {currentItem.Admin1}
@@ -755,20 +835,18 @@ export default function Approved() {
                           currentItem.Admin2 === "Approved"
                             ? "fa-solid fa-check-circle text-green-600"
                             : currentItem.Admin2 === "Rejected"
-                            ? "fa-solid fa-times-circle text-red-600"
-                            : "fa-solid fa-hourglass-half text-yellow-600"
+                              ? "fa-solid fa-times-circle text-red-600"
+                              : "fa-solid fa-hourglass-half text-yellow-600"
                         }`}
                       ></i>
-                      <p className="text-lg text-gray-700 font-medium">
-                        Head Admin
-                      </p>
+                      <p className="text-lg text-gray-700 font-medium">Head Admin</p>
                       <span
                         className={`text-xl font-semibold ${
                           currentItem.Admin2 === "Approved"
                             ? "text-green-600"
                             : currentItem.Admin2 === "Rejected"
-                            ? "text-red-600"
-                            : "text-yellow-600"
+                              ? "text-red-600"
+                              : "text-yellow-600"
                         }`}
                       >
                         {currentItem.Admin2}
@@ -781,34 +859,26 @@ export default function Approved() {
                           currentItem.Admin3 === "Approved"
                             ? "fa-solid fa-check-circle text-green-600"
                             : currentItem.Admin3 === "Rejected"
-                            ? "fa-solid fa-times-circle text-red-600"
-                            : "fa-solid fa-hourglass-half text-yellow-600"
+                              ? "fa-solid fa-times-circle text-red-600"
+                              : "fa-solid fa-hourglass-half text-yellow-600"
                         }`}
                       ></i>
-                      <p className="text-lg text-gray-700 font-medium">
-                        School Admin
-                      </p>
+                      <p className="text-lg text-gray-700 font-medium">School Admin</p>
                       <span
                         className={`text-xl font-semibold ${
                           currentItem.Admin3 === "Approved"
                             ? "text-green-600"
                             : currentItem.Admin3 === "Rejected"
-                            ? "text-red-600"
-                            : "text-yellow-600"
+                              ? "text-red-600"
+                              : "text-yellow-600"
                         }`}
                       >
                         {currentItem.Admin3}
                       </span>
                     </div>
                   </div>
-                  <div className="flex flex-col items-center bg-gray-50 p-5 rounded-lg shadow-md mt-6">
-                    <p className="text-lg text-gray-700 font-medium">
-                      President
-                    </p>
-                    <span className="text-xl font-semibold text-gray-800">
-                      Victor Elliot S. Lepiten
-                    </span>
-                  </div>
+
+             
                 </div>
 
                 {/* Print and Close Buttons */}
@@ -819,14 +889,14 @@ export default function Approved() {
                       onClick={handlePrint}
                       className="bg-green-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-600 text-lg no-print"
                     >
-                      Print
+                      <i className="fa-solid fa-print mr-2"></i> Print
                     </button>
                     <button
                       type="button"
                       onClick={() => setViewRequestModalOpen(false)}
-                      className="bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-600 text-lgtext-gray-500 hover:text-gray-700 no-print"
+                      className="bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-600 text-lg no-print"
                     >
-                      Close
+                      <i className="fa-solid fa-times mr-2"></i> Close
                     </button>
                   </div>
                 )}
@@ -836,22 +906,17 @@ export default function Approved() {
 
           {viewBorrowModalOpen && currentItem && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div
-                id="printContent"
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-8 relative"
-              >
+              <div id="printContent" className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-8 relative">
                 {/* Close Button */}
                 <button
                   onClick={() => setViewBorrowModalOpen(false)}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-2xl"
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-2xl no-print"
                 >
                   ✕
                 </button>
 
                 {/* Modal Title */}
-                <h2 className="text-3xl font-bold text-gray-700 text-center mb-8">
-                  Borrow Request Details
-                </h2>
+                <h2 className="text-3xl font-bold text-gray-700 text-center mb-8">Borrow Request Details</h2>
 
                 {/* Borrow Request Details */}
                 <div className="space-y-6 mt-6">
@@ -871,8 +936,7 @@ export default function Approved() {
                     <div className="flex items-center gap-2 text-gray-700">
                       <i className="fa-solid fa-calendar-day text-blue-500"></i>
                       <span>
-                        <strong>Request Date:</strong>{" "}
-                        {currentItem.ReqBorrowDate}
+                        <strong>Request Date:</strong> {currentItem.ReqBorrowDate}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-700">
@@ -892,20 +956,91 @@ export default function Approved() {
 
                 <hr className="my-6 border-gray-300" />
 
+                {/* Approval Status */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                  <div className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+                    <span className="text-sm text-gray-500">Inventory Admin</span>
+                    <span
+                      className={
+                        currentItem.Admin1Approval === "Approved"
+                          ? "text-green-500 font-bold"
+                          : currentItem.Admin1Approval === "Pending"
+                            ? "text-yellow-500 font-bold"
+                            : "text-red-500 font-bold"
+                      }
+                    >
+                      <i
+                        className={`fa ${
+                          currentItem.Admin1Approval === "Approved"
+                            ? "fa-check-circle"
+                            : currentItem.Admin1Approval === "Rejected"
+                              ? "fa-times-circle"
+                              : "fa-hourglass-half"
+                        } mr-1`}
+                      ></i>
+                      {currentItem.Admin1Approval}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
+                    <span className="text-sm text-gray-500">Head Admin</span>
+                    <span
+                      className={
+                        currentItem.Admin2Approval === "Approved"
+                          ? "text-green-500 font-bold"
+                          : currentItem.Admin2Approval === "Pending"
+                            ? "text-yellow-500 font-bold"
+                            : "text-red-500 font-bold"
+                      }
+                    >
+                      <i
+                        className={`fa ${
+                          currentItem.Admin2Approval === "Approved"
+                            ? "fa-check-circle"
+                            : currentItem.Admin2Approval === "Rejected"
+                              ? "fa-times-circle"
+                              : "fa-hourglass-half"
+                        } mr-1`}
+                      ></i>
+                      {currentItem.Admin2Approval}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                    <span className="text-sm text-gray-500">School Admin</span>
+                    <span
+                      className={
+                        currentItem.Admin3Approval === "Approved"
+                          ? "text-green-500 font-bold"
+                          : currentItem.Admin3Approval === "Pending"
+                            ? "text-yellow-500 font-bold"
+                            : "text-red-500 font-bold"
+                      }
+                    >
+                      <i
+                        className={`fa ${
+                          currentItem.Admin3Approval === "Approved"
+                            ? "fa-check-circle"
+                            : currentItem.Admin3Approval === "Rejected"
+                              ? "fa-times-circle"
+                              : "fa-hourglass-half"
+                        } mr-1`}
+                      ></i>
+                      {currentItem.Admin3Approval}
+                    </span>
+                  </div>
+                </div>
+
+
+                <hr className="my-6 border-gray-300" />
+
                 {/* Borrowed Items Section */}
                 <h4 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
-                  <i className="fa-solid fa-boxes-stacked text-green-600"></i>{" "}
-                  Borrowed Items
+                  <i className="fa-solid fa-boxes-stacked text-green-600"></i> Borrowed Items
                 </h4>
 
                 {borrowLoading ? (
-                  <div className="text-center text-gray-500 text-lg">
-                    Loading borrowed items...
-                  </div>
+                  <div className="text-center text-gray-500 text-lg">Loading borrowed items...</div>
                 ) : borrowedItems.length === 0 ? (
-                  <div className="text-center text-gray-500 text-lg">
-                    No borrowed items found
-                  </div>
+                  <div className="text-center text-gray-500 text-lg">No borrowed items found</div>
                 ) : (
                   <div className="grid grid-cols-2 gap-4">
                     {borrowedItems.map((item) => (
@@ -924,52 +1059,10 @@ export default function Approved() {
                 {/* Print Button */}
                 <div className="flex justify-center mt-8">
                   <button
-                    onClick={() => {
-                      const printContent =
-                        document.getElementById("printContent");
-                      const printWindow = window.open("", "_blank");
-                      printWindow.document.write(`
-              <html>
-              <head>
-                <title>Print Borrow Request Details</title>
-                <style>
-                  body {
-                    font-family: Arial, sans-serif;
-                    margin: 20px;
-                    color: #333;
-                  }
-                  h1, h2, h3, h4 {
-                    color: #4A5568;
-                  }
-                  .details {
-                    margin-top: 10px;
-                    line-height: 1.6;
-                  }
-                  .borrowed-items {
-                    margin-top: 20px;
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 10px;
-                  }
-                  .borrowed-items div {
-                    padding: 10px;
-                    border: 1px solid #CBD5E0;
-                    border-radius: 8px;
-                    background-color: #F7FAFC;
-                  }
-                </style>
-              </head>
-              <body>
-                ${printContent.innerHTML}
-              </body>
-              </html>
-            `);
-                      printWindow.document.close();
-                      printWindow.print();
-                    }}
-                    className="bg-green-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-600 text-lg"
+                    onClick={handlePrint}
+                    className="bg-green-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-600 text-lg no-print"
                   >
-                    Print
+                    <i className="fa-solid fa-print mr-2"></i> Print
                   </button>
                 </div>
               </div>
@@ -978,5 +1071,5 @@ export default function Approved() {
         </div>
       </div>
     </>
-  );
+  )
 }
