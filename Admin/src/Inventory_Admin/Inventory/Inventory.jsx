@@ -8,8 +8,8 @@ import "./Css/Electronics.css";
 import { toast } from "react-toastify";
 
 const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/CategoryApi/";
-
 export default function Inventory() {
+  const [categoryViewID, setCategoryViewID] = useState(0); 
   const [categories, setCategories] = useState([]);
   const [modalState, setModalState] = useState({
     isVisible: false,
@@ -34,9 +34,11 @@ export default function Inventory() {
       await fetchData(`${API_URL}InsertCategory`, "POST", {
         id: 0,
         categoryName: newCategory,
+        categoryViewID: categoryViewID,
       });
       setModalState({ isVisible: false, isEditMode: false, category: null });
       setNewCategory("");
+      setCategoryViewID(0); // reset to default
       FetchCategory();
       toast.success(`Category added successfully!`);
     } catch (error) {
@@ -53,11 +55,13 @@ export default function Inventory() {
         {
           id: modalState.category.id,
           categoryName: newCategory,
+          categoryViewID: categoryViewID,
         }
       );
 
       setModalState({ isVisible: false, isEditMode: false, category: null });
       setNewCategory("");
+      setCategoryViewID(0); // reset
       toast.success(`Category updated successfully!`);
       FetchCategory();
     } catch (error) {
@@ -83,6 +87,7 @@ export default function Inventory() {
   const handleEditClick = (category) => {
     setModalState({ isVisible: true, isEditMode: true, category });
     setNewCategory(category.categoryName);
+    setCategoryViewID(category.categoryViewID ?? 0); // fallback if null
   };
 
   const handleCategoryClick = (category) => {
@@ -106,7 +111,6 @@ export default function Inventory() {
         <h1 className="text-3xl font-bold mb-6">Stocks and Inventory</h1>
 
         <div className="flex flex-wrap justify-center gap-4 mb-6">
-          {/* Edit Button */}
           <button
             onClick={() =>
               setModalState({
@@ -124,7 +128,6 @@ export default function Inventory() {
             {modalState.isEditMode ? "Cancel" : "Edit"}
           </button>
 
-          {/* Add Category Button */}
           <button
             onClick={() =>
               setModalState({
@@ -155,6 +158,8 @@ export default function Inventory() {
           category={modalState.category}
           newCategory={newCategory}
           setNewCategory={setNewCategory}
+          categoryViewID={categoryViewID}
+          setCategoryViewID={setCategoryViewID}
           handleAddCategory={handleAddCategory}
           handleEditCategory={handleEditCategory}
           closeModal={() =>
