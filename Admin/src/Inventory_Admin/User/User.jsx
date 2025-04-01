@@ -5,8 +5,8 @@ import { fetchData } from "../utilities/ApiUti"
 import { toast } from "react-toastify"
 import "./CSS/modal.css"
 
-const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/UsersApi/"
-
+// const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net"
+const API_URL = "http://localhost:5075"
 export default function Users() {
   const [modals, setModals] = useState({
     add: false,
@@ -26,6 +26,7 @@ export default function Users() {
     email: "",
     name: "", // Added name
     department: "", // Added department
+    categoryViewID: 0, // Add default value
   })
 
   const toggleModal = (modalType, user = null) => {
@@ -52,13 +53,14 @@ export default function Users() {
         email: "",
         name: "", // Clear name
         department: "", // Clear department
+        categoryViewID: 0,
       })
     }
   }
 
   const fetchUsers = async () => {
     try {
-      const result = await fetchData(`${API_URL}GetUsers`, "GET")
+      const result = await fetchData(`${API_URL}/api/UsersApi/GetUsers`, "GET")
       setUsers(result)
     } catch (error) {
       console.error("Failed to fetch users", error)
@@ -71,14 +73,15 @@ export default function Users() {
   const handleAddUser = async (e) => {
     e.preventDefault()
     try {
-      await fetchData(`${API_URL}CreateUser`, "POST", {
+      await fetchData(`${API_URL}/api/UsersApi/CreateUser`, "POST", {
         userId: 0,
         userName: addUser.userName,
         password: addUser.password,
         userType: addUser.userType,
         email: addUser.email,
-        name: addUser.name, // Include name
-        department: addUser.department, // Include department
+        name: addUser.name,
+        department: addUser.department,
+        categoryViewID: addUser.userType === "Teacher" ? 1 : 0, // Set CategoryViewID based on userType
       })
       toggleModal("add")
       toast.success(`Added User successfully!`)
@@ -91,7 +94,7 @@ export default function Users() {
   const handleDeleteUser = async () => {
     if (currentItem && currentItem.userId) {
       try {
-        await fetchData(`${API_URL}DeleteUser?UserId=${currentItem.userId}`, "DELETE")
+        await fetchData(`${API_URL}/api/UsersApi/DeleteUser?UserId=${currentItem.userId}`, "DELETE")
         toggleModal("delete")
         toast.error(`Delete User ${currentItem.userId} Succesfully`)
         fetchUsers()
@@ -104,13 +107,20 @@ export default function Users() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setAddUser({ ...addUser, [name]: value })
+    const updatedUser = { ...addUser, [name]: value }
+
+    // Set CategoryViewID to 1 when userType is Teacher
+    if (name === "userType" && value === "Teacher") {
+      updatedUser.categoryViewID = 1
+    }
+
+    setAddUser(updatedUser)
   }
 
   const handleEditUser = async (e) => {
     e.preventDefault()
     try {
-      await fetchData(`${API_URL}UpdateUser?UserId=${currentItem.userId}`, "PUT", {
+      await fetchData(`${API_URL}/api/UsersApi/UpdateUser?UserId=${currentItem.userId}`, "PUT", {
         userId: currentItem.userId,
         userName: addUser.userName,
         password: addUser.password,

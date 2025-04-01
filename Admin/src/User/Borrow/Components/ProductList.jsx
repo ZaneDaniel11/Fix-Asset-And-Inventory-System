@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import "../CSS/Product.css"
 
-const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/UserItemApi/"
+const API_URL = "http://localhost:5075"
+// const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/UserItemApi/"
 
 const ProductList = ({ products, onAddProduct, setProducts }) => {
   const [categories, setCategories] = useState([])
@@ -13,7 +14,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
   // Fetch categories with their item counts from the API
   const FetchCategoryWithCounts = async () => {
     try {
-      const response = await fetch(`${API_URL}GetItemCountsByCategory`)
+      const response = await fetch(`${API_URL}/api/UserItemApi/GetItemCountsByCategory`)
       const result = await response.json()
       console.log("Categories Data:", result) // Debugging API response
 
@@ -35,10 +36,10 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
     try {
       let response
       if (categoryId === 0) {
-        response = await fetch(`${API_URL}GetAllItems`)
+        response = await fetch(`${API_URL}/api/UserItemApi/GetAllItems`)
       } else {
         response = await fetch(
-          `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/ItemApi/GetItemsByCategory?categoryID=${categoryId}`,
+          `${API_URL}/api/ItemApi/GetItemsByCategory?categoryID=${categoryId}`,
         )
       }
 

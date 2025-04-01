@@ -7,7 +7,7 @@ import Inventory_Card from "./Components/Card/Inventory_Cards";
 import "./Css/Electronics.css";
 import { toast } from "react-toastify";
 
-const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/CategoryApi/";
+const API_URL = "http://localhost:5075/api/CategoryApi/";
 export default function Inventory() {
   const [categoryViewID, setCategoryViewID] = useState(0); 
   const [categories, setCategories] = useState([]);
