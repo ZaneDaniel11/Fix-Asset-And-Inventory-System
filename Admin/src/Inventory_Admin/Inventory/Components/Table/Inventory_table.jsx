@@ -1,102 +1,100 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import "../../Css/Electronics.css";
-import "../../Css/modal.css";
-import { fetchData } from "../../../utilities/ApiUti";
-import { toast } from "react-toastify";
+
+import { useState, useEffect } from "react"
+import { useLocation } from "react-router-dom"
+import "../../Css/Electronics.css"
+import "../../Css/modal.css"
+import { fetchData } from "../../../utilities/ApiUti"
+import { toast } from "react-toastify"
 
 // const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/ItemApi/";
-const API_URL = "http://localhost:5075/api/ItemApi/";
+const API_URL = "http://localhost:5075/api/ItemApi/"
 
 export default function Inventory_table() {
-  const location = useLocation();
-  const selectedCategory = location.state?.selectedCategory;
-  const [items, setItems] = useState([]);
-  const [filteredItems, setFilteredItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const location = useLocation()
+  const selectedCategory = location.state?.selectedCategory
+  const [items, setItems] = useState([])
+  const [filteredItems, setFilteredItems] = useState([])
+  const [loading, setLoading] = useState(true)
   const [modals, setModals] = useState({
     add: false,
     update: false,
     delete: false,
     view: false,
     addQuantity: false, // New modal for adding quantity
-  });
-  const [selectedItem, setSelectedItem] = useState(null);
+  })
+  const [selectedItem, setSelectedItem] = useState(null)
 
   const [addItem, setAddCategoryItem] = useState({
     ItemName: "",
     Quantity: "",
     Description: "",
-  });
+    CategoryViewID: "",
+  })
 
   const [updatedItem, setUpdatedItem] = useState({
     itemName: "",
     quantity: "",
     description: "",
-  });
+  })
 
   useEffect(() => {
-    console.log("Selected Category:", selectedCategory);
+    console.log("Selected Category test:", selectedCategory)
     if (selectedCategory) {
-      fetchItems();
+      fetchItems()
     }
-  }, [selectedCategory]);
+  }, [selectedCategory])
 
-  const [addQuantity, setAddQuantity] = useState(0); // New state for additional quantity
+  const [addQuantity, setAddQuantity] = useState(0) // New state for additional quantity
 
   // Toggle modals
   const toggleModal = (type) => {
-    setModals((prev) => ({ ...prev, [type]: !prev[type] }));
-  };
+    setModals((prev) => ({ ...prev, [type]: !prev[type] }))
+  }
 
   const fetchItems = async () => {
     try {
       if (selectedCategory?.id) {
-        const result = await fetchData(
-          `${API_URL}GetItemsByCategory?categoryID=${selectedCategory.id}`,
-          "GET"
-        );
-        setItems(result);
-        setFilteredItems(result);
-        setLoading(false);
-        console.log(result);
+        const result = await fetchData(`${API_URL}GetItemsByCategory?categoryID=${selectedCategory.id}`, "GET")
+        setItems(result)
+        setFilteredItems(result)
+        setLoading(false)
+        console.log(result)
       } else {
-        console.error("No valid category ID provided.");
-        setLoading(false);
+        console.error("No valid category ID provided.")
+        setLoading(false)
       }
     } catch (error) {
-      console.error("Failed to fetch items", error);
-      setLoading(false);
+      console.error("Failed to fetch items", error)
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
     if (selectedCategory) {
-      fetchItems();
+      fetchItems()
     }
-  }, [selectedCategory]);
+  
+  }, [selectedCategory])
 
   useEffect(() => {
     if (selectedCategory && items.length > 0) {
-      const filtered = items.filter(
-        (item) => item.categoryID === selectedCategory.id
-      );
-      setFilteredItems(filtered);
+      const filtered = items.filter((item) => item.categoryID === selectedCategory.id)
+      setFilteredItems(filtered)
     }
-  }, [items, selectedCategory]);
+  }, [items, selectedCategory])
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setAddCategoryItem((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setAddCategoryItem((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleUpdateInputChange = (e) => {
-    const { name, value } = e.target;
-    setUpdatedItem((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setUpdatedItem((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleAddCategoryItem = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
       await fetchData(`${API_URL}InsertItem`, "POST", {
         itemID: 0,
@@ -105,73 +103,63 @@ export default function Inventory_table() {
         quantity: addItem.Quantity,
         description: addItem.Description,
         dateAdded: new Date().toISOString(),
-      });
-      toggleModal("add");
-      fetchItems();
-      toast.success(`Added Item on Category successfully!`);
+        CategoryViewID: selectedCategory.categoryViewID,
+      })
+      toggleModal("add")
+      fetchItems()
+      toast.success(`Added Item on Category successfully!`)
     } catch (error) {
-      console.error("Failed to add item", error);
+      console.error("Failed to add item", error)
     }
-  };
+  }
 
   const handleUpdateItems = async () => {
     try {
-      await fetchData(
-        `${API_URL}UpdateItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`,
-        "PUT",
-        {
-          itemID: selectedItem.itemID,
-          categoryID: selectedCategory.id,
-          itemName: updatedItem.itemName,
-          quantity: updatedItem.quantity,
-          description: updatedItem.description,
-          dateAdded: selectedItem.dateAdded,
-        }
-      );
-      toggleModal("update");
-      fetchItems();
-      toast.success(`Item Updated Succesfully`);
+      await fetchData(`${API_URL}UpdateItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`, "PUT", {
+        itemID: selectedItem.itemID,
+        categoryID: selectedCategory.id,
+        itemName: updatedItem.itemName,
+        quantity: updatedItem.quantity,
+        description: updatedItem.description,
+        dateAdded: selectedItem.dateAdded,
+      })
+      toggleModal("update")
+      fetchItems()
+      toast.success(`Item Updated Succesfully`)
     } catch (error) {
-      console.error("Failed to update item", error);
+      console.error("Failed to update item", error)
     }
-  };
+  }
 
   const handleDeleteItem = async () => {
     try {
-      await fetchData(
-        `${API_URL}DeleteItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`,
-        "DELETE"
-      );
-      toggleModal("delete");
-      fetchItems();
-      toast.error(`Delete Item on Category Succesfully`);
+      await fetchData(`${API_URL}DeleteItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`, "DELETE")
+      toggleModal("delete")
+      fetchItems()
+      toast.error(`Delete Item on Category Succesfully`)
     } catch (error) {
-      console.error("Failed to delete item", error);
+      console.error("Failed to delete item", error)
     }
-  };
+  }
 
   const handleAddQuantity = async () => {
     try {
-      const newQuantity = selectedItem.quantity + addQuantity;
-      await fetchData(
-        `${API_URL}UpdateItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`,
-        "PUT",
-        {
-          itemID: selectedItem.itemID,
-          categoryID: selectedCategory.id,
-          itemName: selectedItem.itemName,
-          quantity: newQuantity,
-          description: selectedItem.description,
-          dateAdded: selectedItem.dateAdded,
-        }
-      );
-      toast.success(`Added Quantity successfully!`);
-      toggleModal("addQuantity");
-      fetchItems();
+      const newQuantity = selectedItem.quantity + addQuantity
+      await fetchData(`${API_URL}UpdateItem?ItemID=${selectedItem.itemID}&CategoryID=${selectedCategory.id}`, "PUT", {
+        itemID: selectedItem.itemID,
+        categoryID: selectedCategory.id,
+        itemName: selectedItem.itemName,
+        quantity: newQuantity,
+        description: selectedItem.description,
+        dateAdded: selectedItem.dateAdded,
+      })
+      toast.success(`Added Quantity successfully!`)
+      toggleModal("addQuantity")
+      fetchItems()
     } catch (error) {
-      console.error("Failed to add quantity", error);
+      console.error("Failed to add quantity", error)
     }
-  };
+  }
 
   return (
     <div>
@@ -198,21 +186,11 @@ export default function Inventory_table() {
               <table className="min-w-full border-collapse border border-gray-200 bg-white">
                 <thead className="bg-gray-200">
                   <tr className="font-semibold text-md text-zinc-50">
-                    <th className="border border-gray-300 px-5 py-3">
-                      Item ID
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Item Name
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Quantity
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Date Added
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3 text-center">
-                      Actions
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Item ID</th>
+                    <th className="border border-gray-300 px-5 py-3">Item Name</th>
+                    <th className="border border-gray-300 px-5 py-3">Quantity</th>
+                    <th className="border border-gray-300 px-5 py-3">Date Added</th>
+                    <th className="border border-gray-300 px-5 py-3 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -224,15 +202,9 @@ export default function Inventory_table() {
                           index % 2 === 0 ? "bg-white" : "bg-gray-50"
                         } hover:bg-gray-100 transition duration-200`}
                       >
-                        <td className="border border-gray-300 px-5 py-3">
-                          {item.itemID}
-                        </td>
-                        <td className="border border-gray-300 px-5 py-3">
-                          {item.itemName}
-                        </td>
-                        <td className="border border-gray-300 px-5 py-3">
-                          {item.quantity}
-                        </td>
+                        <td className="border border-gray-300 px-5 py-3">{item.itemID}</td>
+                        <td className="border border-gray-300 px-5 py-3">{item.itemName}</td>
+                        <td className="border border-gray-300 px-5 py-3">{item.quantity}</td>
                         <td className="border border-gray-300 px-5 py-3">
                           {new Date(item.dateAdded).toLocaleDateString()}
                         </td>
@@ -240,13 +212,13 @@ export default function Inventory_table() {
                           <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={() => {
-                                setSelectedItem(item);
+                                setSelectedItem(item)
                                 setUpdatedItem({
                                   itemName: item.itemName,
                                   quantity: item.quantity,
                                   description: item.description,
-                                });
-                                toggleModal("update");
+                                })
+                                toggleModal("update")
                               }}
                               className="text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-3 py-1.5"
                             >
@@ -254,8 +226,8 @@ export default function Inventory_table() {
                             </button>
                             <button
                               onClick={() => {
-                                setSelectedItem(item);
-                                toggleModal("delete");
+                                setSelectedItem(item)
+                                toggleModal("delete")
                               }}
                               className="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-3 py-1.5"
                             >
@@ -263,8 +235,8 @@ export default function Inventory_table() {
                             </button>
                             <button
                               onClick={() => {
-                                setSelectedItem(item);
-                                toggleModal("addQuantity");
+                                setSelectedItem(item)
+                                toggleModal("addQuantity")
                               }}
                               className="text-white bg-orange-500 hover:bg-orange-600 font-medium rounded-lg text-sm px-3 py-1.5"
                             >
@@ -272,8 +244,8 @@ export default function Inventory_table() {
                             </button>
                             <button
                               onClick={() => {
-                                setSelectedItem(item);
-                                toggleModal("view");
+                                setSelectedItem(item)
+                                toggleModal("view")
                               }}
                               className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
                             >
@@ -302,9 +274,7 @@ export default function Inventory_table() {
           <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full mx-4 md:mx-0">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                Add Quantity to {selectedItem?.itemName}
-              </h2>
+              <h2 className="text-2xl font-semibold text-gray-800">Add Quantity to {selectedItem?.itemName}</h2>
               <button
                 onClick={() => toggleModal("addQuantity")}
                 className="text-gray-500 hover:text-gray-700"
@@ -316,10 +286,7 @@ export default function Inventory_table() {
 
             {/* Input */}
             <div className="mb-6">
-              <label
-                htmlFor="add-quantity"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+              <label htmlFor="add-quantity" className="block text-sm font-medium text-gray-700 mb-2">
                 Quantity
               </label>
               <input
@@ -327,17 +294,14 @@ export default function Inventory_table() {
                 id="add-quantity"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={addQuantity}
-                onChange={(e) => setAddQuantity(parseInt(e.target.value))}
+                onChange={(e) => setAddQuantity(Number.parseInt(e.target.value))}
                 placeholder="Enter Quantity"
               />
             </div>
 
             {/* Buttons */}
             <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => toggleModal("addQuantity")}
-                className="btn-secondary"
-              >
+              <button onClick={() => toggleModal("addQuantity")} className="btn-secondary">
                 Cancel
               </button>
               <button onClick={handleAddQuantity} className="btn-primary">
@@ -371,10 +335,7 @@ export default function Inventory_table() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-box fa-lg text-blue-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="item-name"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="item-name" className="block text-sm font-medium text-gray-700">
                       Item Name
                     </label>
                     <input
@@ -394,10 +355,7 @@ export default function Inventory_table() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-hashtag fa-lg text-green-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="quantity"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
                       Quantity
                     </label>
                     <input
@@ -417,10 +375,7 @@ export default function Inventory_table() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-align-left fa-lg text-yellow-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="description"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                       Description
                     </label>
                     <input
@@ -435,15 +390,31 @@ export default function Inventory_table() {
                     />
                   </div>
                 </div>
+
+                {/* CategoryViewID Input */}
+                <div className="flex items-center space-x-2">
+                  <i className="fa-solid fa-tag fa-lg text-purple-500"></i>
+                  <div className="flex-1">
+                    <label htmlFor="categoryViewID" className="block text-sm font-medium text-gray-700">
+                      Category View ID
+                    </label>
+                    <input
+                      type="text"
+                      id="categoryViewID"
+                      name="CategoryViewID"
+                      value={selectedCategory.categoryViewID}
+                      onChange={handleInputChange}
+                      className="input-field border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      placeholder="Enter Category View ID"
+                      required
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Action Buttons */}
               <div className="mt-6 flex justify-end space-x-4">
-                <button
-                  type="button"
-                  onClick={() => toggleModal("add")}
-                  className="btn-secondary"
-                >
+                <button type="button" onClick={() => toggleModal("add")} className="btn-secondary">
                   Cancel
                 </button>
                 <button type="submit" className="btn-primary">
@@ -461,9 +432,7 @@ export default function Inventory_table() {
           <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full mx-4 md:mx-0">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                Update Item
-              </h2>
+              <h2 className="text-2xl font-semibold text-gray-800">Update Item</h2>
               <button
                 onClick={() => toggleModal("update")}
                 className="text-gray-500 hover:text-gray-700"
@@ -480,10 +449,7 @@ export default function Inventory_table() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-box fa-lg text-blue-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="update-item-name"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="update-item-name" className="block text-sm font-medium text-gray-700">
                       Item Name
                     </label>
                     <input
@@ -503,10 +469,7 @@ export default function Inventory_table() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-hashtag fa-lg text-green-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="update-quantity"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="update-quantity" className="block text-sm font-medium text-gray-700">
                       Quantity
                     </label>
                     <input
@@ -526,10 +489,7 @@ export default function Inventory_table() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-align-left fa-lg text-yellow-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="update-description"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="update-description" className="block text-sm font-medium text-gray-700">
                       Description
                     </label>
                     <input
@@ -548,11 +508,7 @@ export default function Inventory_table() {
 
               {/* Buttons */}
               <div className="mt-6 flex justify-end space-x-4">
-                <button
-                  type="button"
-                  onClick={() => toggleModal("update")}
-                  className="btn-secondary"
-                >
+                <button type="button" onClick={() => toggleModal("update")} className="btn-secondary">
                   Cancel
                 </button>
                 <button type="submit" className="btn-primary">
@@ -570,11 +526,7 @@ export default function Inventory_table() {
           <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center">
               <h5 className="text-lg font-semibold">Delete Item</h5>
-              <button
-                type="button"
-                onClick={() => toggleModal("delete")}
-                className="text-gray-500 hover:text-gray-700"
-              >
+              <button type="button" onClick={() => toggleModal("delete")} className="text-gray-500 hover:text-gray-700">
                 <i className="fa-solid fa-xmark"></i>
               </button>
             </div>
@@ -646,8 +598,7 @@ export default function Inventory_table() {
               <div className="flex items-center space-x-3">
                 <i className="fa-solid fa-calendar-day fa-lg text-red-500"></i>
                 <span className="text-lg font-semibold text-gray-800">
-                  <strong>Date Added:</strong>{" "}
-                  {new Date(selectedItem?.dateAdded).toLocaleDateString()}
+                  <strong>Date Added:</strong> {new Date(selectedItem?.dateAdded).toLocaleDateString()}
                 </span>
               </div>
             </div>
@@ -655,5 +606,5 @@ export default function Inventory_table() {
         </div>
       )}
     </div>
-  );
+  )
 }

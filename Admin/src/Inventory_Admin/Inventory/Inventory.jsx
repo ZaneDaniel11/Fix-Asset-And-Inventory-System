@@ -23,6 +23,7 @@ export default function Inventory() {
     try {
       const result = await fetchData(`${API_URL}GetCategory`, "GET");
       setCategories(result);
+      console.log(result);
     } catch (error) {
       console.error("Failed to fetch categories", error);
     }
@@ -96,6 +97,7 @@ export default function Inventory() {
         selectedCategory: {
           id: category.id,
           categoryName: category.categoryName,
+          categoryViewID: category.categoryViewID,
         },
       },
     });
