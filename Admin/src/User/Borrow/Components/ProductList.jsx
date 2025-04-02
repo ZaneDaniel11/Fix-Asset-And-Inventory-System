@@ -11,6 +11,8 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
   const [selectedCategoryId, setSelectedCategoryId] = useState(0)
   const [imageErrors, setImageErrors] = useState({})
 
+   const userType = localStorage.getItem("userType");
+
   // Fetch categories with their item counts from the API
   const FetchCategoryWithCounts = async () => {
     try {
@@ -18,12 +20,26 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
       const result = await response.json()
       console.log("Categories Data:", result) // Debugging API response
 
-      const mappedCategories = result.map((category) => ({
+      let mappedCategories = result.map((category) => ({
         id: category.categoryID,
         name: category.categoryName,
         icon: "📦",
         count: category.itemCount,
+        categoryViewID: category.categoryViewID, // Make sure to include this property
       }))
+
+      // Filter out categories with CategoryViewID = 1 if the user is a Teacher
+      if (userType === "Teacher") {
+        mappedCategories = result
+          .filter((category) => category.categoryViewID !== 1)
+          .map((category) => ({
+            id: category.categoryID,
+            name: category.categoryName,
+            icon: "📦",
+            count: category.itemCount,
+            categoryViewID: category.categoryViewID,
+          }))
+      }
 
       setCategories([{ id: 0, name: "All", icon: "📦", count: 0 }, ...mappedCategories])
     } catch (error) {
@@ -38,20 +54,23 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
       if (categoryId === 0) {
         response = await fetch(`${API_URL}/api/UserItemApi/GetAllItems`)
       } else {
-        response = await fetch(
-          `${API_URL}/api/ItemApi/GetItemsByCategory?categoryID=${categoryId}`,
-        )
+        response = await fetch(`${API_URL}/api/ItemApi/GetItemsByCategory?categoryID=${categoryId}`)
       }
 
       const result = await response.json()
       console.log("Products Data:", result) // Debugging API response
 
-      const processedProducts = result.map((product) => ({
+      let processedProducts = result.map((product) => ({
         ...product,
         initialQuantity: product.quantity,
         requestedQuantity: 0,
         isRequested: false, // Track if the item is requested
       }))
+
+      // Filter out items with CategoryViewID = 1 if the user is a Teacher
+      if (userType === "Teacher") {
+        processedProducts = processedProducts.filter((product) => product.categoryViewID !== 1)
+      }
 
       setProducts(processedProducts)
     } catch (error) {
@@ -70,6 +89,16 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
     console.log("Selected Category ID:", selectedCategoryId) // Debugging category selection
     FetchProductsByCategory(selectedCategoryId)
   }, [selectedCategoryId])
+
+  // Refetch products when userType changes
+  useEffect(() => {
+    FetchCategoryWithCounts()
+  }, [userType])
+
+  // Refetch products when userType changes
+  useEffect(() => {
+    FetchProductsByCategory(selectedCategoryId)
+  }, [userType])
 
   // Handle adding products and enforce quantity limit
   const handleAddProduct = (product) => {

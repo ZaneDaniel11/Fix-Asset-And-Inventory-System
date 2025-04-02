@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ProductList from "./Components/ProductList";
 import RequestSummary from "./Components/RequestSummary";
-import Sidebar from "../../Components/Sidebar";
+
 
 export default function Borrow() {
   const [products, setProducts] = useState([]); // To store all the products
