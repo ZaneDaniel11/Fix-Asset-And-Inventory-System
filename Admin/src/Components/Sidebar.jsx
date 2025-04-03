@@ -120,12 +120,7 @@ const Sidebar = () => {
                 <span className="text-white">Borrow Status</span>
               </a>
             </li>
-            <li>
-              <a href="/UserRequest" className="flex items-center">
-                <i className="bx bx-plus-circle text-xl"></i>
-                <span className="text-white">Request Item</span>
-              </a>
-            </li>
+         
           
             <li>
               <a href="/UserRequestLogs" className="flex items-center">
