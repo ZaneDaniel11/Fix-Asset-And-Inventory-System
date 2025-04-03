@@ -126,14 +126,7 @@ const Sidebar = () => {
                 <span className="text-white">Request Item</span>
               </a>
             </li>
-            {usertype !== "Teacher" && (
-              <li>
-                <a href="/UserRequestMaintenance" className="flex items-center">
-                  <i className="bx bx-wrench text-xl"></i>
-                  <span className="text-white">Request Maintenance</span>
-                </a>
-              </li>
-            )}
+          
             <li>
               <a href="/UserRequestLogs" className="flex items-center">
                 <i className="bx bx-log text-xl"></i>
