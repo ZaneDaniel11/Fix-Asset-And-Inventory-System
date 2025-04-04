@@ -95,20 +95,20 @@ export default function Borrow() {
   }
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-gradient-to-b from-blue-50 to-indigo-50 min-h-screen">
       <div className="container mx-auto py-8 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex items-center mb-8"
+          className="flex items-center mb-8 p-6 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl text-white"
         >
-          <div className="bg-primary p-3 rounded-full mr-4">
-            <BookOpen className="h-6 w-6 text-primary-foreground" />
+          <div className="bg-white/20 p-3 rounded-full mr-4">
+            <BookOpen className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Borrow Items</h1>
-            <p className="text-muted-foreground">Browse and request items from our inventory</p>
+            <h1 className="text-3xl font-bold">Borrow Items</h1>
+            <p className="text-blue-100">Browse and request items from our inventory</p>
           </div>
         </motion.div>
 

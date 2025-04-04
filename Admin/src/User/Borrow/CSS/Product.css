@@ -1,18 +1,55 @@
 /* Custom Scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px; /* Make scrollbar smaller */
+  height: 6px; /* For horizontal scrollbars */
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: #6b7280; /* Gray color for thumb */
+  background: linear-gradient(to bottom, #4f46e5, #7c3aed); /* Indigo to purple gradient */
   border-radius: 10px; /* Rounded edges */
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: #4b5563; /* Darker gray on hover */
+  background: linear-gradient(to bottom, #4338ca, #6d28d9); /* Darker gradient on hover */
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
-  background-color: #e5e7eb; /* Light gray for track */
+  background-color: #e0e7ff; /* Light indigo background */
   border-radius: 10px;
 }
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Add animation for hover effects */
+@keyframes pulse-border {
+  0%,
+  100% {
+    border-color: rgba(79, 70, 229, 0.6); /* Indigo */
+  }
+  50% {
+    border-color: rgba(124, 58, 237, 0.9); /* Purple */
+  }
+}
+
+.pulse-border:hover {
+  animation: pulse-border 2s infinite;
+}
+
+/* Add a subtle gradient background utility */
+.bg-gradient-subtle {
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 50%, #ddd6fe 100%);
+}
+

@@ -1,3 +1,4 @@
+"use client"
 
 import { Badge } from "@/components/ui/badge"
 
@@ -108,9 +109,9 @@ const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, o
   return (
     <div className="w-full lg:w-4/12 lg:ml-6 mt-6 lg:mt-0">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-xl">
           <h2 className="text-2xl font-bold">Your Cart</h2>
-          <Badge variant="secondary" className="flex items-center gap-1">
+          <Badge variant="outline" className="flex items-center gap-1 bg-white/20 text-white border-white/30">
             <ShoppingCart className="h-4 w-4" />
             <span>{totalItems} items</span>
           </Badge>
@@ -156,7 +157,11 @@ const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, o
                             <Button
                               variant="outline"
                               size="icon"
-                              className="h-8 w-8"
+                              className={`h-8 w-8 ${
+                                product.requestedQuantity <= 1
+                                  ? "bg-gray-100 text-gray-400"
+                                  : "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-300"
+                              }`}
                               onClick={() => handleDecrease(product.itemID)}
                               disabled={product.requestedQuantity <= 1}
                             >
@@ -169,7 +174,11 @@ const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, o
                             <Button
                               variant="outline"
                               size="icon"
-                              className="h-8 w-8"
+                              className={`h-8 w-8 ${
+                                product.requestedQuantity >= product.initialQuantity
+                                  ? "bg-gray-100 text-gray-400"
+                                  : "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-300"
+                              }`}
                               onClick={() => handleIncrease(product.itemID, product.initialQuantity)}
                               disabled={product.requestedQuantity >= product.initialQuantity}
                             >
@@ -191,7 +200,12 @@ const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, o
         </CardContent>
 
         <CardFooter>
-          <Button className="w-full" size="lg" onClick={openModal} disabled={selectedProducts.length === 0}>
+          <Button
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+            size="lg"
+            onClick={openModal}
+            disabled={selectedProducts.length === 0}
+          >
             Submit Borrow Request
           </Button>
         </CardFooter>
@@ -200,9 +214,9 @@ const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, o
       {/* Request Dialog */}
       <Dialog open={modalIsOpen} onOpenChange={setModalIsOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Submit Borrow Request</DialogTitle>
-            <DialogDescription>Please provide details for your request</DialogDescription>
+          <DialogHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-lg -mt-6 -mx-6 mb-6">
+            <DialogTitle className="text-2xl">Submit Borrow Request</DialogTitle>
+            <DialogDescription className="text-indigo-100">Please provide details for your request</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -246,7 +260,12 @@ const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, o
             <Button type="button" variant="secondary" onClick={closeModal} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="button" onClick={handleSave} disabled={isSubmitting}>
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+            >
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

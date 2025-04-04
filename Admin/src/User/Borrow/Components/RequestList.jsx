@@ -144,27 +144,27 @@ export default function RequestList() {
   }
 
   return (
-    <div className="bg-background min-h-screen py-8 px-4">
+    <div className="bg-gradient-to-b from-indigo-50 to-purple-50 min-h-screen py-8 px-4">
       <div className="container mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex items-center mb-8"
+          className="flex items-center mb-8 p-6 bg-gradient-to-r from-purple-600 to-indigo-700 rounded-xl text-white"
         >
-          <div className="bg-primary p-3 rounded-full mr-4">
-            <ClipboardList className="h-6 w-6 text-primary-foreground" />
+          <div className="bg-white/20 p-3 rounded-full mr-4">
+            <ClipboardList className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">My Borrow Requests</h1>
-            <p className="text-muted-foreground">Track and manage your item requests</p>
+            <h1 className="text-3xl font-bold">My Borrow Requests</h1>
+            <p className="text-purple-100">Track and manage your item requests</p>
           </div>
         </motion.div>
 
-        <Card>
-          <CardHeader>
+        <Card className="border-indigo-100 shadow-md">
+          <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-t-xl">
             <CardTitle>Request History</CardTitle>
-            <CardDescription>View and manage your borrow requests</CardDescription>
+            <CardDescription className="text-indigo-100">View and manage your borrow requests</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -192,10 +192,22 @@ export default function RequestList() {
                       <TableCell className="max-w-[200px] truncate">{request.Purpose || "N/A"}</TableCell>
                       <TableCell>{formatDate(request.ReqBorrowDate)}</TableCell>
                       <TableCell>
-                        <Badge variant={getStatusVariant(request.Status)} className="flex w-fit items-center gap-1">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                            request.Status?.toLowerCase() === "approved"
+                              ? "bg-green-100 text-green-800"
+                              : request.Status?.toLowerCase() === "rejected"
+                                ? "bg-red-100 text-red-800"
+                                : request.Status?.toLowerCase() === "pending"
+                                  ? "bg-amber-100 text-amber-800"
+                                  : request.Status?.toLowerCase() === "returned"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
                           {getStatusIcon(request.Status)}
-                          <span>{request.Status || "Unknown"}</span>
-                        </Badge>
+                          <span className="ml-1">{request.Status || "Unknown"}</span>
+                        </span>
                       </TableCell>
                       <TableCell>
                         <Button
@@ -227,11 +239,11 @@ export default function RequestList() {
         {/* Request Details Dialog */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="sm:max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>
-                Request Details <span className="text-primary">#{selectedRequestDetails?.BorrowId}</span>
+            <DialogHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 rounded-t-lg -mt-6 -mx-6 mb-6">
+              <DialogTitle className="text-2xl">
+                Request Details <span className="text-indigo-200">#{selectedRequestDetails?.BorrowId}</span>
               </DialogTitle>
-              <DialogDescription>View the details of your borrow request</DialogDescription>
+              <DialogDescription className="text-indigo-100">View the details of your borrow request</DialogDescription>
             </DialogHeader>
 
             {selectedRequestDetails && (

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Search, Filter, AlertCircle } from "lucide-react"
-import "./Product.css"
+import "../CSS/Product.css"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -142,16 +142,16 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
   return (
     <div className="w-full lg:w-8/12 space-y-6">
       <Card>
-        <CardHeader className="pb-3">
-          <h2 className="text-2xl font-bold text-foreground">Available Items</h2>
+        <CardHeader className="pb-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-xl">
+          <h2 className="text-2xl font-bold">Available Items</h2>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-500" />
             <Input
               type="text"
-              className="pl-9"
+              className="pl-9 border-blue-200 focus:border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50"
               placeholder="Search items..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -180,8 +180,8 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
                       whileTap={{ scale: 0.95 }}
                       className={`flex flex-col items-center justify-center p-3 min-w-[100px] h-[100px] rounded-lg border-2 transition-all ${
                         selectedCategoryId === category.id
-                          ? "border-primary bg-primary/10"
-                          : "border-border hover:border-primary/50 hover:bg-accent"
+                          ? "border-blue-500 bg-blue-100 shadow-md"
+                          : "border-gray-200 hover:border-blue-300 hover:bg-blue-50"
                       }`}
                       onClick={() => setSelectedCategoryId(category.id)}
                     >
@@ -221,7 +221,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card className="overflow-hidden h-full flex flex-col">
+                    <Card className="overflow-hidden h-full flex flex-col border-blue-100 hover:border-blue-300 transition-all hover:shadow-md hover:shadow-blue-100">
                       <div className="relative h-40 bg-muted">
                         <img
                           src={product.imageUrl || "https://via.placeholder.com/300x200?text=No+Image"}
@@ -245,7 +245,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
                             Available: <span className="font-medium">{product.quantity}</span>
                           </span>
                           {product.categoryName && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="outline" className="text-xs border-blue-300 bg-blue-50 text-blue-700">
                               {product.categoryName}
                             </Badge>
                           )}
@@ -260,13 +260,16 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
                         ) : product.isRequested ? (
                           <Button
                             variant="secondary"
-                            className="w-full"
+                            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700"
                             onClick={() => handleRemoveRequest(product.itemID)}
                           >
                             Remove Request
                           </Button>
                         ) : (
-                          <Button className="w-full" onClick={() => handleAddProduct(product)}>
+                          <Button
+                            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                            onClick={() => handleAddProduct(product)}
+                          >
                             Borrow Item
                           </Button>
                         )}
