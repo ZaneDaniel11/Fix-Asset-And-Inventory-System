@@ -18,7 +18,6 @@ import ReturedItems from "./Inventory_Admin/Borrowed/ReturnedItems.jsx";
 import AssetInventory from "./Asset/Inventory/AInventory.jsx";
 import AssetInvenTable from "./Asset/Inventory/Components/CategoryItem/InventoryItemTable.jsx";
 import Schedule from "./Asset/Schedule/Schedule.jsx";
-import AssetTransfers from "./Asset/AssetTransfer/Asset_Trasnfer.jsx"
 import Reports from "./Asset/Report/AssetReport.jsx";
 import Disposed from "./Asset/Disposed/Disposed-assets-dashboard.jsx"
 import { ToastContainer } from "react-toastify";
@@ -39,7 +38,7 @@ import HadminMaintenance from "./Head_Admin/MaintenanceRequest/MaintenanceReq.js
 // School Admin
 import SadminBorrow from "./School_Admin/Borrow/SuperBorrow.jsx";
 import SadminRequest from "./School_Admin/RequestItems/SuperRequestItems.jsx";
-import SadminLogs from "./School_Admin/Logs/SuperLogs.jsx";
+import SadminLogs from "./School_Admin/Super_Logs/SuperLogs.jsx";
 function App() {
   const location = useLocation();
   const isAuthenticated = !!localStorage.getItem("token"); // Check if token is present
@@ -266,15 +265,8 @@ function App() {
               />
             }
           />
-              <Route
-            path="/AssetTransfer"
-            element={
-              <ProtectedRoute
-                element={<AssetTransfers />}
-                allowedUsertypes={["Asset_Admin"]}
-              />
-            }
-          />
+       
+          
           <Route
             path="/Schedule"
             element={

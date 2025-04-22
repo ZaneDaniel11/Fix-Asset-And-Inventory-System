@@ -39,7 +39,6 @@ export default function InventoryTable() {
   const [transferData, setTransferData] = useState({
     newIssuedTo: "",
     newLocation: "",
-    categoryId:"",
   })
   const [modals, setModals] = useState({
     add: false,
@@ -51,6 +50,7 @@ export default function InventoryTable() {
     transfer: false,
     viewHistory: false,
     confirmDelete: false,
+    dispose: false, // Add this new state for the dispose modal
   })
   const [depreciationData, setDepreciationData] = useState(null)
   const [loadingDepreciation, setLoadingDepreciation] = useState(false)
@@ -78,6 +78,17 @@ export default function InventoryTable() {
     DepreciationValue: "",
     DepreciationPeriodType: "month",
     DepreciationPeriodValue: 0,
+  })
+  const [disposeData, setDisposeData] = useState({
+    assetId: 0,
+    assetName: "",
+    assetCode: "",
+    assetCategory: "",
+    disposalDate: new Date().toISOString().split("T")[0],
+    reason: "Obsolete",
+    originalValue: 0,
+    disposalValue: 0,
+    lossValue: 0,
   })
 
   // Format date for display
@@ -248,52 +259,55 @@ export default function InventoryTable() {
   }
 
   // Handle asset transfer
-// Handle asset transfer
-const handleTransfer = async () => {
-  const storedName = localStorage.getItem("name");
+  const handleTransfer = async () => {
+    const storedName = localStorage.getItem("name")
 
+    if (!transferData.newIssuedTo || !transferData.newLocation) {
+      alert("Please fill in all fields.")
+      return
+    }
 
-  // Prepare transfer data
-  const transferPayload = {
+    // Debug the selected item to see what properties are available
+    console.log("Selected item for transfer:", selectedItem)
+
+    // Prepare transfer data with proper property access
+    // Note: Using optional chaining and fallbacks to prevent undefined errors
+    const transferPayload = {
       AssetID: selectedItem.assetId,
-      AssetCode: selectedItem.assetCode, 
-      AssetName: selectedItem.assetName, 
-      categoryID: transferData.categoryId,  // ✅ Ensure this is correct
+      AssetCode: selectedItem.assetCode,
+      AssetName: selectedItem.assetName,
+      // Try multiple possible property names for category ID with fallbacks
+      AssetCategoryID: selectedItem.categoryID || selectedItem.CategoryID || categoryId,
       NewOwner: transferData.newIssuedTo,
       NewLocation: transferData.newLocation,
-      Remarks: transferData.remarks || "", 
-      PerformedBy: storedName, 
-  };
+      Remarks: transferData.remarks || selectedItem.remarks || "",
+      PerformedBy: storedName,
+    }
 
-  console.log(transferPayload);
-  try {
-      console.log("📤 Sending Transfer Request:", transferPayload); // ✅ Log request payload
+    try {
+      console.log("📤 Sending Transfer Request:", transferPayload) // Log request payload
 
-      const response = await axios.post(
-          "http://localhost:5075/api/AssetItemApi/TransferAsset",
-          transferPayload,
-          {
-              headers: { "Content-Type": "application/json" },
-          }
-      );
+      const response = await axios.post("http://localhost:5075/api/AssetItemApi/TransferAsset", transferPayload, {
+        headers: { "Content-Type": "application/json" },
+      })
 
-      console.log("✅ Transfer Response:", response.data); // ✅ Log successful response
+      console.log("✅ Transfer Response:", response.data) // Log successful response
 
-      alert(response.data.Message || "Asset transferred successfully!");
-      setModals((prev) => ({ ...prev, transfer: false }));
-      fetchItems(categoryId);
-  } catch (error) {
-      console.error("❌ Error transferring asset:", error);
+      alert(response.data.Message || "Asset transferred successfully!")
+      setModals((prev) => ({ ...prev, transfer: false }))
+      fetchItems(categoryId)
+    } catch (error) {
+      console.error("❌ Error transferring asset:", error)
 
       if (error.response) {
-          console.error("📩 Server Response:", error.response.data); // ✅ Log error response
-          alert(`Transfer failed: ${error.response.data}`);
+        console.error("📩 Server Response:", error.response.data) // Log error response
+        alert(`Transfer failed: ${error.response.data}`)
       } else {
-          alert("Transfer failed. Please try again.");
+        alert("Transfer failed. Please try again.")
       }
+    }
   }
-};
-  
+
   // Handle delete asset
   const handleDeleteAsset = async () => {
     try {
@@ -377,6 +391,63 @@ const handleTransfer = async () => {
       default:
         return "bg-gray-100 text-gray-800 border-gray-200"
     }
+  }
+
+  // Add a function to handle disposal
+  const handleDispose = async () => {
+    try {
+      // Here you would implement the API call to mark the asset as disposed
+      // For example:
+      // const response = await axios.post(`${API_URL}DisposeAsset`, disposeData);
+
+      console.log("Disposing asset with data:", disposeData)
+
+      // For now, just show a success message
+      alert("Asset disposed successfully!")
+      toggleModal("dispose")
+
+      // Refresh the asset list
+      fetchItems(categoryId)
+    } catch (error) {
+      console.error("Error disposing asset:", error)
+      alert("Failed to dispose asset. Please try again.")
+    }
+  }
+
+  // Add a function to open the dispose modal
+  const openDisposeModal = (item) => {
+    // Pre-fill the dispose data with the selected item's information
+    setDisposeData({
+      assetId: item.assetId || 0,
+      assetName: item.assetName || "",
+      assetCode: item.assetCode || "",
+      assetCategory: item.categoryName || "",
+      disposalDate: new Date().toISOString().split("T")[0],
+      reason: "Obsolete",
+      originalValue: item.assetCost || 0,
+      disposalValue: 0,
+      lossValue: item.assetCost || 0,
+    })
+
+    toggleModal("view") // Close the view modal
+    toggleModal("dispose") // Open the dispose modal
+  }
+
+  // Add a function to calculate loss value
+  const calculateLossValue = (originalValue, disposalValue) => {
+    return Math.max(0, originalValue - disposalValue)
+  }
+
+  // Add a function to handle disposal value change
+  const handleDisposalValueChange = (value) => {
+    const disposalValue = Number.parseFloat(value) || 0
+    const originalValue = Number.parseFloat(disposeData.originalValue) || 0
+
+    setDisposeData({
+      ...disposeData,
+      disposalValue,
+      lossValue: calculateLossValue(originalValue, disposalValue),
+    })
   }
 
   return (
@@ -545,6 +616,13 @@ const handleTransfer = async () => {
                               title="View Depreciation"
                             >
                               <FaCalendarAlt />
+                            </button>
+                            <button
+                              onClick={() => openDisposeModal(item)}
+                              className="text-red-600 hover:text-red-900 transition-colors duration-150"
+                              title="Dispose Asset"
+                            >
+                              <FaTrash />
                             </button>
                           </div>
                         </td>
@@ -1030,118 +1108,88 @@ const handleTransfer = async () => {
                       <FaHistory className="mr-2" />
                       History
                     </button>
+                    <button
+                      onClick={() => {
+                        toggleModal("view")
+                        openDisposeModal(selectedItem)
+                      }}
+                      className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
+                    >
+                      <FaTrash className="mr-2" />
+                      Dispose
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         )}
-  {/* Transfer Modal */}
-{modals.transfer && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden">
-      <div className="bg-gradient-to-r from-yellow-500 to-amber-500 px-6 py-4 sticky top-0 z-10">
-        <h2 className="text-xl font-bold text-white">Transfer Asset</h2>
-      </div>
-      <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-        <div className="mb-6">
-          <p className="text-sm text-gray-500 mb-2">Asset</p>
-          <p className="font-medium text-gray-900">{selectedItem?.assetName}</p>
-        </div>
+        {/* Transfer Modal */}
+        {modals.transfer && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden">
+              <div className="bg-gradient-to-r from-yellow-500 to-amber-500 px-6 py-4 sticky top-0 z-10">
+                <h2 className="text-xl font-bold text-white">Transfer Asset</h2>
+              </div>
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+                <div className="mb-6">
+                  <p className="text-sm text-gray-500 mb-2">Asset</p>
+                  <p className="font-medium text-gray-900">{selectedItem?.assetName}</p>
+                </div>
 
-        {/* Display Category ID */}
-        <div className="mb-4 bg-gray-50 p-3 rounded-lg">
-          <p className="text-sm text-gray-500 mb-1">Category ID</p>
-          <p className="font-medium text-gray-900">{categoryId}</p>
-        </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">New Owner</label>
+                    <input
+                      type="text"
+                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      value={transferData.newIssuedTo}
+                      onChange={(e) =>
+                        setTransferData({
+                          ...transferData,
+                          newIssuedTo: e.target.value,
+                        })
+                      }
+                      placeholder="Enter new owner name"
+                    />
+                  </div>
 
-        <div className="space-y-4">
-          {/* Hidden input to store categoryId */}
-          <input
-            type="hidden"
-            value={categoryId}
-            onChange={(e) =>
-              setTransferData({
-                ...transferData,
-                categoryId: e.target.value,
-              })
-            }
-          />
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">New Owner</label>
-            <input
-              type="text"
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              value={transferData.newIssuedTo}
-              onChange={(e) =>
-                setTransferData({
-                  ...transferData,
-                  newIssuedTo: e.target.value,
-                })
-              }
-              placeholder="Enter new owner name"
-            />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">New Location</label>
+                    <input
+                      type="text"
+                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      value={transferData.newLocation}
+                      onChange={(e) =>
+                        setTransferData({
+                          ...transferData,
+                          newLocation: e.target.value,
+                        })
+                      }
+                      placeholder="Enter new location"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={toggleTransferModal}
+                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleTransfer}
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  >
+                    Confirm Transfer
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">New Location</label>
-            <input
-              type="text"
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              value={transferData.newLocation}
-              onChange={(e) =>
-                setTransferData({
-                  ...transferData,
-                  newLocation: e.target.value,
-                })
-              }
-              placeholder="Enter new location"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
-            <textarea
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              value={transferData.remarks || ""}
-              onChange={(e) =>
-                setTransferData({
-                  ...transferData,
-                  remarks: e.target.value,
-                })
-              }
-              placeholder="Enter any remarks about this transfer"
-              rows={3}
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-          <button
-            onClick={toggleTransferModal}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              // Set the categoryId before calling handleTransfer
-              setTransferData(prev => ({
-                ...prev,
-                categoryId: categoryId
-              }));
-              handleTransfer();
-            }}
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-          >
-            Confirm Transfer
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}        {/* View History Modal */}
+        )}
+        {/* View History Modal */}
         {modals.viewHistory && (
           <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
@@ -1655,8 +1703,182 @@ const handleTransfer = async () => {
             </div>
           </div>
         )}
+        {/* Dispose Asset Modal */}
+        {modals.dispose && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+              <div className="bg-gradient-to-r from-red-600 to-red-500 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+                <h2 className="text-xl font-bold text-white">Dispose Asset</h2>
+                <button
+                  onClick={() => toggleModal("dispose")}
+                  className="text-white hover:text-gray-200 focus:outline-none"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Asset Name</label>
+                      <input
+                        type="text"
+                        value={disposeData.assetName}
+                        onChange={(e) => setDisposeData({ ...disposeData, assetName: e.target.value })}
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        readOnly
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Asset Code</label>
+                      <input
+                        type="text"
+                        value={disposeData.assetCode}
+                        onChange={(e) => setDisposeData({ ...disposeData, assetCode: e.target.value })}
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        readOnly
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Asset Category</label>
+                      <input
+                        type="text"
+                        value={categoryId}
+                        onChange={(e) => setDisposeData({ ...disposeData, assetCategory: e.target.value })}
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        readOnly
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Asset ID</label>
+                      <input
+                        type="text"
+                        value={disposeData.assetId}
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        readOnly
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Disposal Date</label>
+                      <input
+                        type="date"
+                        value={disposeData.disposalDate}
+                        onChange={(e) => setDisposeData({ ...disposeData, disposalDate: e.target.value })}
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+                      <select
+                        value={disposeData.reason}
+                        onChange={(e) => setDisposeData({ ...disposeData, reason: e.target.value })}
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      >
+                        <option value="Obsolete">Obsolete</option>
+                        <option value="Damaged">Damaged</option>
+                        <option value="Sold">Sold</option>
+                        <option value="Lost">Lost</option>
+                        <option value="Donated">Donated</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Original Value</label>
+                      <div className="mt-1 relative rounded-md shadow-sm">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <span className="text-gray-500 sm:text-sm">$</span>
+                        </div>
+                        <input
+                          type="number"
+                          value={disposeData.originalValue}
+                          onChange={(e) => setDisposeData({ ...disposeData, originalValue: e.target.value })}
+                          className="w-full pl-7 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                          readOnly
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Disposal Value</label>
+                      <div className="mt-1 relative rounded-md shadow-sm">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <span className="text-gray-500 sm:text-sm">$</span>
+                        </div>
+                        <input
+                          type="number"
+                          value={disposeData.disposalValue}
+                          onChange={(e) => handleDisposalValueChange(e.target.value)}
+                          className="w-full pl-7 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Loss Value</label>
+                      <div className="mt-1 relative rounded-md shadow-sm">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <span className="text-gray-500 sm:text-sm">$</span>
+                        </div>
+                        <input
+                          type="number"
+                          value={disposeData.lossValue}
+                          className="w-full pl-7 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-100"
+                          readOnly
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mt-4">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg
+                          className="h-5 w-5 text-yellow-400"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-yellow-800">Warning</h3>
+                        <div className="mt-2 text-sm text-yellow-700">
+                          <p>
+                            Disposing an asset is permanent and cannot be undone. The asset will be marked as disposed
+                            and removed from active inventory.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-5 border-t border-gray-200">
+                    <button
+                      type="button"
+                      onClick={() => toggleModal("dispose")}
+                      className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDispose}
+                      className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    >
+                      Dispose Asset
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
 }
-

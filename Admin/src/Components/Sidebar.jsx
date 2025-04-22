@@ -154,14 +154,6 @@ const Sidebar = () => {
               </a>
             </li>
             <li>
-              <a href="/AssetTransfer" className="flex items-center">
-                <i className="bx bx-package text-xl"></i>
-                <span className="text-white">Asset Transfeer
-
-                </span>
-              </a>
-            </li>
-            <li>
               <a href="/Schedule" className="flex items-center">
                 <i className="bx bx-calendar text-xl"></i>
                 <span className="text-white">Schedule</span>
