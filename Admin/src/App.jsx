@@ -33,7 +33,7 @@ import UserRequestLogs from "./User/History/RequestHistory.jsx";
 // Head Admin Side
 import HadminBorrow from "./Head_Admin/Borrow/Head_Borrow.jsx";
 import HadminRequestItems from "./Head_Admin/RequestItems/Head_RequestItems.jsx";
-import HadminLogs from "./Head_Admin/Logs/Logs.jsx";
+import HadminLogs from "./Head_Admin/Head_Logs/Head_Logs.jsx";
 import HadminMaintenance from "./Head_Admin/MaintenanceRequest/MaintenanceReq.jsx";
 
 // School Admin

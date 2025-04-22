@@ -1,376 +1,344 @@
-import React, { useState, useEffect } from "react";
-import Sidebar from "../../Components/Sidebar";
-import { toast } from "react-toastify";
+"use client"
+
+import { useState, useEffect } from "react"
+import { toast } from "react-toastify"
+import { Eye, Ban, BadgeIcon as IdCard, User, Calendar, Target, Info, Package, Loader2 } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default function BorrowStatus() {
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [currentItem, setCurrentItem] = useState(null);
-  const [statusQuery, setStatusQuery] = useState("");
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [borrowedItems, setBorrowedItems] = useState([]);
-  const [borrowLoading, setBorrowLoading] = useState(false);
-  const [cancelModalOpen, setCancelModalOpen] = useState(false);
-  const [canceling, setCanceling] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false)
+  const [currentItem, setCurrentItem] = useState(null)
+  const [statusQuery, setStatusQuery] = useState("")
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [borrowedItems, setBorrowedItems] = useState([])
+  const [borrowLoading, setBorrowLoading] = useState(false)
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
+  const [canceling, setCanceling] = useState(false)
 
   useEffect(() => {
     const fetchBorrowRequests = async () => {
-      const borrowerId = localStorage.getItem("userId");
+      const borrowerId = localStorage.getItem("userId")
 
       if (!borrowerId) {
-        setError("User ID is not available in localStorage");
-        setLoading(false);
-        return;
+        setError("User ID is not available in localStorage")
+        setLoading(false)
+        return
       }
 
       try {
-        const response = await fetch(
-          `http://localhost:5075/api/BorrowRequestApi/RequestById/${borrowerId}`
-        );
+        const response = await fetch(`http://localhost:5075/api/BorrowRequestApi/RequestById/${borrowerId}`)
 
         if (!response.ok) {
-          throw new Error("Failed to fetch borrow requests");
+          throw new Error("Failed to fetch borrow requests")
         }
 
-        const data = await response.json();
-        setItems(Array.isArray(data) ? data : [data]);
-        console.log(data);
+        const data = await response.json()
+        setItems(Array.isArray(data) ? data : [data])
+        console.log(data)
       } catch (error) {
-        setError(error.message);
+        setError(error.message)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchBorrowRequests();
-  }, []);
+    fetchBorrowRequests()
+  }, [])
 
   const fetchBorrowItems = async (borrowId) => {
-    setBorrowLoading(true);
+    setBorrowLoading(true)
     try {
-      const response = await fetch(
-        `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${borrowId}`
-      );
+      const response = await fetch(`http://localhost:5075/api/BorrowRequestApi/ViewRequest/${borrowId}`)
       if (!response.ok) {
-        throw new Error("Failed to fetch borrowed items");
+        throw new Error("Failed to fetch borrowed items")
       }
-      const data = await response.json();
-      setBorrowedItems(data);
+      const data = await response.json()
+      setBorrowedItems(data)
     } catch (error) {
-      setError(error.message);
+      setError(error.message)
     } finally {
-      setBorrowLoading(false);
+      setBorrowLoading(false)
     }
-  };
+  }
 
   const openViewModal = (item) => {
-    setCurrentItem(item);
-    setViewModalOpen(true);
-    fetchBorrowItems(item.BorrowId);
-  };
+    setCurrentItem(item)
+    setViewModalOpen(true)
+    fetchBorrowItems(item.BorrowId)
+  }
 
   const closeViewModal = () => {
-    setViewModalOpen(false);
-    setCurrentItem(null);
-    setBorrowedItems([]);
-  };
+    setViewModalOpen(false)
+    setCurrentItem(null)
+    setBorrowedItems([])
+  }
 
   const openCancelModal = (item) => {
-    setCurrentItem(item);
-    setCancelModalOpen(true);
-  };
+    setCurrentItem(item)
+    setCancelModalOpen(true)
+  }
 
   const closeCancelModal = () => {
-    setCancelModalOpen(false);
-    setCurrentItem(null);
-  };
+    setCancelModalOpen(false)
+    setCurrentItem(null)
+  }
 
   const cancelRequest = async () => {
-    if (!currentItem) return;
+    if (!currentItem) return
 
-    setCanceling(true);
+    setCanceling(true)
     try {
-      const response = await fetch(
-        "http://localhost:5075/api/BorrowRequestApi/CancelRequest",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ borrowId: currentItem.BorrowId }),
-        }
-      );
-      toast.error("Borrow Canceled");
+      const response = await fetch("http://localhost:5075/api/BorrowRequestApi/CancelRequest", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ borrowId: currentItem.BorrowId }),
+      })
+      toast.error("Borrow Canceled")
       if (!response.ok) {
-        throw new Error("Failed to cancel the request");
+        throw new Error("Failed to cancel the request")
       }
 
       // Update the UI to reflect the cancellation
       setItems((prevItems) =>
-        prevItems.map((item) =>
-          item.BorrowId === currentItem.BorrowId
-            ? { ...item, Status: "Canceled" }
-            : item
-        )
-      );
+        prevItems.map((item) => (item.BorrowId === currentItem.BorrowId ? { ...item, Status: "Canceled" } : item)),
+      )
 
-      closeCancelModal();
+      closeCancelModal()
     } catch (error) {
-      setError(error.message);
+      setError(error.message)
     } finally {
-      setCanceling(false);
+      setCanceling(false)
     }
-  };
+  }
 
   const filteredItems = Array.isArray(items)
-    ? items.filter(
-        (item) => item.Status === "Pending" || item.Status === "In Progress"
-      )
-    : [];
+    ? items.filter((item) => item.Status === "Pending" || item.Status === "In Progress")
+    : []
+
+  // Function to get status badge color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Pending":
+        return "text-yellow-600"
+      case "Canceled":
+        return "text-red-600"
+      case "In Progress":
+        return "text-blue-600"
+      case "Rejected":
+        return "text-red-600"
+      case "Approved":
+        return "text-green-500"
+      default:
+        return "text-green-600"
+    }
+  }
 
   if (loading) {
-    return <div>Loading borrow requests...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-gray-500" />
+          <p className="text-lg text-gray-600">Loading borrow requests...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <>
-      {/* Main Content */}
-      <div className="flex-grow p-6">
-        <div className="bg-gray-200 p-6 shadow-lg rounded-lg mb-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-700">Borrow Overview</h2>
-        </div>
+    <div className="flex-grow p-6">
+      <Card className="mb-8">
+        <CardHeader className="bg-gray-200 rounded-t-lg">
+          <CardTitle className="text-3xl font-bold text-gray-700 text-center">Borrow Overview</CardTitle>
+        </CardHeader>
+      </Card>
 
-        {/* Search Bar */}
-        <div className="p-4 mb-4 bg-white shadow-md rounded-md"></div>
-
-        {/* Borrow Request Table */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse border border-gray-200">
-            <thead className="bg-gray-200">
-              <tr className="text-zinc-50">
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Borrow ID
-                </th>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Requested By
-                </th>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Date
-                </th>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Purpose
-                </th>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Status
-                </th>
-
-                <th className="border border-gray-300 px-4 py-2 text-center">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader className="bg-gray-200">
+              <TableRow>
+                <TableHead className="border border-gray-300 text-left">Borrow ID</TableHead>
+                <TableHead className="border border-gray-300 text-left">Requested By</TableHead>
+                <TableHead className="border border-gray-300 text-left">Date</TableHead>
+                <TableHead className="border border-gray-300 text-left">Purpose</TableHead>
+                <TableHead className="border border-gray-300 text-left">Status</TableHead>
+                <TableHead className="border border-gray-300 text-center">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredItems.map((item, index) => (
-                <tr
+                <TableRow
                   key={item.BorrowId}
-                  className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  } hover:bg-gray-100 transition duration-200`}
+                  className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100 transition duration-200`}
                 >
-                  <td className="border border-gray-300 px-4 py-2">
-                    {item.BorrowId}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {item.RequestedBy}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {item.ReqBorrowDate}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {item.Purpose}
-                  </td>
-                  <td
-                    className={`border border-gray-300 px-4 py-2 font-medium ${
-                      item.Status === "Pending"
-                        ? "text-yellow-600"
-                        : item.Status === "Canceled"
-                        ? "text-red-600"
-                        : item.Status === "In Progress"
-                        ? "text-blue-600"
-                        : item.Status === "Rejected"
-                        ? "text-red-600"
-                        : item.Status === "Approved"
-                        ? "text-green-500"
-                        : "text-green-600"
-                    }`}
-                  >
+                  <TableCell className="border border-gray-300">{item.BorrowId}</TableCell>
+                  <TableCell className="border border-gray-300">{item.RequestedBy}</TableCell>
+                  <TableCell className="border border-gray-300">{item.ReqBorrowDate}</TableCell>
+                  <TableCell className="border border-gray-300">{item.Purpose}</TableCell>
+                  <TableCell className={`border border-gray-300 font-medium ${getStatusColor(item.Status)}`}>
                     {item.Status}
-                  </td>
-
-                  <td className="border border-gray-300 px-4 py-2 text-center flex items-center justify-center space-x-2">
-                    <button
-                      type="button"
-                      onClick={() => openViewModal(item)}
-                      className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-3 py-1.5"
-                    >
-                      <i className="fa-solid fa-eye"></i>
-                    </button>
-                    {item.Status === "Pending" && (
-                      <button
-                        type="button"
-                        onClick={() => openCancelModal(item)}
-                        className="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-3 py-1.5"
+                  </TableCell>
+                  <TableCell className="border border-gray-300 text-center">
+                    <div className="flex items-center justify-center space-x-2">
+                      <Button
+                        size="sm"
+                        onClick={() => openViewModal(item)}
+                        className="text-white bg-blue-700 hover:bg-blue-800"
                       >
-                        <i className="fa-solid fa-ban"></i>
-                      </button>
-                    )}
-                  </td>
-                </tr>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {item.Status === "Pending" && (
+                        <Button
+                          size="sm"
+                          onClick={() => openCancelModal(item)}
+                          className="text-white bg-red-600 hover:bg-red-700"
+                        >
+                          <Ban className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
-        {/* Cancel Modal */}
-        {cancelModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white w-full max-w-md mx-auto p-6 rounded-lg shadow-lg relative">
-              <h3 className="text-lg font-bold text-gray-800 text-center mb-4">
-                Confirm Cancellation
-              </h3>
-              <p className="text-sm text-gray-600 text-center mb-6">
-                Are you sure you want to cancel this request? This action cannot
-                be undone.
-              </p>
+      {/* Cancel Modal */}
+      <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-gray-800 text-center">Confirm Cancellation</DialogTitle>
+            <DialogDescription className="text-center">
+              Are you sure you want to cancel this request? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-between">
+            <Button
+              variant="outline"
+              onClick={closeCancelModal}
+              className="text-gray-600 hover:text-gray-800 border-gray-300"
+            >
+              No, Go Back
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={cancelRequest}
+              disabled={canceling}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {canceling ? "Canceling..." : "Yes, Cancel"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-              <div className="flex justify-between items-center space-x-4">
-                <button
-                  onClick={closeCancelModal}
-                  className="w-full py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg"
-                >
-                  No, Go Back
-                </button>
-                <button
-                  onClick={cancelRequest}
-                  disabled={canceling}
-                  className="w-full py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg"
-                >
-                  {canceling ? "Canceling..." : "Yes, Cancel"}
-                </button>
-              </div>
+      {/* View Modal */}
+      {currentItem && (
+        <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
+          <DialogContent className="sm:max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="text-3xl font-bold text-gray-700 text-center">Borrow Request Details</DialogTitle>
+            </DialogHeader>
 
-              {/* Close Icon */}
-              <button
-                onClick={closeCancelModal}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-lg"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        )}
-
-        {viewModalOpen && currentItem && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-8 relative">
-              {/* Close Button */}
-              <button
-                onClick={closeViewModal}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-2xl"
-              >
-                ✕
-              </button>
-
-              {/* Modal Title */}
-              <h2 className="text-3xl font-bold text-gray-700 text-center mb-8">
-                Borrow Request Details
-              </h2>
-
-              {/* Borrow Request Details */}
-              <div className="space-y-6 mt-6">
-                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <i className="fa-solid fa-id-card text-blue-500"></i>
-                    <span>
-                      <strong>ID:</strong> {currentItem.BorrowId}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <i className="fa-solid fa-user text-blue-500"></i>
-                    <span>
-                      <strong>Requested By:</strong> {currentItem.RequestedBy}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <i className="fa-solid fa-calendar-day text-blue-500"></i>
-                    <span>
-                      <strong>Request Date:</strong> {currentItem.ReqBorrowDate}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <i className="fa-solid fa-bullseye text-blue-500"></i>
-                    <span>
-                      <strong>Purpose:</strong> {currentItem.Purpose}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <i className="fa-solid fa-info-circle text-blue-500"></i>
-                    <span>
-                      <strong>Status:</strong> {currentItem.Status}
-                    </span>
-                  </div>
+            <div className="space-y-6 mt-6">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div className="flex items-center gap-2 text-gray-700">
+                  <IdCard className="h-5 w-5 text-blue-500" />
+                  <span>
+                    <strong>ID:</strong> {currentItem.BorrowId}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <User className="h-5 w-5 text-blue-500" />
+                  <span>
+                    <strong>Requested By:</strong> {currentItem.RequestedBy}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <Calendar className="h-5 w-5 text-blue-500" />
+                  <span>
+                    <strong>Request Date:</strong> {currentItem.ReqBorrowDate}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <Target className="h-5 w-5 text-blue-500" />
+                  <span>
+                    <strong>Purpose:</strong> {currentItem.Purpose}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <Info className="h-5 w-5 text-blue-500" />
+                  <span>
+                    <strong>Status:</strong> {currentItem.Status}
+                  </span>
                 </div>
               </div>
+            </div>
 
-              <hr className="my-6 border-gray-300" />
+            <Separator className="my-6" />
 
-              {/* Borrowed Items Section */}
+            <div>
               <h4 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
-                <i className="fa-solid fa-boxes-stacked text-green-600"></i>{" "}
-                Borrowed Items
+                <Package className="h-5 w-5 text-green-600" /> Borrowed Items
               </h4>
 
               {borrowLoading ? (
-                <div className="text-center text-gray-500 text-lg">
+                <div className="text-center text-gray-500 text-lg py-8">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
                   Loading borrowed items...
                 </div>
               ) : borrowedItems.length === 0 ? (
-                <div className="text-center text-gray-500 text-lg">
-                  No borrowed items found
-                </div>
+                <div className="text-center text-gray-500 text-lg py-8">No borrowed items found</div>
               ) : (
-                <div className="overflow-y-auto max-h-[300px] space-y-4">
-                  <ul>
+                <ScrollArea className="h-[300px] pr-4">
+                  <div className="space-y-4">
                     {borrowedItems.map((item) => (
-                      <div
+                      <Card
                         key={item.ItemId}
-                        className="flex items-center gap-6 border border-gray-200 rounded-lg p-4 bg-gray-50 hover:shadow-lg transition-shadow duration-300 mb-3"
+                        className="border border-gray-200 bg-gray-50 hover:shadow-lg transition-shadow duration-300"
                       >
-                        {/* Image Section */}
-                        <img
-                          src="https://via.placeholder.com/100"
-                          alt={item.ItemName}
-                          className="w-20 h-20 object-cover rounded-lg"
-                        />
-                        {/* Content Section */}
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-800">
-                            {item.ItemName}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            Quantity: <strong>{item.Quantity}</strong>
-                          </p>
-                        </div>
-                      </div>
+                        <CardContent className="p-4 flex items-center gap-6">
+                          <img
+                            src="https://via.placeholder.com/100"
+                            alt={item.ItemName}
+                            className="w-20 h-20 object-cover rounded-lg"
+                          />
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-800">{item.ItemName}</h3>
+                            <p className="text-sm text-gray-600">
+                              Quantity: <strong>{item.Quantity}</strong>
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
                     ))}
-                  </ul>
-                </div>
+                  </div>
+                </ScrollArea>
               )}
             </div>
-          </div>
-        )}
-      </div>
-    </>
-  );
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  )
 }
+
