@@ -9,7 +9,7 @@ import InventoryTable from "./Inventory_Admin/Inventory/Components/Table/Invento
 import BorrowedRequest from "./Inventory_Admin/Request/BorrowRequest.jsx";
 import RequestItems from "./Inventory_Admin/Request/RequestItems.jsx";
 import RequestRepair from "./Inventory_Admin/Request/RequestRepair.jsx";
-import Logs from "./Inventory_Admin/Logs/Log.jsx";
+import Logs from "./Inventory_Admin/Inventory_Logs/Inventory_Logs.jsx";
 import Sidebar from "./Components/Sidebar.jsx";
 import BorrowedItems from "./Inventory_Admin/Borrowed/BorrowedItems.jsx";
 import ReturedItems from "./Inventory_Admin/Borrowed/ReturnedItems.jsx";
