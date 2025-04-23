@@ -1,4 +1,3 @@
-"use client"
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
@@ -70,13 +69,13 @@ const DisposedAssetsDashboard = () => {
   // Get status badge color based on days remaining
   const getStatusBadge = (daysRemaining) => {
     if (daysRemaining < 0) {
-      return <Badge variant="destructive">Expired</Badge>
+      return <Badge variant="destructive">Expired ({Math.abs(daysRemaining)} days ago)</Badge>
     } else if (daysRemaining <= 30) {
-      return <Badge variant="destructive">Critical ({daysRemaining} days)</Badge>
+      return <Badge variant="destructive">Critical ({daysRemaining} days left)</Badge>
     } else if (daysRemaining <= 90) {
-      return <Badge variant="warning">Warning ({daysRemaining} days)</Badge>
+      return <Badge variant="warning">Warning ({daysRemaining} days left)</Badge>
     } else {
-      return <Badge variant="outline">Active ({daysRemaining} days)</Badge>
+      return <Badge variant="outline">Active ({daysRemaining} days left)</Badge>
     }
   }
 
@@ -132,9 +131,9 @@ const DisposedAssetsDashboard = () => {
       const formattedStartDate = startDate.toISOString().split("T")[0]
       const formattedEndDate = endDate.toISOString().split("T")[0]
 
-      // Example API endpoint - replace with your actual endpoint
+      // Use the new API endpoint
       const response = await fetch(
-        `http://localhost:5075/api/AssetItemApi/warranty-assets?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
+        `http://localhost:5075/api/AssetDisposalApi/GetAssetSummaries?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
       )
 
       if (!response.ok) {
@@ -144,9 +143,20 @@ const DisposedAssetsDashboard = () => {
       const data = await response.json()
       console.log("Warranty assets data:", data)
 
-      // For demo purposes, generate sample data if API is not implemented yet
-      const sampleData = generateSampleWarrantyAssets()
-      setWarrantyAssets(data.length ? data : sampleData)
+      // Map the API response to match the component's expected format
+      const formattedData = data.map((asset) => ({
+        id: asset.AssetId,
+        assetName: asset.AssetName,
+        assetTag: asset.AssetCode,
+        category: asset.AssetCategory,
+        categoryId: asset.AssetCategoryId,
+        purchaseDate: asset.PurchaseDate,
+        warrantyExpiration: asset.WarrantyExpiration,
+        vendor: asset.Vendor,
+        currentValue: asset.CurrentValue,
+      }))
+
+      setWarrantyAssets(formattedData.length ? formattedData : generateSampleWarrantyAssets())
     } catch (error) {
       console.error("Error fetching warranty assets:", error)
       // Fallback to sample data
