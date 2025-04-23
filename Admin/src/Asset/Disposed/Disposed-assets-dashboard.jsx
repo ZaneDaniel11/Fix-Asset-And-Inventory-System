@@ -88,9 +88,9 @@ const DisposedAssetsDashboard = () => {
       const formattedStartDate = startDate.toISOString().split("T")[0]
       const formattedEndDate = endDate.toISOString().split("T")[0]
 
-      // Example API endpoint - replace with your actual endpoint
+      // Use the new API endpoint
       const response = await fetch(
-        `http://localhost:5075/api/AssetItemApi/disposed-assets?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
+        `http://localhost:5075/api/AssetDisposalApi/GetDisposedAssets?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
       )
 
       if (!response.ok) {
@@ -100,9 +100,21 @@ const DisposedAssetsDashboard = () => {
       const data = await response.json()
       console.log("Disposed assets data:", data)
 
-      // For demo purposes, generate sample data if API is not implemented yet
-      const sampleData = generateSampleDisposedAssets()
-      setDisposedAssets(data.length ? data : sampleData)
+      // Map the API response to match the component's expected format
+      const formattedData = data.map((asset) => ({
+        id: asset.AssetID,
+        assetName: asset.AssetName,
+        assetTag: asset.AssetCode,
+        category: categories.find((c) => c.CategoryId === asset.CategoryID)?.CategoryName || "Unknown",
+        disposalDate: asset.DisposalDate,
+        disposalReason: asset.DisposalReason,
+        originalValue: asset.OriginalValue,
+        disposalValue: asset.DisposedValue,
+        lossValue: asset.LossValue,
+        categoryID: asset.CategoryID,
+      }))
+
+      setDisposedAssets(formattedData.length ? formattedData : generateSampleDisposedAssets())
     } catch (error) {
       console.error("Error fetching disposed assets:", error)
       // Fallback to sample data
@@ -816,4 +828,3 @@ const DisposedAssetsDashboard = () => {
 }
 
 export default DisposedAssetsDashboard
-

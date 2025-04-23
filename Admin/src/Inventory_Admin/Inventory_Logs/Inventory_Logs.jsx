@@ -1,4 +1,4 @@
-import Sidebar from "../../Components/Sidebar";
+
 import React, { useState, useEffect } from "react";
 
 export default function Admin1Logs() {
@@ -176,7 +176,7 @@ export default function Admin1Logs() {
             <h2 className="text-2xl font-bold">Overview</h2>
           </div>
 
-          <div className="flex justify-between mb-4 shadow-lg p-6 bg-white rounded-lg mb-6">
+          <div className="flex justify-between  shadow-lg p-6 bg-white rounded-lg mb-6">
             <input
               type="text"
               placeholder="Search"
