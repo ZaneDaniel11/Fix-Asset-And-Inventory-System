@@ -172,7 +172,7 @@ export default function BorrowStatus() {
       <Card>
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-gray-200">
+            <TableHeader className="bg-gray-200 text-white">
               <TableRow>
                 <TableHead className="border border-gray-300 text-left">Borrow ID</TableHead>
                 <TableHead className="border border-gray-300 text-left">Requested By</TableHead>

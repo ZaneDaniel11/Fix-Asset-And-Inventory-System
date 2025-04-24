@@ -1,42 +1,44 @@
+"use client"
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react"
 
 export default function Admin1Logs() {
-  const [viewRequestModalOpen, setViewRequestModalOpen] = useState(false);
-  const [viewBorrowModalOpen, setViewBorrowModalOpen] = useState(false);
-  const [currentItem, setCurrentItem] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [requestItems, setRequestItems] = useState([]);
-  const [borrowRequests, setBorrowRequests] = useState([]);
-  const [maintenanceLogs, setMaintenanceLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [borrowedItems, setBorrowedItems] = useState([]);
-  const [borrowLoading, setBorrowLoading] = useState(false);
-  const [selectedTable, setSelectedTable] = useState("requestItems");
+  const [viewRequestModalOpen, setViewRequestModalOpen] = useState(false)
+  const [viewBorrowModalOpen, setViewBorrowModalOpen] = useState(false)
+  const [viewMaintenanceModalOpen, setViewMaintenanceModalOpen] = useState(false) // Added for maintenance view
+  const [currentItem, setCurrentItem] = useState(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [requestItems, setRequestItems] = useState([])
+  const [borrowRequests, setBorrowRequests] = useState([])
+  const [maintenanceLogs, setMaintenanceLogs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [borrowedItems, setBorrowedItems] = useState([])
+  const [borrowLoading, setBorrowLoading] = useState(false)
+  const [selectedTable, setSelectedTable] = useState("requestItems")
+  const [editModalOpen, setEditModalOpen] = useState(false) // Added for edit modals
+  const [editRequestModalOpen, setEditRequestModalOpen] = useState(false) // Added for request edit
 
   // Fetch approved borrow requests (initial load)
   useEffect(() => {
     const fetchApprovedBorrowRequests = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:5075/api/BorrowRequestApi/ApprovedByAdmin1"
-        );
-        const data = await response.json();
-        setBorrowRequests(data);
+        const response = await fetch("http://localhost:5075/api/BorrowRequestApi/ApprovedByAdmin1")
+        const data = await response.json()
+        setBorrowRequests(data)
       } catch (error) {
-        setError(error.message);
+        setError(error.message)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchApprovedBorrowRequests();
-  }, []);
+    fetchApprovedBorrowRequests()
+  }, [])
 
   const fetchRequestItems = async () => {
     try {
-      setLoading(true);
+      setLoading(true)
       fetch("http://localhost:5075/api/RequestItemsApi/GetAllRequests")
         .then((response) => response.json())
         .then((data) => {
@@ -49,20 +51,20 @@ export default function Admin1Logs() {
             priority: item.priority,
             Admin1: item.admin1Approval,
             Admin2: item.admin2Approval,
-          }));
-          setRequestItems(mappedItems);
+          }))
+          setRequestItems(mappedItems)
         })
-        .catch((error) => console.error("Error fetching data:", error));
+        .catch((error) => console.error("Error fetching data:", error))
     } catch (error) {
-      setError(error.message);
+      setError(error.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const fetchBorrowRequests = async () => {
     try {
-      setLoading(true);
+      setLoading(true)
       fetch("http://localhost:5075/api/BorrowRequestApi/GetAllBorrowRequests")
         .then((response) => response.json())
         .then((data) => {
@@ -75,25 +77,23 @@ export default function Admin1Logs() {
             Admin1Approval: item.Admin1Approval,
             Admin2Approval: item.Admin2Approval,
             Admin3Approval: item.Admin3Approval,
-          }));
-          setBorrowRequests(mappedItems);
-          console.log(mappedItems);
+          }))
+          setBorrowRequests(mappedItems)
+          console.log(mappedItems)
         })
-        .catch((error) => console.error("Error fetching data:", error));
+        .catch((error) => console.error("Error fetching data:", error))
     } catch (error) {
-      setError(error.message);
+      setError(error.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const fetchMaintenanceLogs = async () => {
     try {
-      setLoading(true);
-      const response = await fetch(
-        "http://localhost:5075/api/MaintenanceApi/GetAllMaintenanceRequest"
-      );
-      const data = await response.json();
+      setLoading(true)
+      const response = await fetch("http://localhost:5075/api/MaintenanceApi/GetAllMaintenanceRequest")
+      const data = await response.json()
       const mappedLogs = data.map((log) => ({
         id: log.maintenanceID,
         name: log.assetName,
@@ -105,67 +105,83 @@ export default function Admin1Logs() {
         issue: log.issue,
         description: log.description,
         location: log.location,
-      }));
-      setMaintenanceLogs(mappedLogs);
+      }))
+      setMaintenanceLogs(mappedLogs)
     } catch (error) {
-      setError(error.message);
+      setError(error.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
   const openViewRequestModal = (item) => {
-    setCurrentItem(item);
-    setViewRequestModalOpen(true);
-  };
+    setCurrentItem(item)
+    setViewRequestModalOpen(true)
+  }
 
   const openViewBorrowModal = async (item) => {
-    setCurrentItem(item);
-    setViewBorrowModalOpen(true);
-    setBorrowLoading(true);
+    setCurrentItem(item)
+    setViewBorrowModalOpen(true)
+    setBorrowLoading(true)
 
     try {
-      const response = await fetch(
-        `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`
-      );
-      const data = await response.json();
-      setBorrowedItems(data);
+      const response = await fetch(`http://localhost:5075/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`)
+      const data = await response.json()
+      setBorrowedItems(data)
     } catch (error) {
-      console.error("Error fetching borrowed items:", error);
+      console.error("Error fetching borrowed items:", error)
     } finally {
-      setBorrowLoading(false);
+      setBorrowLoading(false)
     }
-  };
+  }
+
+  // Added missing function definitions
+  const openViewModal = (item) => {
+    setCurrentItem(item)
+    setViewMaintenanceModalOpen(true)
+  }
+
+  const openEditRequestModal = (item) => {
+    setCurrentItem(item)
+    setEditRequestModalOpen(true)
+  }
+
+  const openEditModal = (item) => {
+    setCurrentItem(item)
+    setEditModalOpen(true)
+  }
+
   const handleTableChange = (table) => {
-    setSelectedTable(table);
+    setSelectedTable(table)
     if (table === "requestItems") {
-      fetchRequestItems();
+      fetchRequestItems()
     } else if (table === "borrowRequests") {
-      fetchBorrowRequests();
+      fetchBorrowRequests()
     } else if (table === "maintenanceLogs") {
-      fetchMaintenanceLogs();
+      fetchMaintenanceLogs()
     }
-  };
+  }
 
   const filteredItems = requestItems.filter(
     (item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (item.Admin3 === "Approved" || item.Admin3 === "Declined") &&
-      item.Admin2 === "Approved"
-  );
+      item.Admin2 === "Approved",
+  )
 
   const filteredItemsMaintenace = maintenanceLogs.filter(
     (item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (item.Admin2 === "Approved" || item.Admin2 === "Declined") &&
-      item.Admin1 === "Approved"
-  );
+      item.Admin1 === "Approved",
+  )
 
   if (loading) {
-    return <div>Loading data...</div>;
+    return <div>Loading data...</div>
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div>Error: {error}</div>
   }
 
   return (
@@ -190,9 +206,7 @@ export default function Admin1Logs() {
             <button
               onClick={() => handleTableChange("requestItems")}
               className={`px-4 py-2 font-bold ${
-                selectedTable === "requestItems"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-300"
+                selectedTable === "requestItems" ? "bg-blue-500 text-white" : "bg-gray-300"
               }`}
             >
               Request Item
@@ -201,9 +215,7 @@ export default function Admin1Logs() {
             <button
               onClick={() => handleTableChange("borrowRequests")}
               className={`px-4 py-2 font-bold ${
-                selectedTable === "borrowRequests"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-300"
+                selectedTable === "borrowRequests" ? "bg-blue-500 text-white" : "bg-gray-300"
               } ml-4`}
             >
               Borrow Request
@@ -212,9 +224,7 @@ export default function Admin1Logs() {
             <button
               onClick={() => handleTableChange("maintenanceLogs")}
               className={`px-4 py-2 font-bold ${
-                selectedTable === "maintenanceLogs"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-300"
+                selectedTable === "maintenanceLogs" ? "bg-blue-500 text-white" : "bg-gray-300"
               } ml-4`}
             >
               Maintenance Logs
@@ -226,29 +236,15 @@ export default function Admin1Logs() {
               <table className="min-w-full border-collapse border border-gray-200 bg-white">
                 <thead className="bg-gray-200">
                   <tr className="font-semibold text-md text-zinc-50">
-                    <th className="border border-gray-300 px-5 py-3">
-                      Request ID
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Item Name
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Requested By
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Requested Date
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Request ID</th>
+                    <th className="border border-gray-300 px-5 py-3">Item Name</th>
+                    <th className="border border-gray-300 px-5 py-3">Requested By</th>
+                    <th className="border border-gray-300 px-5 py-3">Requested Date</th>
                     <th className="border border-gray-300 px-5 py-3">Status</th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Priority
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Inventory Admin
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Priority</th>
+                    <th className="border border-gray-300 px-5 py-3">Inventory Admin</th>
                     <th className="border border-gray-300 px-5 py-3">Admin2</th>
-                    <th className="border border-gray-300 px-5 py-3 text-center">
-                      Actions
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -259,15 +255,9 @@ export default function Admin1Logs() {
                         index % 2 === 0 ? "bg-white" : "bg-gray-50"
                       } hover:bg-gray-100 transition duration-200`}
                     >
-                      <td className="border border-gray-300 px-5 py-3">
-                        {item.id}
-                      </td>
-                      <td className="border border-gray-300 px-5 py-3">
-                        {item.name}
-                      </td>
-                      <td className="border border-gray-300 px-5 py-3">
-                        {item.requestedBy}
-                      </td>
+                      <td className="border border-gray-300 px-5 py-3">{item.id}</td>
+                      <td className="border border-gray-300 px-5 py-3">{item.name}</td>
+                      <td className="border border-gray-300 px-5 py-3">{item.requestedBy}</td>
                       <td className="border border-gray-300 px-5 py-3">
                         {new Date(item.requestedDate).toLocaleDateString()}
                       </td>
@@ -276,10 +266,10 @@ export default function Admin1Logs() {
                           item.status === "Pending"
                             ? "text-yellow-600"
                             : item.status === "Rejected"
-                            ? "text-red-600"
-                            : item.status === "Approved"
-                            ? "text-green-500"
-                            : "text-blue-600"
+                              ? "text-red-600"
+                              : item.status === "Approved"
+                                ? "text-green-500"
+                                : "text-blue-600"
                         }`}
                       >
                         <i
@@ -287,26 +277,24 @@ export default function Admin1Logs() {
                             item.status === "Approved"
                               ? "fa-check-circle"
                               : item.status === "Rejected"
-                              ? "fa-times-circle"
-                              : item.status === "Pending"
-                              ? "fa-hourglass-half"
-                              : "fa-circle"
+                                ? "fa-times-circle"
+                                : item.status === "Pending"
+                                  ? "fa-hourglass-half"
+                                  : "fa-circle"
                           } mr-1`}
                         ></i>
                         {item.status}
                       </td>
-                      <td className="border border-gray-300 px-5 py-3">
-                        {item.priority}
-                      </td>
+                      <td className="border border-gray-300 px-5 py-3">{item.priority}</td>
                       <td
                         className={`border border-gray-300 px-5 py-3 ${
                           item.Admin1 === "Approved"
                             ? "text-green-500"
                             : item.Admin1 === "Rejected"
-                            ? "text-red-500"
-                            : item.Admin1 === "Pending"
-                            ? "text-yellow-500"
-                            : "text-gray-400"
+                              ? "text-red-500"
+                              : item.Admin1 === "Pending"
+                                ? "text-yellow-500"
+                                : "text-gray-400"
                         }`}
                       >
                         <i
@@ -314,10 +302,10 @@ export default function Admin1Logs() {
                             item.Admin1 === "Approved"
                               ? "fa-check-circle"
                               : item.Admin1 === "Rejected"
-                              ? "fa-times-circle"
-                              : item.Admin1 === "Pending"
-                              ? "fa-hourglass-half"
-                              : "fa-circle"
+                                ? "fa-times-circle"
+                                : item.Admin1 === "Pending"
+                                  ? "fa-hourglass-half"
+                                  : "fa-circle"
                           } mr-1`}
                         ></i>
                         {item.Admin1}
@@ -327,12 +315,12 @@ export default function Admin1Logs() {
                           item.Admin2 === "Approved"
                             ? "text-green-500"
                             : item.Admin2 === "Rejected"
-                            ? "text-red-500"
-                            : item.Admin2 === "Pending"
-                            ? "text-yellow-500"
-                            : item.Admin2 === "Declined"
-                            ? "text-red-500"
-                            : "text-gray-400"
+                              ? "text-red-500"
+                              : item.Admin2 === "Pending"
+                                ? "text-yellow-500"
+                                : item.Admin2 === "Declined"
+                                  ? "text-red-500"
+                                  : "text-gray-400"
                         }`}
                       >
                         <i
@@ -340,10 +328,10 @@ export default function Admin1Logs() {
                             item.Admin2 === "Approved"
                               ? "fa-check-circle"
                               : item.Admin2 === "Rejected"
-                              ? "fa-times-circle"
-                              : item.Admin2 === "Pending"
-                              ? "fa-hourglass-half"
-                              : "fa-circle"
+                                ? "fa-times-circle"
+                                : item.Admin2 === "Pending"
+                                  ? "fa-hourglass-half"
+                                  : "fa-circle"
                           } mr-1`}
                         ></i>
                         {item.Admin2}
@@ -375,31 +363,15 @@ export default function Admin1Logs() {
               <table className="min-w-full border-collapse border border-gray-200 bg-white">
                 <thead className="bg-gray-200">
                   <tr className="font-semibold text-md text-zinc-50">
-                    <th className="border border-gray-300 px-5 py-3">
-                      Borrow ID
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Requested By
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Requested Date
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Purpose
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Borrow ID</th>
+                    <th className="border border-gray-300 px-5 py-3">Requested By</th>
+                    <th className="border border-gray-300 px-5 py-3">Requested Date</th>
+                    <th className="border border-gray-300 px-5 py-3">Purpose</th>
                     <th className="border border-gray-300 px-5 py-3">Status</th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Inventory
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Head Admin
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      School Admin
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3 text-center">
-                      Actions
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Inventory</th>
+                    <th className="border border-gray-300 px-5 py-3">Head Admin</th>
+                    <th className="border border-gray-300 px-5 py-3">School Admin</th>
+                    <th className="border border-gray-300 px-5 py-3 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -410,27 +382,21 @@ export default function Admin1Logs() {
                         index % 2 === 0 ? "bg-white" : "bg-gray-50"
                       } hover:bg-gray-100 transition duration-200`}
                     >
-                      <td className="border border-gray-300 px-5 py-3">
-                        {item.BorrowId}
-                      </td>
-                      <td className="border border-gray-300 px-5 py-3">
-                        {item.RequestedBy}
-                      </td>
+                      <td className="border border-gray-300 px-5 py-3">{item.BorrowId}</td>
+                      <td className="border border-gray-300 px-5 py-3">{item.RequestedBy}</td>
                       <td className="border border-gray-300 px-5 py-3">
                         {new Date(item.ReqBorrowDate).toLocaleDateString()}
                       </td>
-                      <td className="border border-gray-300 px-5 py-3">
-                        {item.Purpose}
-                      </td>
+                      <td className="border border-gray-300 px-5 py-3">{item.Purpose}</td>
                       <td
                         className={`border border-gray-300 px-5 py-3 font-medium ${
                           item.Status === "Pending"
                             ? "text-yellow-600"
                             : item.Status === "Rejected"
-                            ? "text-red-600"
-                            : item.Status === "Approved"
-                            ? "text-green-500"
-                            : "text-blue-600"
+                              ? "text-red-600"
+                              : item.Status === "Approved"
+                                ? "text-green-500"
+                                : "text-blue-600"
                         }`}
                       >
                         {item.Status}
@@ -440,10 +406,10 @@ export default function Admin1Logs() {
                           item.Admin1Approval === "Approved"
                             ? "text-green-500"
                             : item.Admin1Approval === "Rejected"
-                            ? "text-red-500"
-                            : item.Admin1Approval === "Pending"
-                            ? "text-yellow-500"
-                            : "text-gray-400"
+                              ? "text-red-500"
+                              : item.Admin1Approval === "Pending"
+                                ? "text-yellow-500"
+                                : "text-gray-400"
                         }`}
                       >
                         <i
@@ -451,10 +417,10 @@ export default function Admin1Logs() {
                             item.Admin1Approval === "Approved"
                               ? "fa-check-circle"
                               : item.Admin1Approval === "Rejected"
-                              ? "fa-times-circle"
-                              : item.Admin1Approval === "Pending"
-                              ? "fa-hourglass-half"
-                              : "fa-circle"
+                                ? "fa-times-circle"
+                                : item.Admin1Approval === "Pending"
+                                  ? "fa-hourglass-half"
+                                  : "fa-circle"
                           } mr-1`}
                         ></i>
                         {item.Admin1Approval}
@@ -464,12 +430,12 @@ export default function Admin1Logs() {
                           item.Admin2Approval === "Approved"
                             ? "text-green-500"
                             : item.Admin2Approval === "Rejected"
-                            ? "text-red-500"
-                            : item.Admin2Approval === "Pending"
-                            ? "text-yellow-500"
-                            : item.Admin2Approval === "Declined"
-                            ? "text-red-500"
-                            : "text-gray-400"
+                              ? "text-red-500"
+                              : item.Admin2Approval === "Pending"
+                                ? "text-yellow-500"
+                                : item.Admin2Approval === "Declined"
+                                  ? "text-red-500"
+                                  : "text-gray-400"
                         }`}
                       >
                         <i
@@ -477,10 +443,10 @@ export default function Admin1Logs() {
                             item.Admin2Approval === "Approved"
                               ? "fa-check-circle"
                               : item.Admin2Approval === "Rejected"
-                              ? "fa-times-circle"
-                              : item.Admin2Approval === "Pending"
-                              ? "fa-hourglass-half"
-                              : "fa-circle"
+                                ? "fa-times-circle"
+                                : item.Admin2Approval === "Pending"
+                                  ? "fa-hourglass-half"
+                                  : "fa-circle"
                           } mr-1`}
                         ></i>
                         {item.Admin2Approval}
@@ -490,12 +456,12 @@ export default function Admin1Logs() {
                           item.Admin3Approval === "Approved"
                             ? "text-green-500"
                             : item.Admin3Approval === "Rejected"
-                            ? "text-red-500"
-                            : item.Admin3Approval === "Pending"
-                            ? "text-yellow-500"
-                            : item.Admin3Approval === "Declined"
-                            ? "text-red-500"
-                            : "text-gray-400"
+                              ? "text-red-500"
+                              : item.Admin3Approval === "Pending"
+                                ? "text-yellow-500"
+                                : item.Admin3Approval === "Declined"
+                                  ? "text-red-500"
+                                  : "text-gray-400"
                         }`}
                       >
                         <i
@@ -503,10 +469,10 @@ export default function Admin1Logs() {
                             item.Admin3Approval === "Approved"
                               ? "fa-check-circle"
                               : item.Admin3Approval === "Rejected"
-                              ? "fa-times-circle"
-                              : item.Admin3Approval === "Pending"
-                              ? "fa-hourglass-half"
-                              : "fa-circle"
+                                ? "fa-times-circle"
+                                : item.Admin3Approval === "Pending"
+                                  ? "fa-hourglass-half"
+                                  : "fa-circle"
                           } mr-1`}
                         ></i>
                         {item.Admin3Approval}
@@ -539,63 +505,41 @@ export default function Admin1Logs() {
               <table className="min-w-full border-collapse border border-gray-200 bg-white">
                 <thead className="bg-gray-200">
                   <tr className="font-semibold text-md text-zinc-50">
-                    <th className="border border-gray-300 px-5 py-3">
-                      Request ID
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Asset Name
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Request Date
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Location
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Request ID</th>
+                    <th className="border border-gray-300 px-5 py-3">Asset Name</th>
+                    <th className="border border-gray-300 px-5 py-3">Request Date</th>
+                    <th className="border border-gray-300 px-5 py-3">Location</th>
                     <th className="border border-gray-300 px-5 py-3">Issue</th>
                     <th className="border border-gray-300 px-5 py-3">Status</th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Inventory Admin
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3">
-                      Approval
-                    </th>
-                    <th className="border border-gray-300 px-5 py-3 text-center">
-                      Actions
-                    </th>
+                    <th className="border border-gray-300 px-5 py-3">Inventory Admin</th>
+                    <th className="border border-gray-300 px-5 py-3">Approval</th>
+                    <th className="border border-gray-300 px-5 py-3 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredItemsMaintenace.map((log) => (
+                  {filteredItemsMaintenace.map((log, index) => (
                     <tr
                       key={log.id}
                       className={`${
-                        log % 2 === 0 ? "bg-white" : "bg-gray-50"
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50"
                       } hover:bg-gray-100 transition duration-200`}
                     >
-                      <td className="border border-gray-300 px-5 py-3">
-                        {log.id}
-                      </td>
-                      <td className="border border-gray-300 px-5 py-3">
-                        {log.name}
-                      </td>
+                      <td className="border border-gray-300 px-5 py-3">{log.id}</td>
+                      <td className="border border-gray-300 px-5 py-3">{log.name}</td>
                       <td className="border border-gray-300 px-5 py-3">
                         {new Date(log.requestedDate).toLocaleDateString()}
                       </td>
-                      <td className="border border-gray-300 px-5 py-3">
-                        {log.location}
-                      </td>
-                      <td className="border border-gray-300 px-5 py-3">
-                        {log.issue}
-                      </td>
+                      <td className="border border-gray-300 px-5 py-3">{log.location}</td>
+                      <td className="border border-gray-300 px-5 py-3">{log.issue}</td>
                       <td
                         className={`border border-gray-300 px-4 py-2 font-medium ${
                           log.status === "Pending"
                             ? "text-yellow-600"
                             : log.status === "Rejected"
-                            ? "text-red-600"
-                            : log.status === "Approved"
-                            ? "text-green-500"
-                            : "text-blue-600"
+                              ? "text-red-600"
+                              : log.status === "Approved"
+                                ? "text-green-500"
+                                : "text-blue-600"
                         }`}
                       >
                         <i
@@ -603,10 +547,10 @@ export default function Admin1Logs() {
                             log.status === "Approved"
                               ? "fa-check-circle"
                               : log.status === "Rejected"
-                              ? "fa-times-circle"
-                              : log.status === "Pending"
-                              ? "fa-hourglass-half"
-                              : "fa-circle"
+                                ? "fa-times-circle"
+                                : log.status === "Pending"
+                                  ? "fa-hourglass-half"
+                                  : "fa-circle"
                           } mr-1`}
                         ></i>
                         {log.status}
@@ -616,10 +560,10 @@ export default function Admin1Logs() {
                           log.Admin1 === "Pending"
                             ? "text-yellow-600"
                             : log.Admin1 === "Declined"
-                            ? "text-red-600"
-                            : log.Admin1 === "Approved"
-                            ? "text-green-500"
-                            : "text-blue-600"
+                              ? "text-red-600"
+                              : log.Admin1 === "Approved"
+                                ? "text-green-500"
+                                : "text-blue-600"
                         }`}
                       >
                         <i
@@ -627,10 +571,10 @@ export default function Admin1Logs() {
                             log.Admin1 === "Approved"
                               ? "fa-check-circle"
                               : log.Admin1 === "Rejected"
-                              ? "fa-times-circle"
-                              : log.Admin1 === "Pending"
-                              ? "fa-hourglass-half"
-                              : "fa-circle"
+                                ? "fa-times-circle"
+                                : log.Admin1 === "Pending"
+                                  ? "fa-hourglass-half"
+                                  : "fa-circle"
                           } mr-1`}
                         ></i>
                         {log.Admin1}
@@ -640,10 +584,10 @@ export default function Admin1Logs() {
                           log.Admin2 === "Pending"
                             ? "text-yellow-600"
                             : log.Admin2 === "Declined"
-                            ? "text-red-600"
-                            : log.Admin2 === "Approved"
-                            ? "text-green-500"
-                            : "text-blue-600"
+                              ? "text-red-600"
+                              : log.Admin2 === "Approved"
+                                ? "text-green-500"
+                                : "text-blue-600"
                         }`}
                       >
                         <i
@@ -651,10 +595,10 @@ export default function Admin1Logs() {
                             log.Admin2 === "Approved"
                               ? "fa-check-circle"
                               : log.Admin2 === "Rejected"
-                              ? "fa-times-circle"
-                              : log.Admin2 === "Pending"
-                              ? "fa-hourglass-half"
-                              : "fa-circle"
+                                ? "fa-times-circle"
+                                : log.Admin2 === "Pending"
+                                  ? "fa-hourglass-half"
+                                  : "fa-circle"
                           } mr-1`}
                         ></i>
                         {log.Admin2}
@@ -685,8 +629,7 @@ export default function Admin1Logs() {
             {/* Modal Header */}
             <div className="flex justify-between items-center border-b pb-4">
               <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <i className="fa-solid fa-file-alt text-blue-600"></i> Request
-                Details
+                <i className="fa-solid fa-file-alt text-blue-600"></i> Request Details
               </h3>
               <button
                 onClick={() => setViewRequestModalOpen(false)}
@@ -747,8 +690,8 @@ export default function Admin1Logs() {
                         currentItem.Admin1 === "Approved"
                           ? "text-green-500"
                           : currentItem.Admin1 === "Pending"
-                          ? "text-yellow-500"
-                          : "text-red-500"
+                            ? "text-yellow-500"
+                            : "text-red-500"
                       }
                     >
                       {currentItem.Admin1}
@@ -764,8 +707,8 @@ export default function Admin1Logs() {
                         currentItem.Admin2 === "Approved"
                           ? "text-green-500"
                           : currentItem.Admin2 === "Pending"
-                          ? "text-yellow-500"
-                          : "text-red-500"
+                            ? "text-yellow-500"
+                            : "text-red-500"
                       }
                     >
                       {currentItem.Admin2}
@@ -797,8 +740,7 @@ export default function Admin1Logs() {
             {/* Modal Header */}
             <div className="flex justify-between items-center border-b pb-4">
               <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <i className="fa-solid fa-box-archive text-blue-600"></i> Borrow
-                Item Details
+                <i className="fa-solid fa-box-archive text-blue-600"></i> Borrow Item Details
               </h3>
               <button
                 onClick={() => setViewBorrowModalOpen(false)}
@@ -854,8 +796,8 @@ export default function Admin1Logs() {
                       currentItem.Admin1Approval === "Approved"
                         ? "text-green-500"
                         : currentItem.Admin1Approval === "Pending"
-                        ? "text-yellow-500"
-                        : "text-red-500"
+                          ? "text-yellow-500"
+                          : "text-red-500"
                     }
                   >
                     {currentItem.Admin1Approval}
@@ -871,8 +813,8 @@ export default function Admin1Logs() {
                       currentItem.Admin2Approval === "Approved"
                         ? "text-green-500"
                         : currentItem.Admin2Approval === "Pending"
-                        ? "text-yellow-500"
-                        : "text-red-500"
+                          ? "text-yellow-500"
+                          : "text-red-500"
                     }
                   >
                     {currentItem.Admin2Approval}
@@ -888,8 +830,8 @@ export default function Admin1Logs() {
                       currentItem.Admin3Approval === "Approved"
                         ? "text-green-500"
                         : currentItem.Admin3Approval === "Pending"
-                        ? "text-yellow-500"
-                        : "text-red-500"
+                          ? "text-yellow-500"
+                          : "text-red-500"
                     }
                   >
                     {currentItem.Admin3Approval}
@@ -902,8 +844,7 @@ export default function Admin1Logs() {
 
             {/* Borrowed Items Section */}
             <h4 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
-              <i className="fa-solid fa-boxes-stacked text-green-600"></i>{" "}
-              Borrowed Items
+              <i className="fa-solid fa-boxes-stacked text-green-600"></i> Borrowed Items
             </h4>
             <div className="overflow-y-auto max-h-[300px] space-y-4">
               {borrowLoading ? (
@@ -923,9 +864,7 @@ export default function Admin1Logs() {
                       />
                       {/* Content Section */}
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-800">
-                          {item.ItemName}
-                        </h3>
+                        <h3 className="text-lg font-semibold text-gray-800">{item.ItemName}</h3>
                         <p className="text-sm text-gray-600">
                           Quantity: <strong>{item.Quantity}</strong>
                         </p>
@@ -948,6 +887,124 @@ export default function Admin1Logs() {
           </div>
         </div>
       )}
+
+      {/* View Modal for Maintenance Logs */}
+      {viewMaintenanceModalOpen && currentItem && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-3/4 max-w-5xl p-8">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center border-b pb-4">
+              <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <i className="fa-solid fa-wrench text-blue-600"></i> Maintenance Request Details
+              </h3>
+              <button
+                onClick={() => setViewMaintenanceModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 transition duration-200"
+              >
+                <i className="fa-solid fa-times text-2xl"></i>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="mt-6 space-y-6">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-id-card text-blue-500"></i>
+                  <span>
+                    <strong>ID:</strong> {currentItem.id}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-box text-blue-500"></i>
+                  <span>
+                    <strong>Asset Name:</strong> {currentItem.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-user text-blue-500"></i>
+                  <span>
+                    <strong>Requested By:</strong> {currentItem.requestedBy}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-calendar-day text-blue-500"></i>
+                  <span>
+                    <strong>Request Date:</strong> {currentItem.requestedDate}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-map-marker-alt text-blue-500"></i>
+                  <span>
+                    <strong>Location:</strong> {currentItem.location}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <i className="fa-solid fa-exclamation-circle text-blue-500"></i>
+                  <span>
+                    <strong>Issue:</strong> {currentItem.issue}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <h4 className="font-medium text-gray-800 mb-2">Description:</h4>
+                <p className="text-gray-700 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  {currentItem.description || "No description provided."}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="flex items-center gap-2">
+                  <i className="fa-solid fa-user-check text-green-500"></i>
+                  <span>
+                    <strong>Inventory Admin Approval:</strong>{" "}
+                    <span
+                      className={
+                        currentItem.Admin1 === "Approved"
+                          ? "text-green-500"
+                          : currentItem.Admin1 === "Pending"
+                            ? "text-yellow-500"
+                            : "text-red-500"
+                      }
+                    >
+                      {currentItem.Admin1}
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <i className="fa-solid fa-user-check text-green-500"></i>
+                  <span>
+                    <strong>Head Admin Approval:</strong>{" "}
+                    <span
+                      className={
+                        currentItem.Admin2 === "Approved"
+                          ? "text-green-500"
+                          : currentItem.Admin2 === "Pending"
+                            ? "text-yellow-500"
+                            : "text-red-500"
+                      }
+                    >
+                      {currentItem.Admin2}
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <hr className="my-6 border-gray-300" />
+
+            {/* Modal Footer */}
+            <div className="flex justify-end">
+              <button
+                onClick={() => setViewMaintenanceModalOpen(false)}
+                className="px-6 py-2 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition duration-200 flex items-center gap-2"
+              >
+                <i className="fa-solid fa-circle-xmark"></i> Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
-  );
+  )
 }

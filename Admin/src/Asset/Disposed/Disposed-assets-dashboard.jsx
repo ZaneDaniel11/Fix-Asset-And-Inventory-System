@@ -104,7 +104,7 @@ const DisposedAssetsDashboard = () => {
         id: asset.AssetID,
         assetName: asset.AssetName,
         assetTag: asset.AssetCode,
-        category: categories.find((c) => c.CategoryId === asset.CategoryID)?.CategoryName || "Unknown",
+        category: categories.find((c) => c.categoryId === asset.CategoryID)?.categoryName || "Unknown",
         disposalDate: asset.DisposalDate,
         disposalReason: asset.DisposalReason,
         originalValue: asset.OriginalValue,
@@ -191,8 +191,8 @@ const DisposedAssetsDashboard = () => {
   // Add a function to fetch categories
   const fetchCategories = async () => {
     try {
-      // Try to fetch categories from API
-      const response = await fetch(`http://localhost:5075/api/AssetItemApi/GetCategories`)
+      // Use the correct API endpoint
+      const response = await fetch(`http://localhost:5075/api/CategoryAssetApi/GetAssetCategory`)
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
@@ -203,15 +203,15 @@ const DisposedAssetsDashboard = () => {
       setCategories(data)
     } catch (error) {
       console.error("Error fetching categories:", error)
-      // Fallback to sample categories
+      // Fallback to sample categories with matching property names
       setCategories([
-        { CategoryId: 1, CategoryName: "Electronics" },
-        { CategoryId: 2, CategoryName: "Furniture" },
-        { CategoryId: 3, CategoryName: "Vehicles" },
-        { CategoryId: 4, CategoryName: "Office Equipment" },
-        { CategoryId: 5, CategoryName: "IT Hardware" },
-        { CategoryId: 6, CategoryName: "Software" },
-        { CategoryId: 7, CategoryName: "Networking" },
+        { categoryId: 1, categoryName: "Electronics" },
+        { categoryId: 2, categoryName: "Furniture" },
+        { categoryId: 3, categoryName: "Vehicles" },
+        { categoryId: 4, categoryName: "Office Equipment" },
+        { categoryId: 5, categoryName: "IT Hardware" },
+        { categoryId: 6, categoryName: "Software" },
+        { categoryId: 7, categoryName: "Networking" },
       ])
     }
   }
@@ -533,8 +533,8 @@ const DisposedAssetsDashboard = () => {
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((category) => (
-                  <SelectItem key={category.CategoryId} value={category.CategoryId.toString()}>
-                    {category.CategoryName}
+                  <SelectItem key={category.categoryId} value={category.categoryId.toString()}>
+                    {category.categoryName}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -586,10 +586,10 @@ const DisposedAssetsDashboard = () => {
                           {notification.Priority}
                         </Badge>
                         {notification.CategoryId &&
-                          categories.find((c) => c.CategoryId?.toString() === notification.CategoryId?.toString()) && (
+                          categories.find((c) => c.categoryId?.toString() === notification.CategoryId?.toString()) && (
                             <Badge variant="secondary" className="text-xs">
-                              {categories.find((c) => c.CategoryId?.toString() === notification.CategoryId?.toString())
-                                ?.CategoryName || "Unknown"}
+                              {categories.find((c) => c.categoryId?.toString() === notification.CategoryId?.toString())
+                                ?.categoryName || "Unknown"}
                             </Badge>
                           )}
                       </div>
