@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../CSS/Product.css";
 
-const API_URL = "http://localhost:5075/api/UserItemApi/";
+const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/UserItemApi/";
 
 const ProductList = ({ products, onAddProduct, setProducts }) => {
   const [categories, setCategories] = useState([]);
@@ -38,7 +38,7 @@ const ProductList = ({ products, onAddProduct, setProducts }) => {
         response = await fetch(`${API_URL}GetAllItems`);
       } else {
         response = await fetch(
-          `http://localhost:5075/api/ItemApi/GetItemsByCategory?categoryID=${categoryId}`
+          `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/ItemApi/GetItemsByCategory?categoryID=${categoryId}`
         );
       }
 

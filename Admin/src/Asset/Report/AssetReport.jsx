@@ -132,7 +132,7 @@ const ReportDashboard = () => {
     setIsFiltered(withFilters)
 
     try {
-      let url = "http://localhost:5075/api/AssetItemApi/asset-category-summary"
+      let url = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetItemApi/asset-category-summary"
 
       // Add date filters if requested
       if (withFilters && startDate && endDate) {

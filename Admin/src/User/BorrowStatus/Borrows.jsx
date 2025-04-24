@@ -41,7 +41,7 @@ export default function BorrowStatus() {
       }
 
       try {
-        const response = await fetch(`http://localhost:5075/api/BorrowRequestApi/RequestById/${borrowerId}`)
+        const response = await fetch(`https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/RequestById/${borrowerId}`)
 
         if (!response.ok) {
           throw new Error("Failed to fetch borrow requests")
@@ -63,7 +63,7 @@ export default function BorrowStatus() {
   const fetchBorrowItems = async (borrowId) => {
     setBorrowLoading(true)
     try {
-      const response = await fetch(`http://localhost:5075/api/BorrowRequestApi/ViewRequest/${borrowId}`)
+      const response = await fetch(`https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${borrowId}`)
       if (!response.ok) {
         throw new Error("Failed to fetch borrowed items")
       }
@@ -103,7 +103,7 @@ export default function BorrowStatus() {
 
     setCanceling(true)
     try {
-      const response = await fetch("http://localhost:5075/api/BorrowRequestApi/CancelRequest", {
+      const response = await fetch("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/CancelRequest", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

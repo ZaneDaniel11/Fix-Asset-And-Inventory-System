@@ -22,7 +22,7 @@ export default function BorrowedItems() {
     const fetchBorrowRequests = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5075/api/BorrowRequestApi/AllRequests"
+          "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/AllRequests"
         );
         if (!response.ok) {
           throw new Error("Failed to fetch borrow requests");
@@ -44,7 +44,7 @@ export default function BorrowedItems() {
     setBorrowLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${borrowId}`
+        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${borrowId}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch borrowed items");
@@ -95,7 +95,7 @@ export default function BorrowedItems() {
     setIsUpdating(true);
     try {
       const response = await fetch(
-        `http://localhost:5075/api/BorrowRequestApi/UpdateApproval/${currentItem.BorrowId}`,
+        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/UpdateApproval/${currentItem.BorrowId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

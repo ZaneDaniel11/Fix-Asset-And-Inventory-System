@@ -89,7 +89,7 @@ const DisposedAssetsDashboard = () => {
 
       // Use the new API endpoint
       const response = await fetch(
-        `http://localhost:5075/api/AssetDisposalApi/GetDisposedAssets?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
+        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetDisposalApi/GetDisposedAssets?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
       )
 
       if (!response.ok) {
@@ -133,7 +133,7 @@ const DisposedAssetsDashboard = () => {
 
       // Use the new API endpoint
       const response = await fetch(
-        `http://localhost:5075/api/AssetDisposalApi/GetAssetSummaries?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
+        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetDisposalApi/GetAssetSummaries?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
       )
 
       if (!response.ok) {
@@ -170,7 +170,7 @@ const DisposedAssetsDashboard = () => {
   const fetchNotifications = async () => {
     try {
       // Use the new API endpoint
-      const response = await fetch(`http://localhost:5075/api/AssetNotificationApi/ViewAllNotifications`)
+      const response = await fetch(`https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetNotificationApi/ViewAllNotifications`)
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
@@ -192,7 +192,7 @@ const DisposedAssetsDashboard = () => {
   const fetchCategories = async () => {
     try {
       // Use the correct API endpoint
-      const response = await fetch(`http://localhost:5075/api/CategoryAssetApi/GetAssetCategory`)
+      const response = await fetch(`https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/CategoryAssetApi/GetAssetCategory`)
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)

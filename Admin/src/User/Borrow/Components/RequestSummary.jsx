@@ -41,7 +41,7 @@ const RequestSummary = ({
 
     try {
       const response = await fetch(
-        "http://localhost:5075/api/BorrowRequestApi/Request",
+        "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/Request",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

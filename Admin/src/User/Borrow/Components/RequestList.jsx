@@ -6,7 +6,7 @@ export default function RequestList() {
   const [selectedRequestDetails, setSelectedRequestDetails] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const API_URL = "http://localhost:5075/api/BorrowRequestApi";
+  const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/BorrowRequestApi";
 
   // Function to group requests by BorrowId
   const groupRequestsByBorrowId = (data) => {

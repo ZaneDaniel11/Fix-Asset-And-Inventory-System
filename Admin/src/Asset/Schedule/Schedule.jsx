@@ -10,7 +10,7 @@ import {
 } from "@syncfusion/ej2-react-schedule";
 
 // API URL base
-const API_BASE_URL = "http://localhost:5075/api/EventsApi";
+const API_BASE_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/EventsApi";
 
 // Fetch events from API
 const fetchEvents = async () => {
@@ -46,7 +46,7 @@ const addEvent = async (eventData) => {
   try {
     console.log("Adding event:", eventData); // Log the event data to check structure
     const response = await fetch(
-      "http://localhost:5075/api/EventsApi/AddEvent",
+      "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/EventsApi/AddEvent",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
