@@ -113,8 +113,7 @@ export default function Login() {
 
       {/* Forgot Password & Register Links */}
       <div className="text-center mt-3 text-sm text-gray-500">
-        <a href="#" className="text-blue-500 hover:underline">Forgot password?</a> | 
-        <a href="#" className="text-blue-500 hover:underline"> Create an account</a>
+    
       </div>
     </form>
   </div>
