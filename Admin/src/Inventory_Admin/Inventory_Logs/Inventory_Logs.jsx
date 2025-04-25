@@ -23,7 +23,9 @@ export default function Admin1Logs() {
   useEffect(() => {
     const fetchApprovedBorrowRequests = async () => {
       try {
-        const response = await fetch("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByAdmin1")
+        const response = await fetch(
+          "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByAdmin1",
+        )
         const data = await response.json()
         setBorrowRequests(data)
       } catch (error) {
@@ -34,23 +36,28 @@ export default function Admin1Logs() {
     }
 
     fetchApprovedBorrowRequests()
+    fetchRequestItems() // Add this line to load request items on initial render
   }, [])
 
   const fetchRequestItems = async () => {
     try {
       setLoading(true)
-      fetch("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests")
+      fetch(
+        "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests",
+      )
         .then((response) => response.json())
         .then((data) => {
           const mappedItems = data.map((item) => ({
             id: item.requestID,
+            requestID: item.requestID,
             name: item.requestedItem,
             requestedBy: item.requestedBy,
-            requestedDate: new Date(item.requestedDate).toLocaleString(),
+            requestedDate: item.requestedDate,
             status: item.status,
             priority: item.priority,
             Admin1: item.admin1Approval,
             Admin2: item.admin2Approval,
+            Admin3: item.admin3Approval,
           }))
           setRequestItems(mappedItems)
         })
@@ -65,7 +72,9 @@ export default function Admin1Logs() {
   const fetchBorrowRequests = async () => {
     try {
       setLoading(true)
-      fetch("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/GetAllBorrowRequests")
+      fetch(
+        "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/GetAllBorrowRequests",
+      )
         .then((response) => response.json())
         .then((data) => {
           const mappedItems = data.map((item) => ({
@@ -92,7 +101,9 @@ export default function Admin1Logs() {
   const fetchMaintenanceLogs = async () => {
     try {
       setLoading(true)
-      const response = await fetch("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/MaintenanceApi/GetAllMaintenanceRequest")
+      const response = await fetch(
+        "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/MaintenanceApi/GetAllMaintenanceRequest",
+      )
       const data = await response.json()
       const mappedLogs = data.map((log) => ({
         id: log.maintenanceID,
@@ -125,7 +136,9 @@ export default function Admin1Logs() {
     setBorrowLoading(true)
 
     try {
-      const response = await fetch(`https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`)
+      const response = await fetch(
+        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`,
+      )
       const data = await response.json()
       setBorrowedItems(data)
     } catch (error) {
@@ -255,7 +268,7 @@ export default function Admin1Logs() {
                         index % 2 === 0 ? "bg-white" : "bg-gray-50"
                       } hover:bg-gray-100 transition duration-200`}
                     >
-                      <td className="border border-gray-300 px-5 py-3">{item.id}</td>
+                      <td className="border border-gray-300 px-5 py-3">{item.requestID}</td>
                       <td className="border border-gray-300 px-5 py-3">{item.name}</td>
                       <td className="border border-gray-300 px-5 py-3">{item.requestedBy}</td>
                       <td className="border border-gray-300 px-5 py-3">

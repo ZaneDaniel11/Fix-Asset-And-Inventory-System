@@ -3,7 +3,7 @@ import { fetchData } from "../utilities/ApiUti";
 import { toast } from "react-toastify";
 import "./CSS/modal.css";
 
-const API_URL = "http://localhost:5075/api/UsersApi/";
+const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/UsersApi/";
 
 export default function Users() {
   const [modals, setModals] = useState({

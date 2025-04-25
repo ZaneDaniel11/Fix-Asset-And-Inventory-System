@@ -1,32 +1,30 @@
-import React, { useState } from "react";
-import { toast } from "react-toastify";
+"use client"
 
-const RequestSummary = ({
-  selectedProducts,
-  onQuantityChange,
-  onRemoveProduct,
-  onRequestCompleted,
-}) => {
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [purpose, setPurpose] = useState("");
-  const [priority, setPriority] = useState("");
+import { useState } from "react"
+import { toast } from "react-toastify"
 
-  const openModal = () => setModalIsOpen(true);
-  const closeModal = () => setModalIsOpen(false);
+const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, onRequestCompleted }) => {
+  const [modalIsOpen, setModalIsOpen] = useState(false)
+  const [purpose, setPurpose] = useState("")
+  const [priority, setPriority] = useState("")
+  const [imageErrors, setImageErrors] = useState({})
+
+  const openModal = () => setModalIsOpen(true)
+  const closeModal = () => setModalIsOpen(false)
 
   const handleSave = async () => {
-    const loggedInUsername = localStorage.getItem("name");
-    const borrowerId = localStorage.getItem("userId");
-    const email = localStorage.getItem("email");
+    const loggedInUsername = localStorage.getItem("name")
+    const borrowerId = localStorage.getItem("userId")
+    const email = localStorage.getItem("email")
 
     if (!borrowerId) {
-      alert("User is not logged in. Please log in again.");
-      return;
+      alert("User is not logged in. Please log in again.")
+      return
     }
 
     const requestPayload = {
       requestedBy: loggedInUsername || "Unknown",
-      borrowerId: parseInt(borrowerId),
+      borrowerId: Number.parseInt(borrowerId),
       purpose,
       status: "Pending",
       priority,
@@ -37,7 +35,7 @@ const RequestSummary = ({
         itemID: product.itemID,
         categoryID: product.categoryID,
       })),
-    };
+    }
 
     try {
       const response = await fetch(
@@ -46,56 +44,80 @@ const RequestSummary = ({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(requestPayload),
-        }
-      );
+        },
+      )
 
       if (response.ok) {
-        onRequestCompleted();
-        toast.success("Borrow request submitted successfully!");
-        setPurpose("");
-        setPriority("");
-        closeModal();
+        onRequestCompleted()
+        toast.success("Borrow request submitted successfully!")
+        setPurpose("")
+        setPriority("")
+        closeModal()
       } else {
-        console.error("Error submitting request:", response.statusText);
+        console.error("Error submitting request:", response.statusText)
       }
     } catch (error) {
-      console.error("Error submitting request:", error);
+      console.error("Error submitting request:", error)
     }
-  };
+  }
 
   const handleIncrease = (itemID, availableQuantity) => {
-    const product = selectedProducts.find((p) => p.itemID === itemID);
+    const product = selectedProducts.find((p) => p.itemID === itemID)
     if (product.requestedQuantity < availableQuantity) {
-      onQuantityChange(itemID, product.requestedQuantity + 1);
+      onQuantityChange(itemID, product.requestedQuantity + 1)
     }
-  };
+  }
 
   const handleDecrease = (itemID) => {
-    const product = selectedProducts.find((p) => p.itemID === itemID);
+    const product = selectedProducts.find((p) => p.itemID === itemID)
     if (product.requestedQuantity > 1) {
-      onQuantityChange(itemID, product.requestedQuantity - 1);
+      onQuantityChange(itemID, product.requestedQuantity - 1)
     }
-  };
+  }
 
-  const handleRemove = (itemID) => onRemoveProduct(itemID);
+  const handleRemove = (itemID) => onRemoveProduct(itemID)
+
+  const handleImageError = (itemID) => {
+    setImageErrors((prev) => ({
+      ...prev,
+      [itemID]: true,
+    }))
+  }
 
   return (
     <div className="w-full bg-white p-6 rounded-lg shadow-lg block">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800 text-center">
-        Borrow Summary
-      </h2>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800 text-center">Borrow Summary</h2>
       <div className="space-y-4">
         {selectedProducts.map((product) => (
-          <div
-            key={product.itemID}
-            className="flex items-center border p-4 rounded-lg shadow-md bg-gray-100 space-x-4"
-          >
+          <div key={product.itemID} className="flex items-center border p-4 rounded-lg shadow-md bg-gray-100 space-x-4">
             <div className="flex-shrink-0">
-              <img
-                src="https://via.placeholder.com/100"
-                alt={product.itemName}
-                className="w-20 h-20 object-cover rounded-lg"
-              />
+              {!product.imageUrl || imageErrors[product.itemID] ? (
+                <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="36"
+                    height="36"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#4B5563"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-gray-500"
+                  >
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                  </svg>
+                </div>
+              ) : (
+                <img
+                  src={product.imageUrl || "/placeholder.svg"}
+                  alt={product.itemName}
+                  className="w-20 h-20 object-cover rounded-lg"
+                  onError={() => handleImageError(product.itemID)}
+                />
+              )}
             </div>
             <div className="flex-1 relative">
               <button
@@ -104,12 +126,9 @@ const RequestSummary = ({
               >
                 ✕
               </button>
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                {product.itemName}
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-1">{product.itemName}</h3>
               <p className="text-sm text-gray-600 mb-3">
-                Quantity:{" "}
-                <span className="font-medium">{product.requestedQuantity}</span>
+                Quantity: <span className="font-medium">{product.requestedQuantity}</span>
               </p>
               <div className="flex items-center space-x-3">
                 <button
@@ -118,13 +137,9 @@ const RequestSummary = ({
                 >
                   -
                 </button>
-                <span className="text-xl font-semibold text-gray-800">
-                  {product.requestedQuantity}
-                </span>
+                <span className="text-xl font-semibold text-gray-800">{product.requestedQuantity}</span>
                 <button
-                  onClick={() =>
-                    handleIncrease(product.itemID, product.initialQuantity)
-                  }
+                  onClick={() => handleIncrease(product.itemID, product.initialQuantity)}
                   className="w-10 h-10 bg-green-500 hover:bg-green-600 text-white rounded-full text-xl flex justify-center items-center transition"
                 >
                   +
@@ -151,19 +166,16 @@ const RequestSummary = ({
             <form
               className="space-y-6"
               onSubmit={(e) => {
-                e.preventDefault();
+                e.preventDefault()
                 if (!purpose.trim()) {
-                  alert("Purpose is required");
-                  return;
+                  alert("Purpose is required")
+                  return
                 }
-                handleSave();
+                handleSave()
               }}
             >
               <div>
-                <label
-                  htmlFor="purpose"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="purpose" className="block text-sm font-medium text-gray-700 mb-1">
                   Purpose <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -177,10 +189,7 @@ const RequestSummary = ({
                 />
               </div>
               <div>
-                <label
-                  htmlFor="priority"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
+                <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
                   Priority
                 </label>
                 <select
@@ -215,7 +224,7 @@ const RequestSummary = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default RequestSummary;
+export default RequestSummary
