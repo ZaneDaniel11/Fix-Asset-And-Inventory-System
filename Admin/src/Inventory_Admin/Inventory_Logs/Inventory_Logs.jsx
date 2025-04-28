@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 export default function Admin1Logs() {
   const [viewRequestModalOpen, setViewRequestModalOpen] = useState(false)
   const [viewBorrowModalOpen, setViewBorrowModalOpen] = useState(false)
-  const [viewMaintenanceModalOpen, setViewMaintenanceModalOpen] = useState(false) // Added for maintenance view
+  const [viewMaintenanceModalOpen, setViewMaintenanceModalOpen] = useState(false) 
   const [currentItem, setCurrentItem] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [requestItems, setRequestItems] = useState([])
@@ -357,12 +357,7 @@ export default function Admin1Logs() {
                           >
                             View
                           </button>
-                          <button
-                            onClick={() => openEditRequestModal(item)}
-                            className="text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-3 py-1.5"
-                          >
-                            Edit
-                          </button>
+
                         </div>
                       </td>
                     </tr>
@@ -498,12 +493,7 @@ export default function Admin1Logs() {
                           >
                             View
                           </button>
-                          <button
-                            onClick={() => openEditModal(item)}
-                            className="text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-3 py-1.5"
-                          >
-                            Edit
-                          </button>
+                    
                         </div>
                       </td>
                     </tr>
