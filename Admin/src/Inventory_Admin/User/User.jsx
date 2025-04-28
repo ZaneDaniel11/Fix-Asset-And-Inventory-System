@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { fetchData } from "../utilities/ApiUti";
-import { toast } from "react-toastify";
-import "./CSS/modal.css";
+"use client"
 
-const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/UsersApi/";
+import { useEffect, useState } from "react"
+import { fetchData } from "../utilities/ApiUti"
+import { toast } from "react-toastify"
+import "./CSS/modal.css"
+
+const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/UsersApi/"
 
 export default function Users() {
   const [modals, setModals] = useState({
@@ -11,11 +13,11 @@ export default function Users() {
     update: false,
     delete: false,
     view: false,
-  });
-  const [currentItem, setCurrentItem] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [userTypeQuery, setUserTypeQuery] = useState("");
-  const [users, setUsers] = useState([]);
+  })
+  const [currentItem, setCurrentItem] = useState(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [userTypeQuery, setUserTypeQuery] = useState("")
+  const [users, setUsers] = useState([])
 
   const [addUser, setAddUser] = useState({
     userName: "",
@@ -24,14 +26,14 @@ export default function Users() {
     email: "",
     name: "", // Added name
     department: "", // Added department
-  });
+  })
 
   const toggleModal = (modalType, user = null) => {
-    setCurrentItem(user);
+    setCurrentItem(user)
     setModals((prevModals) => ({
       ...prevModals,
       [modalType]: !prevModals[modalType],
-    }));
+    }))
 
     if (modalType === "update" && user) {
       setAddUser({
@@ -41,7 +43,7 @@ export default function Users() {
         email: user.email,
         name: user.name, // Pre-fill name
         department: user.department, // Pre-fill department
-      });
+      })
     } else if (modalType === "add") {
       setAddUser({
         userName: "",
@@ -50,24 +52,24 @@ export default function Users() {
         email: "",
         name: "", // Clear name
         department: "", // Clear department
-      });
+      })
     }
-  };
+  }
 
   const fetchUsers = async () => {
     try {
-      const result = await fetchData(`${API_URL}GetUsers`, "GET");
-      setUsers(result);
+      const result = await fetchData(`${API_URL}GetUsers`, "GET")
+      setUsers(result)
     } catch (error) {
-      console.error("Failed to fetch users", error);
+      console.error("Failed to fetch users", error)
     }
-  };
+  }
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUsers()
+  }, [])
 
   const handleAddUser = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
       await fetchData(`${API_URL}CreateUser`, "POST", {
         userId: 0,
@@ -77,68 +79,58 @@ export default function Users() {
         email: addUser.email,
         name: addUser.name, // Include name
         department: addUser.department, // Include department
-      });
-      toggleModal("add");
-      toast.success(`Added User successfully!`);
-      fetchUsers(); // Refresh user list after adding
+      })
+      toggleModal("add")
+      toast.success(`Added User successfully!`)
+      fetchUsers() // Refresh user list after adding
     } catch (error) {
-      console.error("Failed to add user", error);
+      console.error("Failed to add user", error)
     }
-  };
+  }
 
   const handleDeleteUser = async () => {
     if (currentItem && currentItem.userId) {
       try {
-        await fetchData(
-          `${API_URL}DeleteUser?UserId=${currentItem.userId}`,
-          "DELETE"
-        );
-        toggleModal("delete");
-        toast.error(`Delete User ${currentItem.userId} Succesfully`);
-        fetchUsers();
+        await fetchData(`${API_URL}DeleteUser?UserId=${currentItem.userId}`, "DELETE")
+        toggleModal("delete")
+        toast.error(`Delete User ${currentItem.userId} Succesfully`)
+        fetchUsers()
       } catch (error) {
-        console.error("Failed to delete user", error);
-        alert(`Failed to delete user. Error: ${error.message}`);
+        console.error("Failed to delete user", error)
+        alert(`Failed to delete user. Error: ${error.message}`)
       }
     }
-  };
+  }
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setAddUser({ ...addUser, [name]: value });
-  };
+    const { name, value } = e.target
+    setAddUser({ ...addUser, [name]: value })
+  }
 
   const handleEditUser = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      await fetchData(
-        `${API_URL}UpdateUser?UserId=${currentItem.userId}`,
-        "PUT",
-        {
-          userId: currentItem.userId,
-          userName: addUser.userName,
-          password: addUser.password,
-          userType: addUser.userType,
-          email: addUser.email,
-          name: addUser.name, // Include name
-          department: addUser.department, // Include department
-        }
-      );
-      toggleModal("update");
-      toast.success(`Information Updated Succesfully`);
-      fetchUsers(); // Refresh user list after updating
+      await fetchData(`${API_URL}UpdateUser?UserId=${currentItem.userId}`, "PUT", {
+        userId: currentItem.userId,
+        userName: addUser.userName,
+        password: addUser.password,
+        userType: addUser.userType,
+        email: addUser.email,
+        name: addUser.name, // Include name
+        department: addUser.department, // Include department
+      })
+      toggleModal("update")
+      toast.success(`Information Updated Succesfully`)
+      fetchUsers() // Refresh user list after updating
     } catch (error) {
-      console.error("Failed to update user:", error);
-      alert("Failed to update user. Please try again.");
+      console.error("Failed to update user:", error)
+      alert("Failed to update user. Please try again.")
     }
-  };
+  }
   const filteredUsers = users.filter((user) => {
-    const userName = user.userName ? user.userName.toLowerCase() : "";
-    return (
-      userName.includes(searchQuery.toLowerCase()) &&
-      (userTypeQuery === "" || user.userType === userTypeQuery)
-    );
-  });
+    const userName = user.userName ? user.userName.toLowerCase() : ""
+    return userName.includes(searchQuery.toLowerCase()) && (userTypeQuery === "" || user.userType === userTypeQuery)
+  })
 
   return (
     <>
@@ -182,53 +174,50 @@ export default function Users() {
           <table className="min-w-full border-collapse border border-gray-200 bg-white">
             <thead className="bg-gray-200">
               <tr className="font-semibold text-md text-white">
-                <th className="border border-gray-300 px-5 py-3">
-                  Profile Picture
-                </th>
+                <th className="border border-gray-300 px-5 py-3">Profile Picture</th>
                 <th className="border border-gray-300 px-5 py-3">Name</th>
 
                 <th className="border border-gray-300 px-5 py-3">Department</th>
                 <th className="border border-gray-300 px-5 py-3">User Name</th>
                 <th className="border border-gray-300 px-5 py-3">Email</th>
                 <th className="border border-gray-300 px-5 py-3">User Type</th>
-                <th className="border border-gray-300 px-5 py-3 text-center">
-                  Actions
-                </th>
+                <th className="border border-gray-300 px-5 py-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredUsers.map((user) => (
                 <tr key={user.userId} className="hover:bg-gray-50">
                   <td className="border border-gray-300 px-5 py-3 text-center">
-                    <img
-                      src={
-                        user.profilePicture || "https://via.placeholder.com/50"
-                      }
-                      alt={`${user.name}'s profile`}
-                      className="w-12 h-12 rounded-full mx-auto"
-                    />
+                    {user.profilePicture ? (
+                      <img
+                        src={user.profilePicture || "/placeholder.svg"}
+                        alt={`${user.name}'s profile`}
+                        className="w-12 h-12 rounded-full mx-auto object-cover border-2 border-gray-200 shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-medium text-lg shadow-sm">
+                        {user.name
+                          ? user.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .substring(0, 2)
+                              .toUpperCase()
+                          : user.userName?.substring(0, 2).toUpperCase()}
+                      </div>
+                    )}
                   </td>
 
                   {/* Name Column */}
-                  <td className="border border-gray-300 px-5 py-3">
-                    {user.name}
-                  </td>
+                  <td className="border border-gray-300 px-5 py-3">{user.name}</td>
 
                   {/* Profile Picture Column */}
 
                   {/* Other Columns */}
-                  <td className="border border-gray-300 px-5 py-3">
-                    {user.department}
-                  </td>
-                  <td className="border border-gray-300 px-5 py-3">
-                    {user.userName}
-                  </td>
-                  <td className="border border-gray-300 px-5 py-3">
-                    {user.email}
-                  </td>
-                  <td className="border border-gray-300 px-5 py-3">
-                    {user.userType}
-                  </td>
+                  <td className="border border-gray-300 px-5 py-3">{user.department}</td>
+                  <td className="border border-gray-300 px-5 py-3">{user.userName}</td>
+                  <td className="border border-gray-300 px-5 py-3">{user.email}</td>
+                  <td className="border border-gray-300 px-5 py-3">{user.userType}</td>
 
                   {/* Actions Column */}
                   <td className="border border-gray-300 px-5 py-3 text-center">
@@ -265,9 +254,7 @@ export default function Users() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                Edit User
-              </h2>
+              <h2 className="text-2xl font-semibold text-gray-800">Edit User</h2>
               <button
                 onClick={() => toggleModal("update")}
                 className="text-gray-500 hover:text-gray-700"
@@ -277,14 +264,40 @@ export default function Users() {
               </button>
             </div>
             <form onSubmit={handleEditUser}>
+              <div className="mb-6 flex flex-col items-center">
+                <div className="mb-3">
+                  {currentItem.profilePicture ? (
+                    <img
+                      src={currentItem.profilePicture || "/placeholder.svg"}
+                      alt="Profile"
+                      className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 rounded-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold text-xl shadow-sm">
+                      {currentItem.name
+                        ? currentItem.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .substring(0, 2)
+                            .toUpperCase()
+                        : currentItem.userName?.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <label
+                  htmlFor="profile-picture-upload"
+                  className="cursor-pointer text-sm text-blue-600 hover:text-blue-800"
+                >
+                  Change Profile Picture
+                  <input id="profile-picture-upload" type="file" className="hidden" accept="image/*" />
+                </label>
+              </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-user fa-lg text-blue-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="edit-name"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700">
                       Name
                     </label>
                     <input
@@ -301,10 +314,7 @@ export default function Users() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-building fa-lg text-green-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="edit-department"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="edit-department" className="block text-sm font-medium text-gray-700">
                       Department
                     </label>
                     <input
@@ -321,10 +331,7 @@ export default function Users() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-id-badge fa-lg text-yellow-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="edit-userName"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="edit-userName" className="block text-sm font-medium text-gray-700">
                       User Name
                     </label>
                     <input
@@ -341,10 +348,7 @@ export default function Users() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-lock fa-lg text-red-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="edit-password"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="edit-password" className="block text-sm font-medium text-gray-700">
                       Password
                     </label>
                     <input
@@ -361,10 +365,7 @@ export default function Users() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-envelope fa-lg text-purple-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="edit-email"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="edit-email" className="block text-sm font-medium text-gray-700">
                       Email
                     </label>
                     <input
@@ -381,10 +382,7 @@ export default function Users() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-user-shield fa-lg text-teal-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="edit-userType"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="edit-userType" className="block text-sm font-medium text-gray-700">
                       User Type
                     </label>
                     <select
@@ -408,11 +406,7 @@ export default function Users() {
                 </div>
               </div>
               <div className="mt-6 flex justify-end space-x-4">
-                <button
-                  type="button"
-                  onClick={() => toggleModal("update")}
-                  className="btn-secondary"
-                >
+                <button type="button" onClick={() => toggleModal("update")} className="btn-secondary">
                   Cancel
                 </button>
                 <button type="submit" className="btn-primary">
@@ -438,14 +432,25 @@ export default function Users() {
               </button>
             </div>
             <form onSubmit={handleAddUser}>
+              <div className="mb-6 flex flex-col items-center">
+                <div className="mb-3">
+                  <div className="w-24 h-24 rounded-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold text-xl shadow-sm">
+                    <i className="fa-solid fa-user fa-lg"></i>
+                  </div>
+                </div>
+                <label
+                  htmlFor="add-profile-picture"
+                  className="cursor-pointer text-sm text-blue-600 hover:text-blue-800"
+                >
+                  Upload Profile Picture
+                  <input id="add-profile-picture" type="file" className="hidden" accept="image/*" />
+                </label>
+              </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-user fa-lg text-blue-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="add-name"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="add-name" className="block text-sm font-medium text-gray-700">
                       Name
                     </label>
                     <input
@@ -463,10 +468,7 @@ export default function Users() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-building fa-lg text-green-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="add-department"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="add-department" className="block text-sm font-medium text-gray-700">
                       Department
                     </label>
                     <input
@@ -484,10 +486,7 @@ export default function Users() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-id-badge fa-lg text-yellow-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="add-userName"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="add-userName" className="block text-sm font-medium text-gray-700">
                       User Name
                     </label>
                     <input
@@ -505,10 +504,7 @@ export default function Users() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-lock fa-lg text-red-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="add-password"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="add-password" className="block text-sm font-medium text-gray-700">
                       Password
                     </label>
                     <input
@@ -526,10 +522,7 @@ export default function Users() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-envelope fa-lg text-purple-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="add-email"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="add-email" className="block text-sm font-medium text-gray-700">
                       Email
                     </label>
                     <input
@@ -547,10 +540,7 @@ export default function Users() {
                 <div className="flex items-center space-x-2">
                   <i className="fa-solid fa-user-shield fa-lg text-teal-500"></i>
                   <div className="flex-1">
-                    <label
-                      htmlFor="add-userType"
-                      className="block text-sm font-medium text-gray-700"
-                    >
+                    <label htmlFor="add-userType" className="block text-sm font-medium text-gray-700">
                       User Type
                     </label>
                     <select
@@ -573,11 +563,7 @@ export default function Users() {
                 </div>
               </div>
               <div className="mt-6 flex justify-end space-x-4">
-                <button
-                  type="button"
-                  onClick={() => toggleModal("add")}
-                  className="btn-secondary"
-                >
+                <button type="button" onClick={() => toggleModal("add")} className="btn-secondary">
                   Cancel
                 </button>
                 <button type="submit" className="btn-primary">
@@ -593,32 +579,17 @@ export default function Users() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full mx-4 md:mx-0">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                Delete User
-              </h2>
-              <button
-                onClick={() => toggleModal("delete")}
-                className="text-gray-500 hover:text-gray-700"
-              >
+              <h2 className="text-2xl font-semibold text-gray-800">Delete User</h2>
+              <button onClick={() => toggleModal("delete")} className="text-gray-500 hover:text-gray-700">
                 <i className="fa-solid fa-xmark text-lg"></i>
               </button>
             </div>
-            <p className="mb-6 text-gray-700">
-              Are you sure you want to delete this user?
-            </p>
+            <p className="mb-6 text-gray-700">Are you sure you want to delete this user?</p>
             <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => toggleModal("delete")}
-                className="btn-secondary"
-              >
+              <button type="button" onClick={() => toggleModal("delete")} className="btn-secondary">
                 Cancel
               </button>
-              <button
-                onClick={handleDeleteUser}
-                type="button"
-                className="btn-danger"
-              >
+              <button onClick={handleDeleteUser} type="button" className="btn-danger">
                 Delete User
               </button>
             </div>
@@ -641,49 +612,59 @@ export default function Users() {
               </button>
             </div>
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <div className="col-span-1 md:col-span-2 flex justify-center mb-4">
+                {currentItem.profilePicture ? (
+                  <img
+                    src={currentItem.profilePicture || "/placeholder.svg"}
+                    alt="Profile"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow-md"
+                  />
+                ) : (
+                  <div className="w-32 h-32 rounded-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold text-3xl shadow-md">
+                    {currentItem.name
+                      ? currentItem.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .substring(0, 2)
+                          .toUpperCase()
+                      : currentItem.userName?.substring(0, 2).toUpperCase()}
+                  </div>
+                )}
+              </div>
               <div className="flex items-center space-x-3">
                 <i className="fa-solid fa-user fa-lg text-blue-500"></i>
                 <div>
                   <p className="text-sm text-gray-500">Name</p>
-                  <p className="text-lg font-semibold text-gray-800">
-                    {currentItem.name}
-                  </p>
+                  <p className="text-lg font-semibold text-gray-800">{currentItem.name}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <i className="fa-solid fa-building fa-lg text-green-500"></i>
                 <div>
                   <p className="text-sm text-gray-500">Department</p>
-                  <p className="text-lg font-semibold text-gray-800">
-                    {currentItem.department}
-                  </p>
+                  <p className="text-lg font-semibold text-gray-800">{currentItem.department}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <i className="fa-solid fa-id-badge fa-lg text-yellow-500"></i>
                 <div>
                   <p className="text-sm text-gray-500">User Name</p>
-                  <p className="text-lg font-semibold text-gray-800">
-                    {currentItem.userName}
-                  </p>
+                  <p className="text-lg font-semibold text-gray-800">{currentItem.userName}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <i className="fa-solid fa-envelope fa-lg text-red-500"></i>
                 <div>
                   <p className="text-sm text-gray-500">Email</p>
-                  <p className="text-lg font-semibold text-gray-800">
-                    {currentItem.email}
-                  </p>
+                  <p className="text-lg font-semibold text-gray-800">{currentItem.email}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <i className="fa-solid fa-user-shield fa-lg text-purple-500"></i>
                 <div>
                   <p className="text-sm text-gray-500">User Type</p>
-                  <p className="text-lg font-semibold text-gray-800">
-                    {currentItem.userType}
-                  </p>
+                  <p className="text-lg font-semibold text-gray-800">{currentItem.userType}</p>
                 </div>
               </div>
             </div>
@@ -700,5 +681,5 @@ export default function Users() {
         </div>
       )}
     </>
-  );
+  )
 }
