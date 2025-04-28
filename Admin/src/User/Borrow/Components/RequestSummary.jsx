@@ -84,74 +84,121 @@ const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, o
     }))
   }
 
+  // Determine if scrolling should be enabled (when items >= 5)
+  const shouldScroll = selectedProducts.length >= 5
+
   return (
-    <div className="w-full bg-white p-6 rounded-lg shadow-lg block">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800 text-center">Borrow Summary</h2>
-      <div className="space-y-4">
-        {selectedProducts.map((product) => (
-          <div key={product.itemID} className="flex items-center border p-4 rounded-lg shadow-md bg-gray-100 space-x-4">
-            <div className="flex-shrink-0">
-              {!product.imageUrl || imageErrors[product.itemID] ? (
-                <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="36"
-                    height="36"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#4B5563"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-gray-500"
+    <div className="w-full sm:w-[280px] md:w-[300px] lg:w-[320px] bg-white p-4 rounded-lg shadow-lg block">
+      <h2 className="text-xl font-semibold mb-4 text-gray-800 text-center">Borrow Summary</h2>
+      <div
+        className={`space-y-3 ${
+          shouldScroll
+            ? "max-h-[450px] overflow-y-auto pr-2 mb-3 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
+            : ""
+        }`}
+      >
+        {selectedProducts.length === 0 ? (
+          <div className="text-center py-6 text-gray-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="36"
+              height="36"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mx-auto mb-3 text-gray-400"
+            >
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <p className="text-sm">No items added yet</p>
+          </div>
+        ) : (
+          selectedProducts.map((product) => (
+            <div
+              key={product.itemID}
+              className="flex items-center border p-3 rounded-lg shadow-md bg-gray-100 space-x-3"
+            >
+              <div className="flex-shrink-0">
+                {!product.imageUrl || imageErrors[product.itemID] ? (
+                  <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#4B5563"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-gray-500"
+                    >
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                  </div>
+                ) : (
+                  <img
+                    src={product.imageUrl || "/placeholder.svg"}
+                    alt={product.itemName}
+                    className="w-16 h-16 object-cover rounded-lg"
+                    onError={() => handleImageError(product.itemID)}
+                  />
+                )}
+              </div>
+              <div className="flex-1 relative">
+                <button
+                  onClick={() => handleRemove(product.itemID)}
+                  className="absolute top-0 right-0 text-red-500 hover:text-red-600 text-base transition"
+                >
+                  ✕
+                </button>
+                <h3 className="text-base font-semibold text-gray-800 mb-1 pr-5">{product.itemName}</h3>
+                <p className="text-xs text-gray-600 mb-2">
+                  Quantity: <span className="font-medium">{product.requestedQuantity}</span>
+                </p>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleDecrease(product.itemID)}
+                    className="w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm flex justify-center items-center transition"
                   >
-                    <circle cx="9" cy="21" r="1"></circle>
-                    <circle cx="20" cy="21" r="1"></circle>
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                  </svg>
+                    -
+                  </button>
+                  <span className="text-base font-semibold text-gray-800">{product.requestedQuantity}</span>
+                  <button
+                    onClick={() => handleIncrease(product.itemID, product.initialQuantity)}
+                    className="w-8 h-8 bg-green-500 hover:bg-green-600 text-white rounded-full text-sm flex justify-center items-center transition"
+                  >
+                    +
+                  </button>
                 </div>
-              ) : (
-                <img
-                  src={product.imageUrl || "/placeholder.svg"}
-                  alt={product.itemName}
-                  className="w-20 h-20 object-cover rounded-lg"
-                  onError={() => handleImageError(product.itemID)}
-                />
-              )}
-            </div>
-            <div className="flex-1 relative">
-              <button
-                onClick={() => handleRemove(product.itemID)}
-                className="absolute top-0 right-0 text-red-500 hover:text-red-600 text-lg transition"
-              >
-                ✕
-              </button>
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">{product.itemName}</h3>
-              <p className="text-sm text-gray-600 mb-3">
-                Quantity: <span className="font-medium">{product.requestedQuantity}</span>
-              </p>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => handleDecrease(product.itemID)}
-                  className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full text-xl flex justify-center items-center transition"
-                >
-                  -
-                </button>
-                <span className="text-xl font-semibold text-gray-800">{product.requestedQuantity}</span>
-                <button
-                  onClick={() => handleIncrease(product.itemID, product.initialQuantity)}
-                  className="w-10 h-10 bg-green-500 hover:bg-green-600 text-white rounded-full text-xl flex justify-center items-center transition"
-                >
-                  +
-                </button>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
+      {selectedProducts.length > 0 && (
+        <div className="mt-3 bg-gray-100 p-2 rounded-lg">
+          <div className="flex justify-between items-center">
+            <span className="font-medium text-sm text-gray-700">Total Items:</span>
+            <span className="font-bold text-gray-800">
+              {selectedProducts.reduce((total, product) => total + product.requestedQuantity, 0)}
+            </span>
+          </div>
+        </div>
+      )}
       <button
         onClick={openModal}
-        className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium text-lg shadow-md transition transform hover:scale-105"
+        disabled={selectedProducts.length === 0}
+        className={`w-full mt-4 py-2 rounded-lg font-medium text-base shadow-md transition ${
+          selectedProducts.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white"
+        }`}
       >
         Request
       </button>
@@ -159,12 +206,12 @@ const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, o
       {/* Modal Section */}
       {modalIsOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-8 w-full max-w-md rounded-lg shadow-lg">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center border-b pb-4">
+          <div className="bg-white p-6 w-full max-w-md rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center border-b pb-3">
               Submit Borrow Request
             </h2>
             <form
-              className="space-y-6"
+              className="space-y-4"
               onSubmit={(e) => {
                 e.preventDefault()
                 if (!purpose.trim()) {
@@ -184,7 +231,7 @@ const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, o
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
                   required
-                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none text-gray-800"
+                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none text-gray-800"
                   placeholder="Enter the purpose"
                 />
               </div>
@@ -196,7 +243,7 @@ const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, o
                   id="priority"
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none text-gray-800"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-300 focus:outline-none text-gray-800"
                 >
                   <option value="">Select Priority</option>
                   <option value="Low">Low</option>
@@ -204,17 +251,17 @@ const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, o
                   <option value="High">High</option>
                 </select>
               </div>
-              <div className="flex justify-end space-x-3">
+              <div className="flex justify-end space-x-3 pt-2">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-5 py-2 rounded-lg transition"
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-4 py-2 rounded-lg transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg shadow-md transition"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md transition"
                 >
                   Save
                 </button>
