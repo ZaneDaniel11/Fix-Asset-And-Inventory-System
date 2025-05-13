@@ -1,3 +1,4 @@
+"use client"
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
@@ -7,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { Badge } from "../../components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
-import { Calendar, FileText, Filter, Search, Trash2, RefreshCw, AlertCircle } from "lucide-react"
+import { Calendar, FileText, Filter, Search, Trash2, RefreshCw, AlertCircle, TrendingDown } from "lucide-react"
 import DatePicker from "react-date-picker"
 import "react-date-picker/dist/DatePicker.css"
 import "react-calendar/dist/Calendar.css"
@@ -15,6 +16,9 @@ import "react-calendar/dist/Calendar.css"
 // Custom CSS for DatePicker
 import "./date-picker-fix.css"
 
+// API base URL constant - easy to change for testing
+const API_BASE_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net"
+// const API_BASE_URL = "http://localhost:5075"
 const DisposedAssetsDashboard = () => {
   // Get current date and first day of current month
   const today = new Date()
@@ -30,7 +34,9 @@ const DisposedAssetsDashboard = () => {
 
   // State for data
   const [disposedAssets, setDisposedAssets] = useState([])
+  const [originalDisposedAssets, setOriginalDisposedAssets] = useState([]) // Store original data for filtering
   const [warrantyAssets, setWarrantyAssets] = useState([])
+  const [originalWarrantyAssets, setOriginalWarrantyAssets] = useState([]) // Store original data for filtering
   const [notifications, setNotifications] = useState([])
 
   // Add a new state variable for selected category
@@ -49,21 +55,33 @@ const DisposedAssetsDashboard = () => {
 
   // Format date
   const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("en-PH", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
+    if (!dateString) return "N/A"
+    try {
+      const date = new Date(dateString)
+      return date.toLocaleDateString("en-PH", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    } catch (error) {
+      console.error("Error formatting date:", error)
+      return "Invalid Date"
+    }
   }
 
   // Calculate days remaining
   const getDaysRemaining = (dateString) => {
-    const date = new Date(dateString)
-    const today = new Date()
-    const diffTime = date.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays
+    if (!dateString) return 0
+    try {
+      const date = new Date(dateString)
+      const today = new Date()
+      const diffTime = date.getTime() - today.getTime()
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      return diffDays
+    } catch (error) {
+      console.error("Error calculating days remaining:", error)
+      return 0
+    }
   }
 
   // Get status badge color based on days remaining
@@ -89,7 +107,7 @@ const DisposedAssetsDashboard = () => {
 
       // Use the new API endpoint
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetDisposalApi/GetDisposedAssets?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
+        `${API_BASE_URL}/api/AssetDisposalApi/GetDisposedAssets?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
       )
 
       if (!response.ok) {
@@ -102,28 +120,32 @@ const DisposedAssetsDashboard = () => {
       // Map the API response to match the component's expected format
       const formattedData = data.map((asset) => ({
         id: asset.AssetID,
-        assetName: asset.AssetName,
-        assetTag: asset.AssetCode,
+        assetName: asset.AssetName || "Unknown",
+        assetTag: asset.AssetCode || "Unknown",
         category: categories.find((c) => c.categoryId === asset.CategoryID)?.categoryName || "Unknown",
         disposalDate: asset.DisposalDate,
-        disposalReason: asset.DisposalReason,
-        originalValue: asset.OriginalValue,
-        disposalValue: asset.DisposedValue,
-        lossValue: asset.LossValue,
+        disposalReason: asset.DisposalReason || "Unknown",
+        originalValue: asset.OriginalValue || 0,
+        disposalValue: asset.DisposedValue || 0,
+        lossValue: asset.LossValue || 0,
         categoryID: asset.CategoryID,
       }))
 
-      setDisposedAssets(formattedData.length ? formattedData : generateSampleDisposedAssets())
+      const finalData = formattedData.length ? formattedData : generateSampleDisposedAssets()
+      setDisposedAssets(finalData)
+      setOriginalDisposedAssets(finalData) // Store original data for filtering
     } catch (error) {
       console.error("Error fetching disposed assets:", error)
       // Fallback to sample data
-      setDisposedAssets(generateSampleDisposedAssets())
+      const sampleData = generateSampleDisposedAssets()
+      setDisposedAssets(sampleData)
+      setOriginalDisposedAssets(sampleData) // Store original data for filtering
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Fetch warranty assets
+  // Modify the fetchWarrantyAssets function to properly handle API response data
   const fetchWarrantyAssets = async () => {
     setIsLoading(true)
     try {
@@ -133,7 +155,7 @@ const DisposedAssetsDashboard = () => {
 
       // Use the new API endpoint
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetDisposalApi/GetAssetSummaries?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
+        `${API_BASE_URL}/api/AssetDisposalApi/GetAssetSummaries?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
       )
 
       if (!response.ok) {
@@ -145,22 +167,79 @@ const DisposedAssetsDashboard = () => {
 
       // Map the API response to match the component's expected format
       const formattedData = data.map((asset) => ({
-        id: asset.AssetId,
-        assetName: asset.AssetName,
-        assetTag: asset.AssetCode,
-        category: asset.AssetCategory,
-        categoryId: asset.AssetCategoryId,
-        purchaseDate: asset.PurchaseDate,
-        warrantyExpiration: asset.WarrantyExpiration,
-        vendor: asset.Vendor,
-        currentValue: asset.CurrentValue,
+        id: asset.AssetId || asset.assetId || 0,
+        assetName: asset.AssetName || asset.assetName || "Unknown",
+        assetTag: asset.AssetCode || asset.assetCode || "Unknown",
+        category: asset.AssetCategory || asset.categoryName || "Unknown",
+        categoryId: asset.AssetCategoryId || asset.categoryId,
+        purchaseDate: asset.PurchaseDate || asset.datePurchased,
+        warrantyExpiration: asset.WarrantyExpiration || asset.warrantyExpiration,
+        vendor: asset.Vendor || asset.vendor || "Unknown",
+        currentValue: asset.CurrentValue || asset.currentValue || 0,
+        initialCost: asset.AssetCost || asset.initialCost || asset.CurrentValue || 0,
+        depreciationRate: asset.DepreciationRate || asset.depreciationRate || 0.2,
+        usefulLifeYears: asset.UsefulLifeYears || asset.usefulLifeYears || 5,
       }))
 
-      setWarrantyAssets(formattedData.length ? formattedData : generateSampleWarrantyAssets())
+      const finalData = formattedData.length ? formattedData : generateSampleWarrantyAssets()
+      setWarrantyAssets(finalData)
+      setOriginalWarrantyAssets(finalData) // Store original data for filtering
     } catch (error) {
       console.error("Error fetching warranty assets:", error)
       // Fallback to sample data
-      setWarrantyAssets(generateSampleWarrantyAssets())
+      const sampleData = generateSampleWarrantyAssets()
+      setWarrantyAssets(sampleData)
+      setOriginalWarrantyAssets(sampleData) // Store original data for filtering
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Modify the fetchDepreciationData function to properly handle API response data
+  const fetchDepreciationData = async () => {
+    setIsLoading(true)
+    try {
+      // Format dates for API
+      const formattedStartDate = startDate.toISOString().split("T")[0]
+      const formattedEndDate = endDate.toISOString().split("T")[0]
+
+      // Use the depreciation API endpoint
+      const response = await fetch(`${API_BASE_URL}/api/AssetDisposalApi/GetAssetsWithDepreciation`)
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      console.log("Depreciation data:", data)
+
+      // Map the API response to match the component's expected format
+      const formattedData = data.map((asset) => ({
+        id: asset.assetId || 0,
+        assetName: asset.assetName || "Unknown",
+        assetTag: asset.assetCode || "Unknown",
+        category: asset.categoryName || "Unknown",
+        categoryId: asset.categoryId,
+        purchaseDate: asset.datePurchased,
+        warrantyExpiration: asset.warrantyExpiration || null,
+        vendor: asset.vendor || "Unknown",
+        currentValue: asset.currentValue || 0,
+        initialCost: asset.initialCost || 0,
+        depreciationRate: asset.depreciationRate || 0.2,
+        usefulLifeYears: asset.usefulLifeYears || 5,
+        depreciationPercentage: asset.depreciationPercentage || 0,
+        depreciationStatus: asset.depreciationStatus || "Unknown",
+      }))
+
+      const finalData = formattedData.length ? formattedData : generateSampleWarrantyAssets()
+      setWarrantyAssets(finalData)
+      setOriginalWarrantyAssets(finalData) // Store original data for filtering
+    } catch (error) {
+      console.error("Error fetching depreciation data:", error)
+      // Fallback to sample data
+      const sampleData = generateSampleWarrantyAssets()
+      setWarrantyAssets(sampleData)
+      setOriginalWarrantyAssets(sampleData) // Store original data for filtering
     } finally {
       setIsLoading(false)
     }
@@ -170,7 +249,7 @@ const DisposedAssetsDashboard = () => {
   const fetchNotifications = async () => {
     try {
       // Use the new API endpoint
-      const response = await fetch(`https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetNotificationApi/ViewAllNotifications`)
+      const response = await fetch(`${API_BASE_URL}/api/AssetNotificationApi/ViewAllNotifications`)
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
@@ -192,7 +271,7 @@ const DisposedAssetsDashboard = () => {
   const fetchCategories = async () => {
     try {
       // Use the correct API endpoint
-      const response = await fetch(`https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/CategoryAssetApi/GetAssetCategory`)
+      const response = await fetch(`${API_BASE_URL}/api/CategoryAssetApi/GetAssetCategory`)
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
@@ -388,6 +467,8 @@ const DisposedAssetsDashboard = () => {
 
   // Add this function to get the appropriate icon based on notification type
   const getNotificationTypeIcon = (type) => {
+    if (!type) return <AlertCircle className="h-5 w-5" />
+
     switch (type.toLowerCase()) {
       case "warranty":
         return <Calendar className="h-5 w-5" />
@@ -402,6 +483,8 @@ const DisposedAssetsDashboard = () => {
 
   // Add this function to get the appropriate color based on notification type
   const getNotificationTypeColor = (type) => {
+    if (!type) return "text-gray-500"
+
     switch (type.toLowerCase()) {
       case "warranty":
         return "text-amber-500"
@@ -414,25 +497,37 @@ const DisposedAssetsDashboard = () => {
     }
   }
 
-  // Filter disposed assets based on search and disposal reason
-  const filteredDisposedAssets = disposedAssets.filter((asset) => {
-    const matchesSearch =
-      asset.assetName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      asset.assetTag.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      asset.category.toLowerCase().includes(searchQuery.toLowerCase())
+  // Safe string comparison function
+  const safeStringIncludes = (str, searchStr) => {
+    if (typeof str !== "string" || !str) return false
+    if (typeof searchStr !== "string" || !searchStr) return true // Empty search matches everything
+    return str.toLowerCase().includes(searchStr.toLowerCase())
+  }
 
-    const matchesReason = disposalReason === "all" || asset.disposalReason === disposalReason
+  // Filter disposed assets based on search and disposal reason
+  const filteredDisposedAssets = originalDisposedAssets.filter((asset) => {
+    // Safe search matching
+    const matchesSearch =
+      searchQuery === "" ||
+      safeStringIncludes(asset.assetName, searchQuery) ||
+      safeStringIncludes(asset.assetTag, searchQuery) ||
+      safeStringIncludes(asset.category, searchQuery)
+
+    // Safe reason matching
+    const matchesReason = disposalReason === "all" || (asset.disposalReason && asset.disposalReason === disposalReason)
 
     return matchesSearch && matchesReason
   })
 
   // Filter warranty assets based on search
-  const filteredWarrantyAssets = warrantyAssets.filter((asset) => {
+  const filteredWarrantyAssets = originalWarrantyAssets.filter((asset) => {
+    if (searchQuery === "") return true
+
     return (
-      asset.assetName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      asset.assetTag.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      asset.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      asset.vendor.toLowerCase().includes(searchQuery.toLowerCase())
+      safeStringIncludes(asset.assetName, searchQuery) ||
+      safeStringIncludes(asset.assetTag, searchQuery) ||
+      safeStringIncludes(asset.category, searchQuery) ||
+      safeStringIncludes(asset.vendor, searchQuery)
     )
   })
 
@@ -449,12 +544,19 @@ const DisposedAssetsDashboard = () => {
     }
   }
 
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value)
+  }
+
   // Handle apply filters
   const handleApplyFilters = () => {
     if (activeTab === "disposed") {
       fetchDisposedAssets()
-    } else {
+    } else if (activeTab === "warranty") {
       fetchWarrantyAssets()
+    } else if (activeTab === "depreciation") {
+      fetchDepreciationData()
     }
   }
 
@@ -469,8 +571,10 @@ const DisposedAssetsDashboard = () => {
     setTimeout(() => {
       if (activeTab === "disposed") {
         fetchDisposedAssets()
-      } else {
+      } else if (activeTab === "warranty") {
         fetchWarrantyAssets()
+      } else if (activeTab === "depreciation") {
+        fetchDepreciationData()
       }
     }, 100)
   }
@@ -482,6 +586,8 @@ const DisposedAssetsDashboard = () => {
       fetchDisposedAssets()
     } else if (value === "warranty") {
       fetchWarrantyAssets()
+    } else if (value === "depreciation") {
+      fetchDepreciationData()
     }
   }
 
@@ -494,10 +600,13 @@ const DisposedAssetsDashboard = () => {
 
   // Modify the useEffect to fetch categories
   useEffect(() => {
-    fetchDisposedAssets()
-    fetchWarrantyAssets()
-    fetchNotifications()
-    fetchCategories() // Add this line
+    fetchCategories() // Fetch categories first
+      .then(() => {
+        // After categories are loaded, fetch other data
+        fetchDisposedAssets()
+        fetchWarrantyAssets()
+        fetchNotifications()
+      })
   }, [])
 
   // Add a function to filter notifications by category
@@ -552,9 +661,9 @@ const DisposedAssetsDashboard = () => {
                   className={`p-3 rounded-lg border ${
                     notification.Read ? "bg-gray-50" : "bg-blue-50 border-blue-200"
                   } ${
-                    notification.Priority.toLowerCase() === "high"
+                    notification.Priority?.toLowerCase() === "high"
                       ? "border-l-4 border-l-red-500"
-                      : notification.Priority.toLowerCase() === "medium"
+                      : notification.Priority?.toLowerCase() === "medium"
                         ? "border-l-4 border-l-amber-500"
                         : "border-l-4 border-l-green-500"
                   }`}
@@ -565,25 +674,25 @@ const DisposedAssetsDashboard = () => {
                     </div>
                     <div className="flex-1">
                       <div className="flex justify-between">
-                        <h4 className="font-medium text-gray-900">{notification.AssetName}</h4>
+                        <h4 className="font-medium text-gray-900">{notification.AssetName || "Unknown Asset"}</h4>
                         <span className="text-xs text-gray-500">{formatDate(notification.Date)}</span>
                       </div>
-                      <p className="text-sm text-gray-600 mt-1">{notification.Message}</p>
+                      <p className="text-sm text-gray-600 mt-1">{notification.Message || "No message"}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <Badge variant="outline" className="text-xs">
-                          {notification.AssetCode}
+                          {notification.AssetCode || "No Code"}
                         </Badge>
                         <Badge
                           variant={
-                            notification.Priority.toLowerCase() === "high"
+                            notification.Priority?.toLowerCase() === "high"
                               ? "destructive"
-                              : notification.Priority.toLowerCase() === "medium"
+                              : notification.Priority?.toLowerCase() === "medium"
                                 ? "warning"
                                 : "outline"
                           }
                           className="text-xs"
                         >
-                          {notification.Priority}
+                          {notification.Priority || "Low"}
                         </Badge>
                         {notification.CategoryId &&
                           categories.find((c) => c.categoryId?.toString() === notification.CategoryId?.toString()) && (
@@ -607,7 +716,7 @@ const DisposedAssetsDashboard = () => {
 
       {/* Main Tabs */}
       <Tabs defaultValue="disposed" value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid grid-cols-2 w-full md:w-[400px]">
+        <TabsList className="grid grid-cols-3 w-full md:w-[500px]">
           <TabsTrigger value="disposed" className="flex items-center gap-2">
             <Trash2 className="h-4 w-4" />
             Disposed Assets
@@ -615,6 +724,10 @@ const DisposedAssetsDashboard = () => {
           <TabsTrigger value="warranty" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Warranty Tracking
+          </TabsTrigger>
+          <TabsTrigger value="depreciation" className="flex items-center gap-2">
+            <TrendingDown className="h-4 w-4" />
+            Depreciation
           </TabsTrigger>
         </TabsList>
 
@@ -666,7 +779,7 @@ const DisposedAssetsDashboard = () => {
                   <Input
                     placeholder="Search assets..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={handleSearchChange}
                     className="pl-10"
                   />
                 </div>
@@ -731,14 +844,14 @@ const DisposedAssetsDashboard = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Asset Name</TableHead>
-                        <TableHead>Asset Tag</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Disposal Date</TableHead>
-                        <TableHead>Reason</TableHead>
-                        <TableHead className="text-right">Original Value</TableHead>
-                        <TableHead className="text-right">Disposal Value</TableHead>
-                        <TableHead className="text-right">Loss Value</TableHead>
+                        <TableHead className="text-white bg-gray-800">Asset Name</TableHead>
+                        <TableHead className="text-white bg-gray-800">Asset Tag</TableHead>
+                        <TableHead className="text-white bg-gray-800">Category</TableHead>
+                        <TableHead className="text-white bg-gray-800">Disposal Date</TableHead>
+                        <TableHead className="text-white bg-gray-800">Reason</TableHead>
+                        <TableHead className="text-right text-white bg-gray-800">Original Value</TableHead>
+                        <TableHead className="text-right text-white bg-gray-800">Disposal Value</TableHead>
+                        <TableHead className="text-right text-white bg-gray-800">Loss Value</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -799,14 +912,14 @@ const DisposedAssetsDashboard = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Asset Name</TableHead>
-                        <TableHead>Asset Tag</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Purchase Date</TableHead>
-                        <TableHead>Warranty Expiration</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Vendor</TableHead>
-                        <TableHead className="text-right">Current Value</TableHead>
+                        <TableHead className="text-white bg-gray-800">Asset Name</TableHead>
+                        <TableHead className="text-white bg-gray-800">Asset Tag</TableHead>
+                        <TableHead className="text-white bg-gray-800">Category</TableHead>
+                        <TableHead className="text-white bg-gray-800">Purchase Date</TableHead>
+                        <TableHead className="text-white bg-gray-800">Warranty Expiration</TableHead>
+                        <TableHead className="text-white bg-gray-800">Status</TableHead>
+                        <TableHead className="text-white bg-gray-800">Vendor</TableHead>
+                        <TableHead className="text-right text-white bg-gray-800">Current Value</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -822,6 +935,133 @@ const DisposedAssetsDashboard = () => {
                             <TableCell>{getStatusBadge(daysRemaining)}</TableCell>
                             <TableCell>{asset.vendor}</TableCell>
                             <TableCell className="text-right">{formatCurrency(asset.currentValue)}</TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        {/* Depreciation Tracking Tab Content */}
+        <TabsContent value="depreciation" className="mt-0">
+          <Card className="shadow-md bg-white">
+            <CardHeader>
+              <CardTitle className="text-xl">Asset Depreciation</CardTitle>
+              <CardDescription>Track asset value and depreciation status over time</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="h-64 w-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-white bg-gray-800">Asset Name</TableHead>
+                        <TableHead className="text-white bg-gray-800">Asset Tag</TableHead>
+                        <TableHead className="text-white bg-gray-800">Category</TableHead>
+                        <TableHead className="text-white bg-gray-800">Purchase Date</TableHead>
+                        <TableHead className="text-right text-white bg-gray-800">Initial Cost</TableHead>
+                        <TableHead className="text-right text-white bg-gray-800">Current Value</TableHead>
+                        <TableHead className="text-center text-white bg-gray-800">Remaining Value %</TableHead>
+                        <TableHead className="text-white bg-gray-800">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredWarrantyAssets.map((asset) => {
+                        // Calculate depreciation (simplified example)
+                        const purchaseDate = new Date(asset.purchaseDate || new Date())
+                        const today = new Date()
+                        const yearsSincePurchase = (today - purchaseDate) / (1000 * 60 * 60 * 24 * 365.25)
+
+                        // Assume 20% depreciation per year (straight-line method)
+                        const depreciationRate = asset.depreciationRate || 0.2
+                        const usefulLifeYears = asset.usefulLifeYears || 5
+
+                        // Calculate current value
+                        const initialCost = asset.initialCost || asset.currentValue || 0
+                        const currentValue =
+                          asset.currentValue ||
+                          Math.max(
+                            0,
+                            initialCost -
+                              initialCost * depreciationRate * Math.min(yearsSincePurchase, usefulLifeYears),
+                          )
+
+                        // Calculate percentage of original value remaining
+                        const percentRemaining = initialCost > 0 ? Math.round((currentValue / initialCost) * 100) : 0
+
+                        // Determine status based on percentage
+                        let statusBadge
+                        if (percentRemaining >= 90) {
+                          statusBadge = (
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                              Excellent (90-100%)
+                            </Badge>
+                          )
+                        } else if (percentRemaining >= 70) {
+                          statusBadge = (
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                              Good (70-89%)
+                            </Badge>
+                          )
+                        } else if (percentRemaining >= 50) {
+                          statusBadge = (
+                            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                              Fair (50-69%)
+                            </Badge>
+                          )
+                        } else if (percentRemaining >= 30) {
+                          statusBadge = (
+                            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                              Poor (30-49%)
+                            </Badge>
+                          )
+                        } else if (percentRemaining >= 10) {
+                          statusBadge = (
+                            <Badge variant="destructive" className="bg-red-50 text-red-700 border-red-200">
+                              Critical (10-29%)
+                            </Badge>
+                          )
+                        } else {
+                          statusBadge = <Badge variant="destructive">End of Life (&lt;10%)</Badge>
+                        }
+
+                        return (
+                          <TableRow key={asset.id}>
+                            <TableCell className="font-medium">{asset.assetName}</TableCell>
+                            <TableCell>{asset.assetTag}</TableCell>
+                            <TableCell>{asset.category}</TableCell>
+                            <TableCell>{formatDate(asset.purchaseDate)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(initialCost)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(currentValue)}</TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex flex-col items-center">
+                                <span className="font-medium">{percentRemaining}%</span>
+                                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                                  <div
+                                    className={`h-2.5 rounded-full ${
+                                      percentRemaining >= 70
+                                        ? "bg-green-500"
+                                        : percentRemaining >= 50
+                                          ? "bg-blue-500"
+                                          : percentRemaining >= 30
+                                            ? "bg-amber-500"
+                                            : percentRemaining >= 10
+                                              ? "bg-orange-500"
+                                              : "bg-red-500"
+                                    }`}
+                                    style={{ width: `${percentRemaining}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{statusBadge}</TableCell>
                           </TableRow>
                         )
                       })}
