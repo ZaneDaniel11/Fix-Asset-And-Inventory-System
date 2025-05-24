@@ -12,3 +12,7 @@ dotnet new webapi --use-controllers
 dotnet add package Microsoft.Data.Sqlite
 dotnet add package Dapper
 
+
+--------------------------------------
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
