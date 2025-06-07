@@ -24,7 +24,7 @@ export default function Admin1Logs() {
     const fetchApprovedBorrowRequests = async () => {
       try {
         const response = await fetch(
-          "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByAdmin1",
+          "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByAdmin1",
         )
         const data = await response.json()
         setBorrowRequests(data)
@@ -43,7 +43,7 @@ export default function Admin1Logs() {
     try {
       setLoading(true)
       fetch(
-        "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests",
+        "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests",
       )
         .then((response) => response.json())
         .then((data) => {
@@ -73,7 +73,7 @@ export default function Admin1Logs() {
     try {
       setLoading(true)
       fetch(
-        "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/GetAllBorrowRequests",
+        "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/GetAllBorrowRequests",
       )
         .then((response) => response.json())
         .then((data) => {
@@ -102,7 +102,7 @@ export default function Admin1Logs() {
     try {
       setLoading(true)
       const response = await fetch(
-        "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/MaintenanceApi/GetAllMaintenanceRequest",
+        "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/MaintenanceApi/GetAllMaintenanceRequest",
       )
       const data = await response.json()
       const mappedLogs = data.map((log) => ({
@@ -137,7 +137,7 @@ export default function Admin1Logs() {
 
     try {
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`,
+        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`,
       )
       const data = await response.json()
       setBorrowedItems(data)

@@ -6,7 +6,7 @@ import { toast } from "react-toastify"
 import "./CSS/modal.css"
 
 // const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net"
-const API_URL = "http://localhost:5075"
+const API_URL = "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net"
 export default function Users() {
   const [modals, setModals] = useState({
     add: false,

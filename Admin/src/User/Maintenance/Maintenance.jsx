@@ -33,7 +33,7 @@ export default function MaintenanceRequests() {
   const fetchRequests = async () => {
     try {
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/MaintenanceApi/GetMaintenanceByRequester/${RequesterID}`
+        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/MaintenanceApi/GetMaintenanceByRequester/${RequesterID}`
       );
       if (!response.ok) throw new Error("Failed to fetch maintenance requests");
       const data = await response.json();
@@ -54,7 +54,7 @@ export default function MaintenanceRequests() {
     const fetchAssetCodes = async () => {
       try {
         const response = await fetch(
-          "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetItemApi/GetAllAssetCodes"
+          "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/AssetItemApi/GetAllAssetCodes"
         );
         if (!response.ok) throw new Error("Failed to fetch asset codes");
         const data = await response.json();
@@ -103,7 +103,7 @@ export default function MaintenanceRequests() {
     try {
       // Fetch asset details based on the selected AssetCode
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetItemApi/GetAssetByCode?assetCode=${code}`
+        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/AssetItemApi/GetAssetByCode?assetCode=${code}`
       );
       if (!response.ok) throw new Error("Failed to fetch asset details");
       const assetData = await response.json();
@@ -139,7 +139,7 @@ export default function MaintenanceRequests() {
 
       if (requestMaintenance.AssetCode) {
         const assetResponse = await fetch(
-          `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetItemApi/GetAssetByCode?assetCode=${requestMaintenance.AssetCode}`
+          `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/AssetItemApi/GetAssetByCode?assetCode=${requestMaintenance.AssetCode}`
         );
 
         if (assetResponse.ok) {
@@ -183,7 +183,7 @@ export default function MaintenanceRequests() {
       console.log("Submitting payload:", payload);
 
       const response = await fetch(
-        "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/MaintenanceApi/InsertMaintenance",
+        "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/MaintenanceApi/InsertMaintenance",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

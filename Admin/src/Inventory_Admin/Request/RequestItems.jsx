@@ -15,7 +15,7 @@ export default function RequestItems() {
   const closeDeclineModal = () => setDeclineModalOpen(false);
   const storedUsername = localStorage.getItem("userType");
   useEffect(() => {
-    fetch("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests")
+    fetch("https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests")
       .then((response) => response.json())
       .then((data) => {
         const mappedItems = data.map((item) => ({
@@ -59,7 +59,7 @@ export default function RequestItems() {
     setIsUpdating(true);
 
     try {
-      const apiUrl = `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/Admin1UpdateApproval/${currentItem.id}`;
+      const apiUrl = `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/RequestItemsApi/Admin1UpdateApproval/${currentItem.id}`;
       const requestBody = {
         Admin1Approval: admin1Approvals,
         RejectReason: admin1Approvals === "Declined" ? declineReason : "",

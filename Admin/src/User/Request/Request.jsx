@@ -30,7 +30,7 @@ export default function Request() {
   async function fetchRequests() {
     const loggedInUserId = localStorage.getItem("userId");
     const response = await fetchData(
-      `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetRequestsByBorrower/${loggedInUserId}`,
+      `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetRequestsByBorrower/${loggedInUserId}`,
       "GET"
     );
     setRequests(response);
@@ -51,7 +51,7 @@ export default function Request() {
     try {
       // Using native fetch directly
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/CancelRequest/${requestId}`,
+        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/RequestItemsApi/CancelRequest/${requestId}`,
         {
           method: "PUT", // Adjust the method to match your API's requirements
           headers: {
@@ -84,7 +84,7 @@ export default function Request() {
     const loggedemail = localStorage.getItem("email");
 
     await fetchData(
-      "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/InsertRequest",
+      "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/RequestItemsApi/InsertRequest",
       "POST",
       {
         requestID: 0,

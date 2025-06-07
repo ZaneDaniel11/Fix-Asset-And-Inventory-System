@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import "../CSS/Product.css"
 
-const API_URL = "http://localhost:5075"
+const API_URL = "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net"
 // const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/UserItemApi/"
 
 const ProductList = ({ products, onAddProduct, setProducts }) => {

@@ -14,7 +14,7 @@ export default function Login() {
     try {
       const response = await fetch(
         // https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net
-        "http://localhost:5075/api/LoginApi/Authenticate",
+        "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/LoginApi/Authenticate",
         {
           method: "POST",
           headers: {

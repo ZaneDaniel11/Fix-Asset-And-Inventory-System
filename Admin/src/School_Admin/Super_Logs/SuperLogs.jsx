@@ -99,7 +99,7 @@ export default function Logs() {
     const fetchApprovedBorrowRequests = async () => {
       try {
         const response = await fetch(
-          "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByAdmin1"
+          "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByAdmin1"
         );
         const data = await response.json();
         setBorrowRequests(data);
@@ -116,7 +116,7 @@ export default function Logs() {
   const fetchRequestItems = async () => {
     try {
       setLoading(true);
-      fetch("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests")
+      fetch("https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests")
         .then((response) => response.json())
         .then((data) => {
           const mappedItems = data.map((item) => ({
@@ -147,7 +147,7 @@ export default function Logs() {
   const fetchBorrowRequests = async () => {
     try {
       setLoading(true);
-      fetch("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/AllRequests")
+      fetch("https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/AllRequests")
         .then((response) => response.json())
         .then((data) => {
           const mappedItems = data.map((item) => ({
@@ -182,7 +182,7 @@ export default function Logs() {
 
     try {
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`
+        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`
       );
       const data = await response.json();
       setBorrowedItems(data);

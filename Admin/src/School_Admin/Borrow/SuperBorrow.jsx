@@ -23,7 +23,7 @@ export default function SupperBorrow() {
     const fetchApprovedBorrowRequests = async () => {
       try {
         const response = await fetch(
-          "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByBothAdmins"
+          "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByBothAdmins"
         );
         const data = await response.json();
         console.log(data);
@@ -59,7 +59,7 @@ export default function SupperBorrow() {
     setIsUpdating(true);
     try {
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/UpdateApprovalAdmin3/${currentItem.BorrowId}`,
+        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/UpdateApprovalAdmin3/${currentItem.BorrowId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -137,7 +137,7 @@ export default function SupperBorrow() {
     setBorrowLoading(true);
     try {
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${borrowId}`
+        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${borrowId}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch borrowed items");

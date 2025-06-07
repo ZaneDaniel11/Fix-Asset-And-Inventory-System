@@ -108,7 +108,7 @@ export default function RequestItems() {
 
   // Fetch API data
   useEffect(() => {
-    fetch("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests")
+    fetch("https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests")
       .then((response) => response.json())
       .then((data) => {
         const mappedItems = data.map((item) => ({
@@ -163,7 +163,7 @@ export default function RequestItems() {
     setIsUpdating(true);
     try {
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/UpdateAdmin3Approval/${currentItem.id}`,
+        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/RequestItemsApi/UpdateAdmin3Approval/${currentItem.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

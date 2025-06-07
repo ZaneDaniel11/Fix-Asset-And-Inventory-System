@@ -20,7 +20,7 @@ import {
 } from "react-icons/fa"
 
 // import { fetchData } from "../utilities/ApiUti";
-const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetItemApi/"
+const API_URL = "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/AssetItemApi/"
 
 export default function InventoryTable() {
   const location = useLocation()
@@ -139,7 +139,7 @@ export default function InventoryTable() {
   // Open history modal
   const openHistoryModal = async (assetID) => {
     try {
-      const response = await fetch(`https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetHistoryApi/viewHistorical?assetID=${assetID}`)
+      const response = await fetch(`https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/AssetHistoryApi/viewHistorical?assetID=${assetID}`)
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`)
@@ -287,7 +287,7 @@ export default function InventoryTable() {
     try {
       console.log("📤 Sending Transfer Request:", transferPayload) // Log request payload
 
-      const response = await axios.post("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetItemApi/TransferAsset", transferPayload, {
+      const response = await axios.post("https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/AssetItemApi/TransferAsset", transferPayload, {
         headers: { "Content-Type": "application/json" },
       })
 
@@ -421,7 +421,7 @@ export default function InventoryTable() {
       console.log("Disposing asset with data:", requestBody)
 
       // Make the API call to dispose the asset
-      const response = await axios.post("https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/AssetItemApi/DisposeAsset", requestBody, {
+      const response = await axios.post("https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/AssetItemApi/DisposeAsset", requestBody, {
         headers: { "Content-Type": "application/json" },
       })
 

@@ -41,9 +41,8 @@ import SadminBorrow from "./School_Admin/Borrow/SuperBorrow.jsx";
 import SadminRequest from "./School_Admin/RequestItems/SuperRequestItems.jsx";
 import SadminLogs from "./School_Admin/Super_Logs/SuperLogs.jsx";
 
-// Public
 
-import MainPage from "./Main/MainPage.jsx";
+// import NewMainPage from "./Mainpage/NewMainPage.jsx";
 function App() {
   const location = useLocation();
   const isAuthenticated = !!localStorage.getItem("token"); // Check if token is present
@@ -65,7 +64,9 @@ function App() {
         <Routes>
           {/* Public route */}
           <Route path="/" element={<Login />} />
-          <Route path="/Mainpage" element={<MainPage/>} />
+          {/* <Route path="/NewMainPage" element={<NewMainPage />} /> */}
+        
+         
 
           {/* Protected routes */}
           {/* Schoo Admin */}

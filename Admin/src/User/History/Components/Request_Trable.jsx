@@ -66,7 +66,7 @@ export default function Request_History() {
     const borrowerId = localStorage.getItem("userId");
     try {
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/MaintenanceApi/GetMaintenanceByRequester/${borrowerId}`
+        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/MaintenanceApi/GetMaintenanceByRequester/${borrowerId}`
       );
       if (!response.ok) throw new Error("Failed to fetch maintenance requests");
       const data = await response.json();
@@ -88,7 +88,7 @@ export default function Request_History() {
 
     try {
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/RequestById/${borrowerId}`
+        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/RequestById/${borrowerId}`
       );
 
       if (!response.ok) {
@@ -115,7 +115,7 @@ export default function Request_History() {
 
     try {
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetRequestsByBorrower/${requesterId}`
+        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetRequestsByBorrower/${requesterId}`
       );
 
       if (!response.ok) {
@@ -135,7 +135,7 @@ export default function Request_History() {
     setBorrowLoading(true);
     try {
       const response = await fetch(
-        `https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${borrowId}`
+        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${borrowId}`
       );
       if (!response.ok) throw new Error("Failed to fetch borrowed items");
 

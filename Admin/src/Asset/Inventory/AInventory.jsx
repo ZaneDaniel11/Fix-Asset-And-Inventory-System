@@ -6,7 +6,7 @@ import Inventory_Modal from "./Components/Category/Inventory_Modal";
 import Inventory_Card from "./Components/Category/Inventory_Cards";
 // import "./Css/Electronics.css";
 
-const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/CategoryAssetApi/";
+const API_URL = "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/CategoryAssetApi/";
 
 export default function Inventory() {
   const [categories, setCategories] = useState([]);
