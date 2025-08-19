@@ -24,7 +24,7 @@ export default function Admin1Logs() {
     const fetchApprovedBorrowRequests = async () => {
       try {
         const response = await fetch(
-          "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByAdmin1",
+          "http://localhost:5075/api/BorrowRequestApi/ApprovedByAdmin1",
         )
         const data = await response.json()
         setBorrowRequests(data)
