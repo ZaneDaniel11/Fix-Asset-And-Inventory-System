@@ -39,7 +39,7 @@ const RequestSummary = ({ selectedProducts, onQuantityChange, onRemoveProduct, o
 
     try {
       const response = await fetch(
-        "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/Request",
+        "http://localhost:5075/api/BorrowRequestApi/Request",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
