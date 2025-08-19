@@ -20,7 +20,7 @@ import {
 } from "react-icons/fa"
 
 // import { fetchData } from "../utilities/ApiUti";
-const API_URL = "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/AssetItemApi/"
+const API_URL = "http://localhost:5075/api/AssetItemApi/"
 
 export default function InventoryTable() {
   const location = useLocation()
