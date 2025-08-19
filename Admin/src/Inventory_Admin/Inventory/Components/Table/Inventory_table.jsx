@@ -7,7 +7,7 @@ import { fetchData } from "../../../utilities/ApiUti"
 import { toast } from "react-toastify"
 
 // const API_URL = "https://propertycustodian-crhnakc8ejergeh5.southeastasia-01.azurewebsites.net/api/ItemApi/";
-const API_URL = "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/ItemApi/"
+const API_URL = "http://localhost:5075/api/ItemApi/"
 
 export default function Inventory_table() {
   const location = useLocation()
