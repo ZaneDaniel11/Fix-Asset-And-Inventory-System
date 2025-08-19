@@ -20,7 +20,7 @@ export default function Admin1Logs() {
     const fetchApprovedBorrowRequests = async () => {
       try {
         const response = await fetch(
-          "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByAdmin1"
+          "http://localhost:5075/api/BorrowRequestApi/ApprovedByAdmin1"
         );
         const data = await response.json();
         setBorrowRequests(data);
@@ -37,7 +37,7 @@ export default function Admin1Logs() {
   const fetchRequestItems = async () => {
     try {
       setLoading(true);
-      fetch("https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/RequestItemsApi/GetAllRequests")
+      fetch("http://localhost:5075/api/RequestItemsApi/GetAllRequests")
         .then((response) => response.json())
         .then((data) => {
           const mappedItems = data.map((item) => ({
@@ -63,7 +63,7 @@ export default function Admin1Logs() {
   const fetchBorrowRequests = async () => {
     try {
       setLoading(true);
-      fetch("https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/GetAllBorrowRequests")
+      fetch("http://localhost:5075/api/BorrowRequestApi/GetAllBorrowRequests")
         .then((response) => response.json())
         .then((data) => {
           const mappedItems = data.map((item) => ({
@@ -89,7 +89,7 @@ export default function Admin1Logs() {
     try {
       setLoading(true);
       const response = await fetch(
-        "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/MaintenanceApi/GetAllMaintenanceRequest"
+        "http://localhost:5075/api/MaintenanceApi/GetAllMaintenanceRequest"
       );
       const data = await response.json();
       const mappedLogs = data.map((log) => ({
@@ -123,7 +123,7 @@ export default function Admin1Logs() {
 
     try {
       const response = await fetch(
-        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`
+        `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${item.BorrowId}`
       );
       const data = await response.json();
       setBorrowedItems(data);
