@@ -21,7 +21,7 @@ export default function Borrow() {
     const fetchApprovedBorrowRequests = async () => {
       try {
         const response = await fetch(
-          "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ApprovedByAdmin1"
+          "http://localhost:5075/api/BorrowRequestApi/ApprovedByAdmin1"
         );
         const data = await response.json();
         console.log(data);
@@ -46,7 +46,7 @@ export default function Borrow() {
     try {
       setIsUpdating(true);
       const response = await fetch(
-        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/UpdateApprovalAdmin2/${currentItem.BorrowId}`,
+        `http://localhost:5075/api/BorrowRequestApi/UpdateApprovalAdmin2/${currentItem.BorrowId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -82,7 +82,7 @@ export default function Borrow() {
     setBorrowLoading(true);
     try {
       const response = await fetch(
-        `https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/ViewRequest/${borrowId}`
+        `http://localhost:5075/api/BorrowRequestApi/ViewRequest/${borrowId}`
       );
       if (!response.ok) throw new Error("Failed to fetch borrowed items");
       const data = await response.json();
