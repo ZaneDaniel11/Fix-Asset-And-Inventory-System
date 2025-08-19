@@ -17,8 +17,8 @@ import "react-calendar/dist/Calendar.css"
 import "./date-picker-fix.css"
 
 // API base URL constant - easy to change for testing
-const API_BASE_URL = "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net"
-// const API_BASE_URL = "http://localhost:5075"
+// const API_BASE_URL = "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net"
+const API_BASE_URL = "http://localhost:5075"
 const DisposedAssetsDashboard = () => {
   // Get current date and first day of current month
   const today = new Date()
