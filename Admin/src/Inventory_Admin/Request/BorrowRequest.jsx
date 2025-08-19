@@ -22,7 +22,7 @@ export default function BorrowedItems() {
     const fetchBorrowRequests = async () => {
       try {
         const response = await fetch(
-          "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/BorrowRequestApi/AllRequests"
+          "http://localhost:5075/api/BorrowRequestApi/AllRequests"
         );
         if (!response.ok) {
           throw new Error("Failed to fetch borrow requests");
