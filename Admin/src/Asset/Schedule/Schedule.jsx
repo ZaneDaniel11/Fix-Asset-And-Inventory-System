@@ -10,7 +10,7 @@ import {
 } from "@syncfusion/ej2-react-schedule";
 
 // API URL base
-const API_BASE_URL = "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/EventsApi";
+const API_BASE_URL = "http://localhost:5075/api/EventsApi";
 
 // Fetch events from API
 const fetchEvents = async () => {
