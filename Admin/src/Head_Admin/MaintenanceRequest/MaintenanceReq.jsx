@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
 export default function MaintenanceRequests() {
-  const API_URL = "https://crmcpropertycusbacck-ffgphsd2aveqdxen.southeastasia-01.azurewebsites.net/api/MaintenanceApi";
+  const API_URL = "http://localhost:5075/api/MaintenanceApi";
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [updateModalOpen, setEditModalOpen] = useState(false);
   const [declineModalOpen, setDeclineModalOpen] = useState(false);
